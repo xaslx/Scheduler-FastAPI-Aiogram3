@@ -98,3 +98,6 @@ class EditPassword(BaseModel):
     email: EmailStr
     new_password: str
     repeat_password: str
+
+class CreateMessage(BaseModel):
+    message: str = Field(max_length=500)

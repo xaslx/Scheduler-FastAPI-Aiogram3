@@ -85,3 +85,21 @@ def success_update_password(
     )
 
     return email
+
+def send_notification_for_all_users(
+    email_to: EmailStr, message: str
+):
+    email = EmailMessage()
+    email["Subject"] = "Рассылка уведомления"
+    email["From"] = settings.SMTP_USER
+    email["To"] = email_to
+
+    email.set_content(
+        f"""
+        <h1>Уведомление</h1>
+        <p>{message}</p>
+    """,
+        subtype="html",
+    )
+
+    return email

@@ -7,13 +7,13 @@ from app.repository.user_repo import UserRepository
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi.templating import Jinja2Templates
 from app.models.user_model import User
-from app.schemas.user_schema import UserOut, UserUpdate, EditRole, EditEnabled, EditTime, ResetPassword, EditPassword
+from app.schemas.user_schema import UserOut, UserUpdate, EditRole, EditEnabled, EditTime, ResetPassword, EditPassword, CreateMessage
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from exceptions import UserNotFound, NotAccess
 from app.utils.templating import templates
 from typing import Annotated
 from fastapi.exceptions import HTTPException
-from app.tasks.tasks import reset_password_email, password_changed, update_password
+from app.tasks.tasks import reset_password_email, password_changed, update_password, send_notification
 import secrets
 from app.auth.authentication import generate_token
 from app.schemas.jwt_token import Token
@@ -33,6 +33,30 @@ async def show_my_profile_template(request: Request, user: User = Depends(get_cu
 @user_router.get('/edit_profile', status_code=200, name='edit:page')
 async def get_edit_my_profile_template(request: Request, user: User = Depends(get_current_user)) -> HTMLResponse:
     return templates.TemplateResponse(request=request, name='edit_profile.html', context={'user': user})
+
+@user_router.get('/create_notification', status_code=200, name='create_notification:page')
+async def get_create_notification_template(
+    request: Request,
+    user: User = Depends(get_admin_user)
+) -> HTMLResponse:
+    if not user:
+        return templates.TemplateResponse(request=request, name='404.html', context={'user': user})
+    return templates.TemplateResponse(request=request, name='create_notification.html', context={'user': user})
+
+@user_router.post('/send_notification', status_code=200)
+async def send_notification_for_all_users(
+    message: CreateMessage,
+    session: AsyncSession = Depends(get_async_session),
+    user: User = Depends(get_admin_user)
+):
+    if not user:
+        raise NotAccess
+    
+    users: list[User] = await UserRepository.find_all(session=session)
+    emails: list[str] = [user.email for user in users]
+    send_notification.delay(users=emails, message=message.message)
+    return {"user_count": len(emails)}
+    
 
 @user_router.get('/edit_password', status_code=200, name='edit_password:page')
 async def get_edit_my_password_template(request: Request, user: User = Depends(get_current_user)) -> HTMLResponse:
@@ -56,8 +80,6 @@ async def edit_password(
     await UserRepository.update(session=session, id=new_password.user_id, hashed_password=hashed_password)
     update_password.delay(email=new_password.email, new_password=new_password.new_password)
     response.delete_cookie("user_access_token")
-
-
 
 
 

@@ -4,7 +4,7 @@ from pydantic import EmailStr
 
 from config import settings
 from app.tasks.celery_app import celery
-from app.tasks.email_templates import register_confirmation_template, forgot_password_email_template, password_changed_email_template, success_update_password
+from app.tasks.email_templates import send_notification_for_all_users, register_confirmation_template, forgot_password_email_template, password_changed_email_template, success_update_password
 
 
 @celery.task
@@ -42,6 +42,19 @@ def update_password(email: EmailStr, new_password: str):
     msg_content = success_update_password(email_to=email, new_password=new_password)
 
     with smtplib.SMTP_SSL(
+            settings.SMTP_HOST, settings.SMTP_PORT
+        ) as server:
+            server.login(settings.SMTP_USER, settings.SMTP_PASS)
+            server.send_message(msg_content)
+
+
+@celery.task
+def send_notification(users: list, message: str):
+
+    for user in users:
+        msg_content = send_notification_for_all_users(user, message)
+
+        with smtplib.SMTP_SSL(
             settings.SMTP_HOST, settings.SMTP_PORT
         ) as server:
             server.login(settings.SMTP_USER, settings.SMTP_PASS)

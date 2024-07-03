@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+
+{% block title %}Рассылка{% endblock %}
+
+{% block content %}
+    <div class="registration-form">
+        <h2>Рассылка уведомления</h2>
+        <form id="registration-form">
+            <div class="form-group">
+                <label style="color: green;" for="message">Сообщение (максимум 500 символов)</label>
+                <textarea style="resize: none;" id="message" placeholder="Это сообщение получат по Email все зарегистрированные пользователи." name="message" rows="6" maxlength="500" required></textarea>
+                <div id="message-error" class="error-message"></div>
+            </div>
+            <button type="submit">Отправить</button>
+        </form>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('registration-form');
+
+            form.addEventListener('submit', function(event) {
+                event.preventDefault(); // Предотвращаем стандартное действие отправки формы
+
+                const formData = new FormData(form);
+                const message = formData.get('message');
+
+                fetch('/user/send_notification', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ message })
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Notification sent:', data);
+
+                    // Показать уведомление с использованием SweetAlert2
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Уведомление отправлено',
+                        text: `Количество пользователей, которые получат уведомление: ${data.user_count}`,
+                        showConfirmButton: true,
+                        customClass: {
+                            container: 'swal2-custom',
+                            popup: 'swal2-custom-popup',
+                            title: 'swal2-custom-title',
+                            content: 'swal2-custom-content'
+                        }
+                    });
+                })
+                .catch(error => {
+                    console.error('Error sending notification:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Ошибка',
+                        text: 'Произошла ошибка при отправке уведомления.',
+                        showConfirmButton: true,
+                        customClass: {
+                            container: 'swal2-custom',
+                            popup: 'swal2-custom-popup',
+                            title: 'swal2-custom-title',
+                            content: 'swal2-custom-content'
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+{% endblock %}
+
+<style>
+    .registration-form {
+        max-width: 100%;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #f3f4f6;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+    }
+
+    .registration-form h2 {
+        text-align: center;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    label {
+        font-weight: bold;
+    }
+
+    textarea {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        height: 150px;
+        font-size: 14px;
+    }
+
+    button {
+        display: block;
+        width: 100%;
+        padding: 10px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+    }
+
+    button:hover {
+        background-color: #0056b3;
+    }
+
+    .error-message {
+        color: red;
+        font-size: 14px;
+        margin-top: 5px;
+    }
+
+    /* Custom styles for SweetAlert2 */
+    .swal2-custom {
+        width: 80%;
+        max-width: 300px;
+        padding: 10px;
+    }
+
+    .swal2-custom-popup {
+        padding: 15px;
+    }
+
+    .swal2-custom-title {
+        font-size: 18px;
+    }
+
+    .swal2-custom-content {
+        font-size: 14px;
+    }
+</style>

@@ -30,7 +30,7 @@
                             <a href="{{ url_for('settings:page') }}">Настройки</a>
                             {% if user.role == 'admin' or user.role == 'dev' %}
                                 <a href="{{ url_for('allusers:page') }}">Список пользователей</a>
-                                <a href="">Создать уведомление</a>
+                                <a href="{{ url_for('create_notification:page') }}">Создать уведомление</a>
                             {% endif %}
                             <a href="#" onclick="logout(event)">Выход</a>
                         </div>

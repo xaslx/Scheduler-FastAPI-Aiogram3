@@ -18,3 +18,4 @@ class UserRepository(BaseRepository):
         ))
         res = await session.execute(query)
         return res.mappings().all()
+    
