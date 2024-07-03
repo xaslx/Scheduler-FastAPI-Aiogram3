@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}Ваш профиль{% endblock %}
+
+{% block content %}
+<div class="profile-container">
+    {% if user %}
+        <div class="profile-card">
+            <div class="profile-header">
+                <img src="/app/static/default100.png" alt="Фото профиля" class="profile-photo">
+                <div class="profile-header-details">
+                    <h1 class="{% if not user.is_active %}inactive-user{% endif %}">
+                        {{ user.name }} {{ user.surname }}
+                    </h1>
+                    {% if not user.is_active %}
+                        <span class="banned-status">Ваш аккаунт заблокирован</span>
+                    {% endif %}
+                    <p><strong>ID:</strong> {{ user.id }}</p>
+                    <p><strong>Email:</strong> {{ user.email }}</p>
+                    <p><strong>Дата регистрации:</strong> {{ user.registered_at.strftime('%d %B %Y %H:%M') }}</p>
+                    <p><strong>Ваша роль:</strong> 
+                        <span class="{% if user.role == 'user' %}role-user{% elif user.role == 'admin' %}role-admin{% elif user.role == 'dev' %}role-dev{% endif %}">
+                            {{ user.role }}
+                        </span>
+                    </p>
+                    <p><strong>Ваша ссылка:</strong> 
+                        <a class="profile-link" href="{{ url_for('personal_link:page', personal_link=user.personal_link) }}" style="color: #007bff; text-decoration: none; margin-left: 10px;">{{ user.personal_link }}</a>
+                    </p>
+                    <p><strong>Ваш телеграм:</strong> 
+                        <a class="profile-link" href="https://t.me/{{ user.telegram_link }}" target="_blank" style="color: #007bff; text-decoration: none; margin-left: 10px;">{{ user.telegram_link }}</a>
+                    </p>
+                    {% if user.is_active %}
+                        <a href="{{ url_for('edit:page') }}" style="width: 60%;" class="edit-profile-button">Редактировать профиль</a>
+                    {% endif %}
+                    <a href="{{ url_for('edit_password:page') }}" style="width: 60%;" class="edit-profile-button">Изменить пароль</a>
+                </div>
+            </div>
+            <div class="profile-description">
+                <h2>Описание пользователя</h2>
+                <p for="description" style="color: white;">(его будут видеть клиенты которые захотят записаться к вам)</p>
+                <hr class="custom-hr">
+                {% if user.description %}
+                    <p>{{ user.description }}</p>
+                {% else %}
+                    <p style="color: red;">Вы пока еще не добавили описание</p>
+                {% endif %}
+            </div>
+            
+    {% else %}
+        <p>Для просмотра профиля необходимо <a href="/auth/login">Войти</a> или <a href="/auth/register">Зарегистрироваться</a>.</p>
+    {% endif %}
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const editButton = document.querySelector('.edit-description-button');
+    const descriptionForm = document.querySelector('.description-form');
+
+    editButton.addEventListener('click', function(e) {
+        e.preventDefault();
+        editButton.style.display = 'none';
+        descriptionForm.style.display = 'block';
+    });
+});
+</script>
+{% endblock %}

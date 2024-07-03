@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+
+{% block title %}Пользователи{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <!-- Улучшенное поле для поиска -->
+    <div class="row justify-content-center mb-4">
+        <div class="col-md-6">
+            <form action="{{ url_for('search:page') }}" method="GET" class="d-flex" style="padding-bottom: 30px;">
+                <input type="text" class="form-control form-control-lg rounded-pill search-input" style="width: 300px; height: 20px;" placeholder="Поиск по имени, фамилии или email" name="query" aria-label="Search">
+                <button class="btn btn-outline-primary btn-sm search-btn" type="submit" style="width: 150px; height: 45px;">Найти</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Результаты поиска -->
+    <div class="row">
+        <div class="col-12">
+            {% if users %}
+                <p><strong>Количество пользователей: {{ users|length }}</strong></p>
+                {% for user in users %}
+                <div class="user-card-wrapper mb-3">
+                    <a href="{{ url_for('user_by_id:page', user_id=user.id) }}" class="text-decoration-none">
+                        <div class="user-card p-3 border rounded shadow-sm d-flex align-items-center bg-dark text-white">
+                            <div class="flex-grow-1">
+                                <h6 class="mb-1"><b>{{ user.name }} {{ user.surname }}</b></h6>
+                                <p class="mb-1" style="color: white;"><b>Email:</b> {{ user.email }}</p>
+                                <p class="mb-0" style="color: white;"><b>Дата регистрации:</b> {{ user.registered_at.strftime('%d %B %Y %H:%M') }}</p>
+                            </div>
+                            <div class="text-right mt-2 mt-md-0">
+                                <p class="mb-0" style="color: white;">ID: {{ user.id }}</p>
+                                <div class="status-indicator {% if user.is_active %}active_indicator{% else %}inactive_indicator{% endif %}"></div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p class="text-muted">Нет пользователей для отображения.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+    .user-card-wrapper {
+        max-width: 500px;
+    }
+    .user-card {
+        background-color: #333;
+        transition: box-shadow 0.3s;
+        border-radius: 10px;
+        width: 100%; /* Занимает всю ширину родительского элемента */
+        position: relative;
+        padding: 15px;
+        margin-bottom: 10px;
+        color: white; /* Цвет текста */
+    }
+    .user-card:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        transform: scale(1.05); /* Увеличение при наведении */
+    }
+    .text-muted {
+        color: #6c757d;
+    }
+    .text-decoration-none {
+        text-decoration: none;
+        color: inherit;
+    }
+    h6 {
+        font-size: 14px;
+        margin-top: 0;
+        color: white;
+    }
+    .status-indicator {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        position: absolute;
+        top: 10px;
+        right: 10px;
+    }
+    .active_indicator {
+        background-color: green;
+    }
+    .inactive_indicator {
+        background-color: red;
+    }
+
+    /* Стили для улучшенного поля поиска и кнопки */
+    .search-input {
+        border-color: #ced4da; /* Цвет рамки */
+        border-radius: 20px; /* Закругленные углы */
+        padding: 12px 20px; /* Поля внутри поля ввода */
+        width: 250px; /* Ширина поля поиска */
+        height: 40x;
+    }
+
+    .search-btn {
+        border-radius: 20px; /* Закругленные углы */
+        padding: 8px 0; /* Поля внутри кнопки (вертикальные) */
+        font-size: 14px; /* Размер шрифта */
+        width: 150px; /* Ширина кнопки */
+        height: 40px
+    }
+
+    .search-btn:hover {
+        background-color: #007bff; /* Цвет фона при наведении */
+        color: white; /* Цвет текста при наведении */
+    }
+
+    /* Стили для расположения элементов в input-group */
+    .input-group {
+        display: flex;
+    }
+
+    .input-group .search-input {
+        margin-right: 10px; /* Отступ между полем ввода и кнопкой */
+    }
+    @media (max-width: 768px) {
+        .user-card {
+            padding: 10px;
+            width: 94%;
+            font-size: 12px;
+        }
+        .status-indicator {
+            top: 5px;
+            right: 5px;
+        }
+    }
+</style>
+{% endblock %}

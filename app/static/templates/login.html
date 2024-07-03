@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+
+{% block title %}Вход{% endblock %}
+
+{% block content %}
+    <div class="registration-form">
+        <h2>Вход</h2>
+        <form id="registration-form">
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" required>
+                <div id="email-error" class="error-message"></div>
+            </div>
+            <div class="form-group password-group">
+                <label for="password">Пароль:</label>
+                <div class="password-container">
+                    <input type="password" id="password" name="password" required>
+                    <img class="eye" src="/app/static/eye.png" alt="Показать пароль" id="toggle-password">
+                </div>
+                <div id="password-error" class="error-message"></div>
+                <div style="margin-top: 15px;" class="password-reset">
+                    <a  href="{{ url_for('reset:page') }}">Восстановить пароль</a>
+                </div>
+            </div>
+            <div id="login-error" class="error-message" style="color: red;"></div>
+            <button type="submit">Войти</button>
+        </form>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <style>
+        .password-container {
+        position: relative;
+        display: inline-block;
+        width: 100%;
+        }
+
+        .eye {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+        }
+    </style>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var passwordInput = document.getElementById('password');
+            var togglePassword = document.getElementById('toggle-password');
+
+            togglePassword.addEventListener('click', function() {
+                if (passwordInput.type === 'password') {
+                    passwordInput.type = 'text';
+                } else {
+                    passwordInput.type = 'password';
+                }
+            });
+
+            document.getElementById('registration-form').addEventListener('submit', function(event) {
+                event.preventDefault();
+                var formData = {
+                    'email': document.getElementById('email').value.trim(),
+                    'password': document.getElementById('password').value.trim(),
+                };
+
+                fetch('/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData),
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Unauthorized');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Success:', data);
+                    window.location.href = '/';
+                })
+                .catch(error => {
+                    var loginErrorElement = document.getElementById('login-error');
+                    loginErrorElement.innerText = 'Неверный email/пароль.';
+                    loginErrorElement.style.display = 'block';
+                    console.error('Error:', error);
+                    setTimeout(function() {
+                        loginErrorElement.style.display = 'none';
+                    }, 2000);
+                });
+            });
+        });
+    </script>
+{% endblock %}

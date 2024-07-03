@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block title %}Ban{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: center; align-items: center; height: 80vh;">
+    <div style="background-color: #333; color: white; width: 250px; height: 200px; text-align: center; border-radius: 10px; padding: 20px; display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative;">
+        <h1 style="font-size: 1.5em; margin-bottom: 40px; color: white;">Ваш аккаунт заблокирован</h1>
+        <a href="{{ url_for('main:page') }}" style="position: absolute; bottom: 20px; padding: 10px 20px; font-size: 1em; color: white; background-color: #007bff; text-decoration: none; border-radius: 5px;">Вернуться на главную</a>
+    </div>
+</div>
+{% endblock %}

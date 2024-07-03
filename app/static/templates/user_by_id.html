@@ -1,0 +1,185 @@
+{% extends "base.html" %}
+
+{% block title %}Профиль пользователя{% endblock %}
+
+{% block content %}
+<div class="profile-container">
+    {% if user %}
+        <div class="profile-card">
+            <div class="profile-header">
+                <img src="/app/static/default100.png" alt="Фото профиля" class="profile-photo">
+                <div class="profile-header-details">
+                    <h1>
+                        {% if not user_by_id.is_active %}
+                            <span style="text-decoration: line-through;">{{ user_by_id.name }} {{ user_by_id.surname }}</span>
+                            <span style="color: red; margin-left: 10px;">banned</span>
+                        {% else %}
+                            {{ user_by_id.name }} {{ user_by_id.surname }}
+                        {% endif %}
+                    </h1>
+                    <p><strong>ID: <span style="color: white;">{{ user_by_id.id }}</span></strong></p>
+                    <p><strong>Дата регистрации:</strong> {{ user_by_id.registered_at.strftime('%d %B %Y %H:%M') }}</p>
+                    <p><strong>Роль:</strong> 
+                        <span class="{% if user_by_id.role == 'user' %}role-user{% elif user_by_id.role == 'admin' %}role-admin{% elif user_by_id.role == 'dev' %}role-dev{% endif %}">
+                            {{ user_by_id.role }}
+                        </span>
+                        {% if user.role == 'dev' and user.id != user_by_id.id %}
+                            <select id="new-role-select" style="margin-left: 10px;">
+                                <option value="user">user</option>
+                                <option value="admin">admin</option>
+                            </select>
+                            <button type="button" onclick="saveNewRole('{{ user_by_id.id }}')" class="save-role-button" style="margin-left: 10px;">Сохранить</button>
+                        {% endif %}
+                    </p>
+                    <p><strong>Персональная ссылка:</strong> 
+                        <a class="profile-link" href="{{ url_for('personal_link:page', personal_link=user_by_id.personal_link) }}" style="color: #007bff; text-decoration: none; margin-left: 10px;">{{ user_by_id.personal_link }}</a>
+                    </p>
+                    <p><strong>
+                        Телеграм: <a class="profile-link" href="https://t.me/{{ user_by_id.telegram_link }}" target="_blank" style="color: #007bff; text-decoration: none; margin-left: 10px;">{{ user_by_id.telegram_link }}</a>
+                    </strong></p>
+                    
+                    <p><strong>Email:</strong> {{ user_by_id.email }}</p>
+                    <p><strong>Активен:</strong> {{ user_by_id.is_active }}</p>
+                    {% if user.id == user_by_id.id %}
+                        <p style="color: red;">Нельзя блокировать/разблокировать самого себя</p>
+                    {% else %}
+                        {% if user_by_id.is_active %}
+                            <button onclick="blockUser('{{ user_by_id.id }}')" class="block-user-button">Заблокировать пользователя</button>
+                        {% else %}
+                            <button onclick="unblockUser('{{ user_by_id.id }}')" class="unblock-user-button">Разблокировать пользователя</button>
+                        {% endif %}
+                        {% if user.role == 'dev' and user.id != user_by_id.id %}
+                            <button onclick="showDeleteModal('{{ user_by_id.id }}')" class="block-user-button" style="margin-top: 20px;">Удалить пользователя</button>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <p>Для просмотра профиля необходимо <a href="/auth/login">Войти</a> или <a href="/auth/register">Зарегистрироваться</a>.</p>
+    {% endif %}
+</div>
+
+<!-- Модальное окно подтверждения удаления -->
+<div id="deleteModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeDeleteModal()">&times;</span>
+        <p>Вы уверены, что хотите удалить этого пользователя навсегда?</p>
+        <button onclick="deleteUser()" class="confirm-button">Да</button>
+        <button onclick="closeDeleteModal()" class="cancel-button">Нет</button>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+    function blockUser(userId) {
+        fetch(`/user/ban/${userId}`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Пользователь заблокирован:', data);
+            location.reload();
+        })
+        .catch(error => {
+            console.error('Произошла ошибка при блокировке пользователя:', error);
+        });
+    }
+
+    function unblockUser(userId) {
+        fetch(`/user/unban/${userId}`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Пользователь разблокирован:', data);
+            location.reload();
+        })
+        .catch(error => {
+            console.error('Произошла ошибка при разблокировке пользователя:', error);
+        });
+    }
+
+    function saveNewRole(userId) {
+        const newRole = document.getElementById('new-role-select').value;
+        fetch(`/user/edit_role/${userId}`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ role: newRole })
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Роль пользователя изменена:', data);
+            location.reload(true); // Обновляем страницу после успешного изменения роли
+        })
+        .catch(error => {
+            console.error('Произошла ошибка при изменении роли пользователя:', error);
+        });
+    }
+
+    let userIdToDelete;
+
+    function showDeleteModal(userId) {
+        userIdToDelete = userId;
+        document.getElementById('deleteModal').style.display = 'block';
+    }
+
+    function closeDeleteModal() {
+        document.getElementById('deleteModal').style.display = 'none';
+    }
+
+    function deleteUser() {
+        fetch(`/user/delete_user/${userIdToDelete}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Пользователь удален:', data);
+            window.location.href = '{{ url_for("allusers:page") }}';  // Перенаправить на список пользователей после удаления
+        })
+        .catch(error => {
+            console.error('Произошла ошибка при удалении пользователя:', error);
+        });
+    }
+
+    // Закрытие модального окна при нажатии вне его
+    window.onclick = function(event) {
+        if (event.target == document.getElementById('deleteModal')) {
+            closeDeleteModal();
+        }
+    }
+</script>
+{% endblock %}

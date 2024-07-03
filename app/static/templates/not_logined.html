@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block title %}Страница не найдена{% endblock %}
+
+{% block content %}
+    <p>Для просмотра профиля необходимо <a href="/auth/login">Войти</a> или <a href="/auth/register">Зарегистрироваться</a>.</p>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+{% endblock %}

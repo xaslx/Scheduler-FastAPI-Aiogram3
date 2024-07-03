@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/app/static/style.css">
+    <link rel="shortcut icon" href="/app/static/icon.png" type="image/x-icon">
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@10.15.6/dist/sweetalert2.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10.15.6/dist/sweetalert2.all.min.js"></script>
+    <title>{% block title %}Scheduler{% endblock %}</title>
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <a href="/">
+                <img src="/app/static/icon.png" alt="Логотип">
+                <span class="site-title">Scheduler</span> <!-- Добавлено название сайта -->
+            </a>
+        </div>
+        {% block user_menu %}
+        <div class="nav-links">
+            {% if user %}
+                <div class="user-info">
+                    <p class="user-name">{{ user.name }} {{ user.surname }}</p>
+                    <div class="user-photo" tabindex="0" onclick="toggleDropdown(event)">
+                        <img src="/app/static/default.png" alt="Фото профиля">
+                        <div class="dropdown-menu">
+                            <a href="{{ url_for('myprofile:page') }}">Мой профиль</a>
+                            <a href="{{ url_for('settings:page') }}">Настройки</a>
+                            {% if user.role == 'admin' or user.role == 'dev' %}
+                                <a href="{{ url_for('allusers:page') }}">Список пользователей</a>
+                                <a href="">Создать уведомление</a>
+                            {% endif %}
+                            <a href="#" onclick="logout(event)">Выход</a>
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+                <a href="/auth/register">Регистрация</a>
+                <a href="/auth/login">Вход</a>
+            {% endif %}
+        </div>
+        {% endblock %}
+    </header>
+    <main>
+        {% block content %}
+        <h1>Добро пожаловать на наш сайт!</h1>
+        <p>Здесь вы найдете много полезной информации.</p>
+        {% endblock %}
+    </main>
+    <footer>
+        <a href="https://t.me/xaslx" class="social-link" target="_blank">
+            <img src="/app/static/tg.png" alt="Социальная сеть">
+            <span>Telegram</span>
+        </a>
+        <p class="copy">&copy; 2024</p>
+    </footer>
+    {% block scripts %}
+    <script>
+        function toggleDropdown(event) {
+            const dropdown = event.currentTarget;
+            dropdown.classList.toggle('active');
+        }
+
+        // Закрыть меню, если клик вне его
+        window.onclick = function(event) {
+            if (!event.target.matches('.user-photo, .user-photo *')) {
+                const dropdowns = document.querySelectorAll('.user-photo');
+                dropdowns.forEach(dropdown => {
+                    dropdown.classList.remove('active');
+                });
+            }
+        }
+
+        function logout(event) {
+            event.preventDefault();  // Предотвращаем действие по умолчанию (переход по ссылке)
+
+            fetch('/auth/logout', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({})
+            })
+            .then(response => {
+                if (response.redirected) {
+                    window.location.href = response.url;  // Перенаправляем на указанный адрес после успешного выхода
+                } else {
+                    // Если не произошло перенаправление, обновляем текущую страницу
+                    window.location.reload();
+                }
+            })
+            .catch(error => console.error('Ошибка:', error));
+        }
+    </script>
+    {% endblock %}
+</body>
+</html>

@@ -1,0 +1,746 @@
+body {
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #fdf5e6;
+    color: #333;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+header {
+    background-color: #282c34;
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    height: 50px;
+    align-items: center;
+    padding: 10px 20px;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+.logo {
+    display: flex;
+    align-items: center;
+    border: 2px solid white;
+    border-radius: 10px;
+    padding: 5px;
+}
+.logo img {
+    height: 30px;
+}
+.logo a {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    color: white;
+}
+.nav-links {
+    display: flex;
+    align-items: center;
+}
+.nav-links a {
+    color: white;
+    text-decoration: none;
+    margin-left: 20px;
+    font-size: 14px;
+    transition: color 0.3s;
+}
+.nav-links a:hover {
+    color: #61dafb;
+}
+main {
+    flex: 1;
+    padding: 20px;
+    text-align: center;
+}
+h1 {
+    font-size: 24px;
+    margin-bottom: 10px;
+    color: #282c34;
+}
+p {
+    font-size: 16px;
+    line-height: 1.6;
+    color: #555;
+}
+.user-info {
+    display: flex;
+    align-items: center; /* Выравниваем элементы по вертикали */
+    margin-left: -10px; /* Отступ влево для компенсации */
+}
+.user-info .user-name {
+    color: white; /* Устанавливаем белый цвет текста */
+    margin-right: 15px; /* Отступ между именем и фотографией */
+}
+.user-info .user-photo {
+    width: 40px; /* Ширина фотографии */
+    height: 40px; /* Высота фотографии */
+    border-radius: 50%; /* Делаем фотографию круглой */
+    cursor: pointer; /* Делаем курсор указателем при наведении */
+    position: relative; /* Позиционируем для выпадающего меню */
+    border: 2px solid white; /* Добавляем белую рамку */
+}
+
+.user-info .user-photo img {
+    width: 100%; /* Заполняем всю область фотографии */
+    height: 100%; /* Заполняем всю область фотографии */
+    object-fit: cover; /* Заполняем фотографию без искажений */
+    border-radius: 50%; /* Делаем круглыми углы изображения */
+}
+
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    top: calc(100% + 10px); /* Отступ от фото до меню */
+    right: 0;
+    background-color: #282c34; /* Цвет меню как у шапки */
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+    z-index: 1;
+    min-width: 160px;
+}
+
+.user-info.active .dropdown-menu {
+    display: block;
+}
+
+.dropdown-menu a {
+    color: white; /* Цвет текста */
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+    position: relative; /* Для позиционирования псевдоэлементов */
+    transition: background-color 0.3s ease, color 0.3s ease; /* Плавные переходы */
+}
+
+.dropdown-menu a::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    right: -8px; /* Отступ полоски от правого края ссылки */
+    transform: translateY(-50%);
+    height: 70%; /* Высота полоски */
+    width: 1px; /* Толщина полоски */
+    background-color: transparent; /* Цвет полоски (прозрачный) */
+}
+
+.dropdown-menu a:hover,
+.dropdown-menu a:focus {
+    background-color: rgba(255, 255, 255, 0.1); /* Цвет фона при наведении и фокусе */
+    color: #61dafb; /* Цвет текста при наведении и фокусе */
+}
+
+.dropdown-menu a:hover::after,
+.dropdown-menu a:focus::after {
+    background-color: black; /* Цвет полоски при наведении и фокусе */
+}
+
+.user-photo.active .dropdown-menu {
+    display: block;
+}
+
+/* карточка профиля */
+.profile-container {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start; /* Выравнивание содержимого вверх */
+    gap: 20px; /* Промежуток между элементами внутри контейнера */
+}
+
+.profile-card {
+    background-color: #333; /* Темный фон */
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5); /* Более темная тень */
+    overflow: hidden;
+    width: 100%;
+    max-width: 600px;
+}
+
+.profile-header {
+    display: flex;
+    align-items: flex-start;
+    padding: 20px;
+    background: linear-gradient(135deg, #333, #444); /* Темный градиент */
+}
+
+.profile-photo {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    margin-right: 20px;
+    border: 3px solid #fff;
+}
+
+.profile-header-details {
+    color: #fff; /* Белый цвет текста */
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    padding-left: 20px;
+}
+
+.profile-header-details h1 {
+    font-size: 24px;
+    margin: 0;
+    color: #fff; /* Белый цвет текста */
+}
+
+.profile-header-details p {
+    margin: 5px 0;
+    font-size: 16px;
+    color: #fff; /* Белый цвет текста */
+}
+
+.profile-header-details strong {
+    color: #aaa; /* Цвет подписей */
+}
+
+.profile-description {
+    background-color: #444; /* Цвет фона блока с описанием */
+    border-radius: 8px;
+    padding: 20px;
+    width: calc(100% - 40px); /* Вычисляем ширину: 100% ширины минус двойные отступы по 20px */
+    margin-left: auto; /* Отодвигаем блок описания вправо */
+    margin-right: 20px; /* Добавляем отступ справа */
+}
+
+.profile-description h2 {
+    color: #fff; /* Белый цвет заголовка описания */
+    font-size: 20px;
+    margin-bottom: 10px;
+}
+
+.profile-description p {
+    color: #fff; /* Белый цвет текста описания */
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+
+/* register */
+.registration-form {
+    max-width: 400px;
+    margin: 50px auto;
+    padding: 30px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+}
+
+.registration-form h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #333333;
+    font-size: 28px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: #666666;
+    font-weight: bold;
+    font-size: 16px;
+}
+
+.form-group input {
+    width: calc(100% - 24px); /* Учитываем внешние отступы */
+    padding: 12px;
+    font-size: 16px;
+    border: 1px solid #cccccc;
+    border-radius: 6px;
+    background-color: #f9f9f9;
+    transition: border-color 0.3s ease-in-out;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: #007bff;
+    background-color: #ffffff;
+    box-shadow: 0 0 8px rgba(0, 123, 255, 0.2);
+}
+
+button[type="submit"] {
+    width: 100%;
+    padding: 12px;
+    background-color: #007bff;
+    color: #ffffff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease-in-out;
+    margin-top: 10px; /* Добавим небольшой отступ сверху */
+}
+
+button[type="submit"]:hover {
+    background-color: #0056b3;
+}
+footer {
+    background-color: #2c2c2c; /* Серый цвет */
+    color: white;
+    text-align: center;
+    padding: 10px 0;
+}
+footer .social-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    text-decoration: none;
+}
+footer .social-link img {
+    width: 30px; /* Ширина иконки */
+    height: 30px; /* Высота иконки */
+    margin-right: 8px; /* Отступ справа от иконки */
+}
+.copy {
+    color: white;
+}
+.edit-profile-button {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 10px 15px;
+    background-color: #007bff;
+    color: white;
+    text-align: center;
+    text-decoration: none;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+.custom-hr {
+    border: none; /* Убираем стандартную границу */
+    border-top: 1px solid white; /* Белая линия сверху */
+    width: 100%; /* На всю ширину */
+    margin: 10px 0; /* Отступы сверху и снизу */
+}
+.registration-form .form-group input,
+.registration-form .form-group textarea {
+    width: 100%;
+    box-sizing: border-box;
+}
+.registration-form textarea{
+    height: 100px;
+}
+.registration-form .form-group textarea {
+    font-size: 16px; /* Увеличиваем размер шрифта внутри textarea */
+}
+
+.edit-profile-button:hover {
+    background-color: #0056b3;
+}   
+.role-user {
+    color: lime;
+}
+
+.role-admin {
+    color: red;
+}
+.role-dev {
+    color: yellow;
+}
+
+
+
+.block-user-button, .unblock-user-button {
+    display: inline-block;
+    padding: 10px 20px;
+    margin-top: 20px;
+    font-size: 16px;
+    font-weight: bold;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    text-decoration: none;
+    transition: background-color 0.3s, transform 0.3s;
+    cursor: pointer;
+}
+
+.block-user-button {
+    background-color: #ff4b5c;
+}
+
+.block-user-button:hover {
+    background-color: #ff1c34;
+    transform: scale(1.05);
+}
+
+.block-user-button:active {
+    background-color: #d00e27;
+    transform: scale(1);
+}
+
+.unblock-user-button {
+    background-color: #4caf50;
+}
+
+.unblock-user-button:hover {
+    background-color: #45a049;
+    transform: scale(1.05);
+}
+
+.unblock-user-button:active {
+    background-color: #388e3c;
+    transform: scale(1);
+}
+
+.profile-header {
+    display: flex;
+    align-items: center;
+}
+
+.profile-header img.profile-photo {
+    border-radius: 50%;
+    margin-right: 20px;
+    width: 100px;
+    height: 100px;
+}
+
+.profile-header-details h1 {
+    font-size: 24px;
+    margin: 0;
+}
+
+.profile-header-details p {
+    margin: 5px 0;
+}
+@media (max-width: 768px) {
+    .profile-photo {
+        display: none; /* Скрываем фото профиля на мобильных устройствах */
+    }
+
+    .profile-details h1 {
+        font-size: 20px; /* Уменьшаем размер шрифта имени пользователя */
+    }
+
+    .profile-details p {
+        font-size: 14px; /* Уменьшаем размер шрифта для остального текста */
+    }
+
+    .edit-profile-button {
+        font-size: 14px; /* Уменьшаем размер кнопок для мобильных устройств */
+    }
+}
+
+/* Запись */
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@100;200;300;400;500;600;700&display=swap');
+
+:root {
+    --calendar-bg-color: #262829;
+    --calendar-font-color: #FFF;
+    --weekdays-border-bottom-color: #404040;
+    --calendar-date-hover-color: #505050;
+    --calendar-current-date-color: #1b1f21;
+    --calendar-today-color: linear-gradient(to bottom, #03a9f4, #2196f3);
+    --calendar-today-innerborder-color: transparent;
+    --calendar-nextprev-bg-color: transparent;
+    --next-prev-arrow-color : #FFF;
+    --calendar-border-radius: 16px;
+    --calendar-prevnext-date-color: #484848
+}
+
+* {
+    padding: 0;
+    margin: 0;
+}
+
+/* CSS стили для блока с информацией о пользователе и контейнера календаря */
+
+.user-info2 {
+    font-family: 'IBM Plex Sans', sans-serif;
+    text-align: center;
+    margin: 20px auto; /* отступ сверху и снизу, автоматическое выравнивание по горизонтали */
+    color: #FFF; /* цвет текста */
+    background-color: #333; /* цвет фона */
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* тень */
+    width: 375px; /* фиксированная ширина блока */
+    max-width: 100%; /* максимальная ширина до 400px или ширина экрана */
+}
+
+
+.calendar-container {
+    font-family: 'IBM Plex Sans', sans-serif;
+    position: relative;
+    max-width: 400px; /* максимальная ширина */
+    min-width: 320px; /* минимальная ширина */
+    background: var(--calendar-bg-color); /* переменная для цвета фона */
+    color: var(--calendar-font-color); /* переменная для цвета текста */
+    margin: 20px auto; /* внешние отступы */
+    box-sizing: border-box; /* учитывать границы внутри размеров элемента */
+    overflow: hidden; /* скрытие содержимого, выходящего за границы */
+    font-weight: normal; /* обычный текст */
+    border-radius: var(--calendar-border-radius); /* изменение радиуса границы */
+    margin-top: 20px; /* отступ сверху */
+}
+.blocked-user-message {
+    background-color: #333;
+    color: white;
+    border-radius: 10px;
+    padding: 20px;
+    margin: 20px auto; /* центрируем блок по горизонтали */
+    min-width: 300px;
+    max-width: 360px; /* задаем максимальную ширину блока */
+    text-align: center; /* выравниваем текст по центру */
+    height: 100px;
+}
+
+.calendar-inner {
+    padding: 10px 10px;
+}
+
+.calendar .calendar-inner .calendar-body {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    text-align: center;
+}
+
+.calendar .calendar-inner .calendar-body div {
+    padding: 4px;
+    min-height: 30px;
+    line-height: 30px;
+    border: 1px solid transparent;
+    margin: 10px 2px 0px;
+}
+
+.calendar .calendar-inner .calendar-body div:nth-child(-n+7) {
+    border: 1px solid transparent;
+    border-bottom: 1px solid var(--weekdays-border-bottom-color);
+}
+
+.calendar .calendar-inner .calendar-body div:nth-child(-n+7):hover {
+    border: 1px solid transparent;
+    border-bottom: 1px solid var(--weekdays-border-bottom-color);
+}
+
+.calendar .calendar-inner .calendar-body div>a {
+    color: var(--calendar-font-color);
+    text-decoration: none;
+    display: flex;
+    justify-content: center;
+}
+
+.calendar .calendar-inner .calendar-body div:hover {
+    border: 1px solid var(--calendar-date-hover-color);
+    border-radius: 4px;
+}
+
+.calendar .calendar-inner .calendar-body div.empty-dates:hover {
+    border: 1px solid transparent;
+}
+
+.calendar .calendar-inner .calendar-controls {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+}
+
+.calendar .calendar-inner .calendar-today-date {
+    display: grid;
+    text-align: center;
+    cursor: pointer;
+    margin: 3px 0px;
+    background: var(--calendar-current-date-color);
+    padding: 8px 0px;
+    border-radius: 10px;
+    width: 80%;
+    margin: auto;
+}
+
+.calendar .calendar-inner .calendar-controls .calendar-year-month {
+    display: flex;
+    min-width: 100px;
+    justify-content: space-evenly;
+    align-items: center;
+}
+
+.calendar .calendar-inner .calendar-controls .calendar-next {
+    text-align: right;
+}
+
+.calendar .calendar-inner .calendar-controls .calendar-year-month .calendar-year-label,
+.calendar .calendar-inner .calendar-controls .calendar-year-month .calendar-month-label {
+    font-weight: 500;
+    font-size: 20px;
+}
+
+.calendar .calendar-inner .calendar-body .calendar-today {
+    background: var(--calendar-today-color);
+    border-radius: 4px;
+}
+
+.calendar .calendar-inner .calendar-body .calendar-today:hover {
+    border: 1px solid transparent;
+}
+
+.calendar .calendar-inner .calendar-body .calendar-today a {
+    outline: 2px solid var(--calendar-today-innerborder-color);
+}
+
+.calendar .calendar-inner .calendar-controls .calendar-next a,
+.calendar .calendar-inner .calendar-controls .calendar-prev a {
+    color: var(--calendar-font-color);
+    font-family: arial, consolas, sans-serif;
+    font-size: 26px;
+    text-decoration: none;
+    padding: 4px 12px;
+    display: inline-block;
+    background: var(--calendar-nextprev-bg-color);
+    margin: 10px 0 10px 0;
+}
+
+.calendar .calendar-inner .calendar-controls .calendar-next a svg,
+.calendar .calendar-inner .calendar-controls .calendar-prev a svg {
+    height: 20px;
+    width: 20px;
+}
+
+.calendar .calendar-inner .calendar-controls .calendar-next a svg path,
+.calendar .calendar-inner .calendar-controls .calendar-prev a svg path{
+    fill: var(--next-prev-arrow-color);
+}
+
+.calendar .calendar-inner .calendar-body .prev-dates,
+.calendar .calendar-inner .calendar-body .next-dates {
+    color: var(--calendar-prevnext-date-color);
+}
+
+.calendar .calendar-inner .calendar-body .prev-dates:hover,
+.calendar .calendar-inner .calendar-body .next-dates:hover {
+    border: 1px solid transparent;
+    pointer-events: none;
+}
+.prev-date {
+    color: #ccc; /* Серый цвет для прошедших дат */
+    cursor: not-allowed; /* Изменение курсора на "не разрешено" */
+}
+.custom-swal {
+    font-size: 1rem; /* Размер шрифта в относительных единицах */
+    border-radius: 8px; /* Закругление углов */
+}
+
+.custom-swal-title {
+    font-size: 1.2rem; /* Размер заголовка */
+    font-weight: bold; /* Жирный текст */
+}
+
+.custom-swal-content {
+    font-size: 1rem; /* Размер текста в уведомлении */
+    line-height: 1.5; /* Межстрочный интервал */
+}
+
+
+
+/* модальное окно */
+/* Модальное окно (фон) */
+.modal {
+    display: none; /* Скрыто по умолчанию */
+    position: fixed; /* Остается на месте (фиксируется) */
+    z-index: 1; /* На переднем плане */
+    left: 0;
+    top: 0;
+    width: 100%; /* Полная ширина */
+    height: 100%; /* Полная высота */
+    overflow: auto; /* Включить прокрутку при необходимости */
+    background-color: rgb(0,0,0); /* Черный цвет с прозрачностью */
+    background-color: rgba(0,0,0,0.4); /* Черный с непрозрачностью */
+    padding-top: 60px;
+}
+
+/* Модальное окно (контейнер) */
+.modal-content {
+    background-color: #fefefe;
+    margin: 5% auto; /* 5% сверху и по центру */
+    padding: 20px;
+    border: 1px solid #888;
+    width: 25%; /* Ширина 25% */
+    border-radius: 10px; /* Закругление углов */
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3); /* Тень */
+}
+
+/* Кнопка закрытия модального окна */
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+/* Кнопки подтверждения и отмены */
+.confirm-button {
+    background-color: #f44336; /* Красный */
+    color: white;
+    padding: 14px 20px;
+    margin: 8px 0;
+    border: none;
+    cursor: pointer;
+    width: 100%;
+    border-radius: 10px; /* Закругление углов */
+    transition: transform 0.2s ease-in-out; /* Плавное изменение */
+}
+
+.cancel-button {
+    background-color: #ccc; /* Серый */
+    color: black;
+    padding: 14px 20px;
+    margin: 8px 0;
+    border: none;
+    cursor: pointer;
+    width: 100%;
+    border-radius: 10px; /* Закругление углов */
+    transition: transform 0.2s ease-in-out; /* Плавное изменение */
+}
+
+.confirm-button:hover,
+.cancel-button:hover {
+    transform: scale(1.05); /* Увеличение размера на 5% при наведении */
+}
+.registration-form {
+    width: 60%; /* Увеличена ширина формы */
+    margin: 0 auto;
+}
+
+.password-group {
+    position: relative;
+}
+
+.password-group .eye {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    width: 20px; /* Размер иконки */
+    height: 20px;
+}
+
+
+/* booking */ 
+.container-booking {
+    display: flex;
+    justify-content: space-between; /* Располагает блоки по сторонам */
+}
+
+.left-container {
+    flex: 1; /* Занимает оставшееся пространство */
+    margin-right: -300px; /* Меньший отступ справа для разделения блоков */
+}
+
+.right-container {
+    flex: 1; /* Занимает оставшееся пространство */
+    margin-left: -300px; /* Меньший отступ слева для разделения блоков */
+}
