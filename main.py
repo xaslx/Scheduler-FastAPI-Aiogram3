@@ -16,7 +16,7 @@ from config import settings
 from app.models.user_model import User
 from app.auth.dependencies import get_current_user
 from fastapi.middleware.cors import CORSMiddleware
-
+from fastapi_pagination import add_pagination
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -31,6 +31,8 @@ app: FastAPI = FastAPI(
     version='0.1',
     lifespan=lifespan
 )
+
+add_pagination(app)
 
 app.include_router(auth_router)
 app.include_router(user_router)

@@ -21,6 +21,9 @@ celery = "^5.4.0"
 fastapi-cache = {extras = ["redis"], version = "^0.1.0"}
 fastapi-cache2 = "^0.2.1"
 redis = "^5.0.7"
+flower = "^2.0.1"
+fastapi-pagination = "^0.12.26"
+gunicorn = "^22.0.0"
 
 
 [build-system]

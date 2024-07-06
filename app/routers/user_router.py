@@ -17,7 +17,10 @@ from app.tasks.tasks import reset_password_email, password_changed, update_passw
 import secrets
 from app.auth.authentication import generate_token
 from app.schemas.jwt_token import Token
-
+from fastapi_pagination.ext.sqlalchemy import paginate
+from fastapi_pagination import Page, Params
+from sqlalchemy import select
+import math
 
 user_router: APIRouter = APIRouter(
     prefix='/user',
@@ -69,7 +72,6 @@ async def edit_password(
     response: Response,
     new_password: EditPassword,
     session: AsyncSession = Depends(get_async_session)):
-    print(new_password)
     if new_password.new_password != new_password.repeat_password:
         raise HTTPException(
             status_code=422,
@@ -87,24 +89,35 @@ async def edit_password(
 async def edit_my_profile(new_user: UserUpdate, session: AsyncSession = Depends(get_async_session), user: User = Depends(get_current_user)):
     await UserRepository.update(session=session, id=user.id, **new_user.model_dump())
 
+
 @user_router.get('/all_users', status_code=200, name='allusers:page')
 async def get_all_users(
-    request: Request, 
+    request: Request,
+    page: Annotated[int, Query()] = 1,
     session: AsyncSession = Depends(get_async_session), 
-    user: User = Depends(get_admin_user)) -> HTMLResponse:
-    users: list[UserOut] = await UserRepository.find_all(session=session)
+    user: User = Depends(get_admin_user)
+) -> Page[UserOut]:
+    
+    res = await paginate(session, select(User).order_by(User.registered_at))
+
+
     if user is None or user.role == 'user':
         return templates.TemplateResponse(request=request, name='404.html', context={'user': user})
     if not user.is_active:
         return templates.TemplateResponse(request=request, name='banned.html', context={'user': user})
-    return templates.TemplateResponse(request=request, name='all_users.html', context={'users': users, 'user': user})
+    return templates.TemplateResponse(
+        request=request, 
+        name="all_users.html", 
+        context={'user': user, 'min': min, 'max': max, "users": res.items, "total_users": res.total, "page": res.page, 'pages': res.pages})
+    
 
 @user_router.get('/search_user', status_code=200, name='search:page')
 async def search_user_by_name_surname(
     request: Request,
     query: str | None = None,
     session: AsyncSession = Depends(get_async_session),
-    user: User = Depends(get_admin_user)
+    user: User = Depends(get_admin_user),
+    page: Annotated[int, Query()] = 1
 ) -> HTMLResponse:
     users: list[User] = []
 
@@ -114,7 +127,10 @@ async def search_user_by_name_surname(
         users: list[User] = await UserRepository.search_user_by_name_surname_or_email(session=session, text=query)
     if not user.is_active:
         return templates.TemplateResponse(request=request, name='banned.html', context={'user': user})
-    return templates.TemplateResponse(request=request, name='all_users.html', context={'users': users, 'user': user})
+    return templates.TemplateResponse(
+        request=request, 
+        name='all_users.html', 
+        context={'page': page,  'total_users': len(users),'users': users, 'user': user, 'pages': math.ceil(len(users)/50)})
 
 @user_router.get('/my_settings', status_code=200, name='settings:page')
 async def get_my_settings_template(
@@ -256,3 +272,5 @@ async def reset_password(
     await UserRepository.update(id=user_id.user_id, hashed_password=hashed_password, session=session)
     password_changed.delay(email=user_id.email, new_password=new_password)
     return JSONResponse(content={"message": "Password successfully updated"})
+
+
