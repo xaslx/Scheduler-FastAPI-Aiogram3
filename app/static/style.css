@@ -66,80 +66,181 @@ p {
     line-height: 1.6;
     color: #555;
 }
+
+
+/* базовая страница выпадающее меню */
 .user-info {
     display: flex;
-    align-items: center; /* Выравниваем элементы по вертикали */
-    margin-left: -10px; /* Отступ влево для компенсации */
-}
-.user-info .user-name {
-    color: white; /* Устанавливаем белый цвет текста */
-    margin-right: 15px; /* Отступ между именем и фотографией */
-}
-.user-info .user-photo {
-    width: 40px; /* Ширина фотографии */
-    height: 40px; /* Высота фотографии */
-    border-radius: 50%; /* Делаем фотографию круглой */
-    cursor: pointer; /* Делаем курсор указателем при наведении */
-    position: relative; /* Позиционируем для выпадающего меню */
-    border: 2px solid white; /* Добавляем белую рамку */
+    align-items: center;
 }
 
-.user-info .user-photo img {
-    width: 100%; /* Заполняем всю область фотографии */
-    height: 100%; /* Заполняем всю область фотографии */
-    object-fit: cover; /* Заполняем фотографию без искажений */
-    border-radius: 50%; /* Делаем круглыми углы изображения */
+
+.user-photo {
+    position: relative;
+    margin-left: 20px;
+    cursor: pointer;
+}
+
+.user-photo img {
+    width: 32px;
+    height: 32px;
+    border: 2px solid white; /* Белая рамка */
+    border-radius: 50%; /* Круглая форма */
 }
 
 .dropdown-menu {
-    display: none;
     position: absolute;
-    top: calc(100% + 10px); /* Отступ от фото до меню */
+    top: 100%;
     right: 0;
-    background-color: #282c34; /* Цвет меню как у шапки */
-    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
-    z-index: 1;
-    min-width: 160px;
+    background: #333;
+    border: 1px solid #444;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    width: 200px;
+    z-index: 1000;
+    color: white;
+    display: none;
 }
 
-.user-info.active .dropdown-menu {
+.dropdown-menu.active {
     display: block;
 }
 
 .dropdown-menu a {
-    color: white; /* Цвет текста */
-    padding: 12px 16px;
+    display: block;
+    padding: 10px 15px;
+    color: white; /* Белый текст */
     text-decoration: none;
-    display: block;
-    position: relative; /* Для позиционирования псевдоэлементов */
-    transition: background-color 0.3s ease, color 0.3s ease; /* Плавные переходы */
 }
 
-.dropdown-menu a::after {
-    content: "";
+.dropdown-menu a:hover {
+    background-color: #444; /* Темнее фон при наведении */
+}
+
+.dropdown-header {
+    padding: 10px 15px;
+    border-bottom: 1px solid #444;
+    font-weight: bold;
+    color: white; /* Белый текст */
+}
+
+.dropdown-content {
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+
+/* Уведомления */
+/* Новые стили для уведомлений */
+.notification-menu {
     position: absolute;
-    top: 50%;
-    right: -8px; /* Отступ полоски от правого края ссылки */
-    transform: translateY(-50%);
-    height: 70%; /* Высота полоски */
-    width: 1px; /* Толщина полоски */
-    background-color: transparent; /* Цвет полоски (прозрачный) */
+    top: 100%;
+    right: 0;
+    background: #333; /* Серый цвет фона */
+    width: 240px; /* Ширина блока уведомлений */
+    z-index: 1000;
+    color: #333; /* Цвет текста */
+    display: none;
+    padding: 10px;
+    max-height: 300px; /* Пример максимальной высоты */
+    overflow-y: auto;
 }
 
-.dropdown-menu a:hover,
-.dropdown-menu a:focus {
-    background-color: rgba(255, 255, 255, 0.1); /* Цвет фона при наведении и фокусе */
-    color: #61dafb; /* Цвет текста при наведении и фокусе */
+.notification-menu, .dropdown-menu {
+    display: none;
 }
 
-.dropdown-menu a:hover::after,
-.dropdown-menu a:focus::after {
-    background-color: black; /* Цвет полоски при наведении и фокусе */
-}
-
-.user-photo.active .dropdown-menu {
+.notification-menu.active, .dropdown-menu.active {
     display: block;
 }
+
+
+.notification-item {
+    padding: 10px 15px;
+    cursor: pointer;
+    word-wrap: break-word; /* Разрывать слова при переполнении */
+    max-width: 100%; /* Максимальная ширина уведомления */
+}
+
+.notification-item:hover {
+    background-color: #555;
+}
+
+.notification-divider {
+    margin: 5px 0;
+    border: none;
+    height: 1px;
+    background-color: #ccc;
+}
+
+.no-notifications {
+    padding: 10px 15px;
+    color: #bbb;
+}
+.notification-icon {
+    position: relative;
+    margin-left: 20px;
+    cursor: pointer;
+}
+
+.notification-icon img {
+    width: 24px;
+    height: 24px;
+    border: 2px solid white; /* Белая рамка */
+    border-radius: 50%; /* Круглая форма */
+}
+.menu-header-notification {
+    padding: 10px;
+    color: gray;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    font-weight: bold;
+}
+
+.view-all a {
+    display: block;
+    padding: 10px 15px;
+    color: #007bff; /* Цвет ссылки "Все уведомления" */
+    text-decoration: none;
+}
+
+.view-all a:hover {
+    color: #0056b3; /* Цвет ссылки "Все уведомления" при наведении */
+    text-decoration: underline; /* Подчеркивание ссылки при наведении */
+}
+
+/* Все уведомления */
+.notification-container-all {
+    display: grid;
+    gap: 20px;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+}
+
+.notification-all {
+    background-color: #f0f0f0;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.notification-content-all {
+    font-size: 16px;
+    line-height: 1.6;
+}
+
+.notification-meta-all {
+    font-size: 14px;
+    color: #666;
+    margin-top: 10px;
+}
+
+@media (max-width: 768px) {
+    .notification-container-all {
+        grid-template-columns: 1fr;
+    }
+}
+
+
 
 /* карточка профиля */
 .profile-container {

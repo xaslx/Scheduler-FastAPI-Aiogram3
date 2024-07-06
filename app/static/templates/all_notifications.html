@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}Уведомления{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <h1>Уведомления</h1>
+        <div id="notification-container-all" class="notification-container-all">
+            <!-- Здесь будут выводиться уведомления -->
+            {% for notification in notifications %}
+                <div class="notification-all">
+                    <div class="notification-content-all">
+                        <a href="/notification/{{ notification.id }}/">{{ notification.title }}</a>
+                    </div>
+                    <div class="notification-meta-all">
+                        {{ notification.created_at.strftime('%d %B %Y %H:%M') }}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+{% endblock %}

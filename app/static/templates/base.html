@@ -10,27 +10,62 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10.15.6/dist/sweetalert2.all.min.js"></script>
     <title>{% block title %}Scheduler{% endblock %}</title>
 </head>
+
 <body>
     <header>
         <div class="logo">
             <a href="/">
                 <img src="/app/static/icon.png" alt="Логотип">
-                <span class="site-title">Scheduler</span> <!-- Добавлено название сайта -->
+                <span class="site-title">Scheduler</span>
             </a>
         </div>
-        {% block user_menu %}
         <div class="nav-links">
             {% if user %}
                 <div class="user-info">
-                    <p class="user-name">{{ user.name }} {{ user.surname }}</p>
-                    <div class="user-photo" tabindex="0" onclick="toggleDropdown(event)">
+                    <p style="color: white;" class="user-name">{{ user.name }} {{ user.surname }}</p>
+                    <div class="notification-icon"
+                         onmouseover="showDropdown('notification-list')" 
+                         onmouseout="hideDropdown('notification-list')" 
+                         onclick="toggleDropdown('notification-list')">
+                        <img src="/app/static/notification.png" alt="Уведомления">
+                        <div id="notification-list" class="notification-menu">
+                            <div class="menu-header-notification">Уведомления</div>
+                            {% if notifications %}
+                                {% for notification in notifications %}
+                                    {% if loop.index <= 3 %}
+                                        <div class="notification-item">
+                                            <a href="/notification/{{ notification.id }}">{{ notification.title }}</a>
+                                        </div>
+                                        {% if loop.index < 3 and not loop.last %}
+                                            <hr class="notification-divider">
+                                        {% endif %}
+                                    {% endif %}
+                                {% endfor %}
+                                <hr class="notification-divider">
+                                <div class="view-all">
+                                    <a style="color: gray;" href="{{ url_for('allnotification:page') }}">Все уведомления</a>
+                                </div>
+                            {% else %}
+                                <p class="no-notifications">Нет уведомлений</p>
+                                <hr class="notification-divider">
+                                <div class="view-all">
+                                    <a style="color: gray;" href="{{ url_for('allnotification:page') }}">Все уведомления</a>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="user-photo"
+                         onmouseover="showDropdown('user-dropdown')" 
+                         onmouseout="hideDropdown('user-dropdown')" 
+                         onclick="toggleDropdown('user-dropdown')">
                         <img src="/app/static/default.png" alt="Фото профиля">
-                        <div class="dropdown-menu">
+                        <div id="user-dropdown" class="dropdown-menu">
                             <a href="{{ url_for('myprofile:page') }}">Мой профиль</a>
                             <a href="{{ url_for('settings:page') }}">Настройки</a>
                             {% if user.role == 'admin' or user.role == 'dev' %}
                                 <a href="{{ url_for('allusers:page') }}">Список пользователей</a>
-                                <a href="{{ url_for('create_notification:page') }}">Создать уведомление</a>
+                                <a href="{{ url_for('createnot:page') }}">Создать уведомление</a>
                             {% endif %}
                             <a href="#" onclick="logout(event)">Выход</a>
                         </div>
@@ -41,7 +76,6 @@
                 <a href="/auth/login">Вход</a>
             {% endif %}
         </div>
-        {% endblock %}
     </header>
     <main>
         {% block content %}
@@ -58,24 +92,77 @@
     </footer>
     {% block scripts %}
     <script>
-        function toggleDropdown(event) {
-            const dropdown = event.currentTarget;
-            dropdown.classList.toggle('active');
-        }
-
-        // Закрыть меню, если клик вне его
-        window.onclick = function(event) {
-            if (!event.target.matches('.user-photo, .user-photo *')) {
-                const dropdowns = document.querySelectorAll('.user-photo');
-                dropdowns.forEach(dropdown => {
-                    dropdown.classList.remove('active');
+        // JavaScript для открытия и закрытия всплывающих меню
+        document.addEventListener('DOMContentLoaded', function() {
+            const notificationItems = document.querySelectorAll('.notification-item');
+    
+            notificationItems.forEach(item => {
+                item.addEventListener('click', function(event) {
+                    event.stopPropagation(); // Предотвращаем всплытие события до window.onclick
+                    const notificationUrl = item.querySelector('a').getAttribute('href');
+                    window.location.href = notificationUrl;
                 });
+            });
+    
+            const userPhoto = document.querySelector('.user-photo');
+            userPhoto.addEventListener('click', function(event) {
+                event.stopPropagation(); // Предотвращаем всплытие события до window.onclick
+                toggleDropdown('user-dropdown');
+            });
+        });
+    
+        let activeDropdown = null;
+        let showTimeout = null;
+        let hideTimeout = null;
+    
+        function showDropdown(dropdownId) {
+            if (hideTimeout) clearTimeout(hideTimeout);
+            if (showTimeout) clearTimeout(showTimeout);
+    
+            if (activeDropdown && activeDropdown !== dropdownId) {
+                hideDropdown(activeDropdown);
+            }
+    
+            showTimeout = setTimeout(() => {
+                const dropdown = document.getElementById(dropdownId);
+                dropdown.classList.add('active');
+                activeDropdown = dropdownId;
+            }, 300);
+        }
+    
+        function hideDropdown(dropdownId) {
+            if (showTimeout) clearTimeout(showTimeout);
+    
+            hideTimeout = setTimeout(() => {
+                const dropdown = document.getElementById(dropdownId);
+                dropdown.classList.remove('active');
+                if (activeDropdown === dropdownId) {
+                    activeDropdown = null;
+                }
+            }, 300);
+        }
+    
+        function toggleDropdown(dropdownId) {
+            if (activeDropdown === dropdownId) {
+                hideDropdown(dropdownId);
+            } else {
+                showDropdown(dropdownId);
             }
         }
-
+    
+        // Закрыть меню, если клик вне его
+        window.onclick = function(event) {
+            if (!event.target.closest('.notification-icon') && activeDropdown === 'notification-list') {
+                hideDropdown('notification-list');
+            }
+            if (!event.target.closest('.user-photo') && activeDropdown === 'user-dropdown') {
+                hideDropdown('user-dropdown');
+            }
+        }
+    
         function logout(event) {
-            event.preventDefault();  // Предотвращаем действие по умолчанию (переход по ссылке)
-
+            event.preventDefault();
+    
             fetch('/auth/logout', {
                 method: 'POST',
                 headers: {
@@ -85,15 +172,16 @@
             })
             .then(response => {
                 if (response.redirected) {
-                    window.location.href = response.url;  // Перенаправляем на указанный адрес после успешного выхода
+                    window.location.href = response.url;
                 } else {
-                    // Если не произошло перенаправление, обновляем текущую страницу
                     window.location.reload();
                 }
             })
             .catch(error => console.error('Ошибка:', error));
         }
     </script>
+    
     {% endblock %}
 </body>
+
 </html>

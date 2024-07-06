@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}Уведомление{% endblock %}
+
+{% block content %}
+    <div class="container-by-id">
+        <div class="notification-details-by-id">
+            <h1 style="color: white;">{{ notification.title }}</h1>
+            <div style="margin-bottom: 15px;" class="notification-meta-by-id">
+                {{ notification.created_at.strftime('%d %B %Y %H:%M') }}
+            </div>
+            <hr style="margin-bottom: 10px;">
+            <div class="notification-description-by-id">
+                <p>{{ notification.description | safe }}</p>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <style>
+        .notification-details-by-id {
+            background-color: #333; /* Цвет фона блока */
+            color: #fff; /* Цвет текста */
+            padding: 20px; /* Поля вокруг контента */
+            margin: 0 auto; /* Центрирование по горизонтали */
+            width: 50%; /* Ширина блока */
+            box-sizing: border-box; /* Учитываем padding внутри ширины */
+            border-radius: 10px; /* Закругленные углы */
+            max-height: 400px; /* Максимальная высота блока */
+            overflow: auto; /* Прокрутка, если текст не помещается */
+            word-wrap: break-word; /* Перенос слов при необходимости */
+        }
+
+        .notification-description-by-id p {
+            line-height: 30px; /* Высота между строками */
+            font-weight: 100; /* Насыщение символов */
+            color: white; /* Цвет текста */
+            text-align: left; /* Выравнивание текста по левому краю */
+            margin: 0; /* Убираем внешние отступы абзаца */
+            padding: 0; /* Убираем внутренние отступы абзаца */
+        }
+
+        @media (max-width: 768px) {
+            .notification-details-by-id {
+                width: 100%; /* Ширина блока на мобильных устройствах */
+            }
+        }
+    </style>
+{% endblock %}

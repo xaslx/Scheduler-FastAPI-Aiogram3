@@ -36,29 +36,6 @@ async def show_my_profile_template(request: Request, user: User = Depends(get_cu
 @user_router.get('/edit_profile', status_code=200, name='edit:page')
 async def get_edit_my_profile_template(request: Request, user: User = Depends(get_current_user)) -> HTMLResponse:
     return templates.TemplateResponse(request=request, name='edit_profile.html', context={'user': user})
-
-@user_router.get('/create_notification', status_code=200, name='create_notification:page')
-async def get_create_notification_template(
-    request: Request,
-    user: User = Depends(get_admin_user)
-) -> HTMLResponse:
-    if not user:
-        return templates.TemplateResponse(request=request, name='404.html', context={'user': user})
-    return templates.TemplateResponse(request=request, name='create_notification.html', context={'user': user})
-
-@user_router.post('/send_notification', status_code=200)
-async def send_notification_for_all_users(
-    message: CreateMessage,
-    session: AsyncSession = Depends(get_async_session),
-    user: User = Depends(get_admin_user)
-):
-    if not user:
-        raise NotAccess
-    
-    users: list[User] = await UserRepository.find_all(session=session)
-    emails: list[str] = [user.email for user in users]
-    send_notification.delay(users=emails, message=message.message)
-    return {"user_count": len(emails)}
     
 
 @user_router.get('/edit_password', status_code=200, name='edit_password:page')
