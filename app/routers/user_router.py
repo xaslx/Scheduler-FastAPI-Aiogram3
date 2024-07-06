@@ -108,7 +108,7 @@ async def get_all_users(
     return templates.TemplateResponse(
         request=request, 
         name="all_users.html", 
-        context={'user': user, 'min': min, 'max': max, "users": res.items, "total_users": res.total, "page": res.page, 'pages': res.pages})
+        context={'pagination': True, 'user': user, 'min': min, 'max': max, "users": res.items, "total_users": res.total, "page": res.page, 'pages': res.pages})
     
 
 @user_router.get('/search_user', status_code=200, name='search:page')
@@ -130,7 +130,7 @@ async def search_user_by_name_surname(
     return templates.TemplateResponse(
         request=request, 
         name='all_users.html', 
-        context={'page': page,  'total_users': len(users),'users': users, 'user': user, 'pages': math.ceil(len(users)/50)})
+        context={'pagination': False, 'page': page,  'total_users': len(users),'users': users, 'user': user, 'pages': math.ceil(len(users)/50)})
 
 @user_router.get('/my_settings', status_code=200, name='settings:page')
 async def get_my_settings_template(
