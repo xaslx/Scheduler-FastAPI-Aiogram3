@@ -18,6 +18,9 @@ from app.models.user_model import User
 from app.auth.dependencies import get_current_user
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi_pagination import add_pagination
+from fastapi.middleware.httpsredirect import HTTPSRedirectMiddleware
+from middleware import RateLimitingMiddleware
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -33,14 +36,20 @@ app: FastAPI = FastAPI(
     lifespan=lifespan
 )
 
+#пагинация
 add_pagination(app)
 
+#роутеры
 app.include_router(auth_router)
 app.include_router(user_router)
 app.include_router(main_router)
 app.include_router(not_found)
 app.include_router(booking_router)
 app.include_router(notification_router)
+
+#мидлвары
+#app.add_middleware(HTTPSRedirectMiddleware)  #все запросы должны быть с https / ws
+app.add_middleware(RateLimitingMiddleware)
 
 origins = [
     "http://localhost.tiangolo.com",
