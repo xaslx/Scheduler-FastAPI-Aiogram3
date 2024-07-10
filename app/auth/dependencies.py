@@ -1,7 +1,7 @@
 from fastapi import Depends, Request
 from jose import ExpiredSignatureError, JWTError, jwt
 from sqlalchemy.ext.asyncio import AsyncSession
-
+from app.schemas.notification_schemas import NotificationOut
 from config import settings
 from database import get_async_session
 from exceptions import (
@@ -13,7 +13,7 @@ from exceptions import (
 )
 from app.models.user_model import User
 from app.repository.user_repo import UserRepository
-
+from app.repository.notification_repo import NotificationRepository
 
 def get_token(request: Request):
     token: str = request.cookies.get("user_access_token")
@@ -52,3 +52,8 @@ async def get_admin_user(user: User = Depends(get_current_user)):
             raise UserIsNotAdmin
         return user
     return None
+
+
+async def get_all_notifications(session: AsyncSession = Depends(get_async_session)):
+    notifications: list[NotificationOut] = await NotificationRepository.find_all_notif(session=session)
+    return notifications

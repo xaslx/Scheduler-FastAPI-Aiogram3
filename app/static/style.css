@@ -220,12 +220,16 @@ p {
     background-color: #f0f0f0;
     padding: 15px;
     border-radius: 8px;
+    word-wrap: break-word;     /* Переносить слова на новую строку при переполнении */
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
 .notification-content-all {
     font-size: 16px;
     line-height: 1.6;
+    white-space: nowrap;        /* Запретить перенос текста на новую строку */
+    overflow: hidden;           /* Скрыть текст, выходящий за пределы блока */
+    text-overflow: ellipsis;    /* Добавить многоточие в конце обрезанного текста */
 }
 
 .notification-meta-all {
@@ -239,7 +243,6 @@ p {
         grid-template-columns: 1fr;
     }
 }
-
 
 
 /* карточка профиля */

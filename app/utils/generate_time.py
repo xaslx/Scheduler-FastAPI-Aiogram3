@@ -1,5 +1,9 @@
 from datetime import datetime, timedelta
+import pytz
+from datetime import datetime
 
+
+moscow_tz = pytz.timezone('Europe/Moscow')
 
 async def generate_time_intervals(start_time, end_time, interval_minutes) -> list:
     start: datetime = datetime.combine(datetime.today(), start_time)

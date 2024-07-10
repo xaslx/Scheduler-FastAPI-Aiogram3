@@ -1,11 +1,9 @@
 from database import Base
 from sqlalchemy.orm import mapped_column, Mapped, relationship
 from sqlalchemy import String, DateTime, Time, ARRAY, Date, JSON
-from datetime import datetime, time
+from datetime import datetime, time, timezone
 from typing import Optional, TYPE_CHECKING
-
-
-
+from app.utils.generate_time import moscow_tz
 
 if TYPE_CHECKING:
     from .booking_model import Booking
@@ -24,7 +22,7 @@ class User(Base):
     personal_link: Mapped[str] = mapped_column(String(255), unique=True)
     telegram_link: Mapped[str] = mapped_column(String(255), unique=True, default=None, nullable=True)
     hashed_password: Mapped[str]
-    registered_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow())
+    registered_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now(moscow_tz).replace(tzinfo=None))
     is_active: Mapped[bool] = mapped_column(default=True)
     description: Mapped[str | None] = mapped_column(String(500), default=None, nullable=True)
     enabled: Mapped[bool] = mapped_column(default=True)

@@ -70,7 +70,9 @@ class FileTooLarge(BaseException):
     status_code = status.HTTP_413_REQUEST_ENTITY_TOO_LARGE
     detail = "Файл не должен привышать 5мб."
 
-
+class NotificationNotFound(BaseException):
+    status_code = status.HTTP_404_NOT_FOUND
+    detail = 'Уведомление не найден'
 
 # JWT token
 class TokenExpiredException(BaseException):

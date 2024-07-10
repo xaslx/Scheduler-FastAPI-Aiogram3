@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, Request, Query, Response
 from pydantic import EmailStr
 from app.auth.auth import get_password_hash
 from database import get_async_session
-from app.auth.dependencies import get_current_user, get_admin_user
+from app.auth.dependencies import get_current_user, get_admin_user, get_all_notifications
 from app.repository.user_repo import UserRepository
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi.templating import Jinja2Templates
@@ -17,10 +17,13 @@ from app.tasks.tasks import reset_password_email, password_changed, update_passw
 import secrets
 from app.auth.authentication import generate_token
 from app.schemas.jwt_token import Token
+from app.schemas.notification_schemas import NotificationOut
 from fastapi_pagination.ext.sqlalchemy import paginate
 from fastapi_pagination import Page, Params
 from sqlalchemy import select
 import math
+
+
 
 user_router: APIRouter = APIRouter(
     prefix='/user',
@@ -30,19 +33,31 @@ user_router: APIRouter = APIRouter(
 
 
 @user_router.get('/my_profile', status_code=200, name='myprofile:page')
-async def show_my_profile_template(request: Request, user: User = Depends(get_current_user)) -> HTMLResponse:
-    return templates.TemplateResponse('my_profile.html', {'request': request, 'user': user})
+async def show_my_profile_template(
+    request: Request, 
+    user: User = Depends(get_current_user),
+    notifications: list[NotificationOut] = Depends(get_all_notifications)
+    ) -> HTMLResponse:
+    return templates.TemplateResponse('my_profile.html', {'request': request, 'user': user, 'notifications': notifications})
 
 @user_router.get('/edit_profile', status_code=200, name='edit:page')
-async def get_edit_my_profile_template(request: Request, user: User = Depends(get_current_user)) -> HTMLResponse:
-    return templates.TemplateResponse(request=request, name='edit_profile.html', context={'user': user})
+async def get_edit_my_profile_template(
+    request: Request, 
+    user: User = Depends(get_current_user),
+    notifications: list[NotificationOut] = Depends(get_all_notifications)
+    ) -> HTMLResponse:
+    return templates.TemplateResponse(request=request, name='edit_profile.html', context={'user': user, 'notifications': notifications})
     
 
 @user_router.get('/edit_password', status_code=200, name='edit_password:page')
-async def get_edit_my_password_template(request: Request, user: User = Depends(get_current_user)) -> HTMLResponse:
+async def get_edit_my_password_template(
+    request: Request, 
+    user: User = Depends(get_current_user),
+    notifications: list[NotificationOut] = Depends(get_all_notifications)
+    ) -> HTMLResponse:
     if not user:
         return templates.TemplateResponse(request=request, name='not_logined.html', context={'user': user})
-    return templates.TemplateResponse(request=request, name='edit_password.html', context={'user': user})
+    return templates.TemplateResponse(request=request, name='edit_password.html', context={'user': user, 'notifications': notifications})
 
 @user_router.patch('/edit_password', status_code=200)
 async def edit_password(
@@ -72,20 +87,21 @@ async def get_all_users(
     request: Request,
     page: Annotated[int, Query()] = 1,
     session: AsyncSession = Depends(get_async_session), 
-    user: User = Depends(get_admin_user)
+    user: User = Depends(get_admin_user),
+    notifications: list[NotificationOut] = Depends(get_all_notifications)
 ) -> Page[UserOut]:
     
     res = await paginate(session, select(User).order_by(User.registered_at))
 
 
     if user is None or user.role == 'user':
-        return templates.TemplateResponse(request=request, name='404.html', context={'user': user})
+        return templates.TemplateResponse(request=request, name='404.html', context={'user': user, 'notifications': notifications})
     if not user.is_active:
-        return templates.TemplateResponse(request=request, name='banned.html', context={'user': user})
+        return templates.TemplateResponse(request=request, name='banned.html', context={'user': user, 'notifications': notifications})
     return templates.TemplateResponse(
         request=request, 
         name="all_users.html", 
-        context={'pagination': True, 'user': user, 'min': min, 'max': max, "users": res.items, "total_users": res.total, "page": res.page, 'pages': res.pages})
+        context={'notifications': notifications, 'pagination': True, 'user': user, 'min': min, 'max': max, "users": res.items, "total_users": res.total, "page": res.page, 'pages': res.pages})
     
 
 @user_router.get('/search_user', status_code=200, name='search:page')
@@ -94,7 +110,8 @@ async def search_user_by_name_surname(
     query: str | None = None,
     session: AsyncSession = Depends(get_async_session),
     user: User = Depends(get_admin_user),
-    page: Annotated[int, Query()] = 1
+    page: Annotated[int, Query()] = 1,
+    notifications: list[NotificationOut] = Depends(get_all_notifications)
 ) -> HTMLResponse:
     users: list[User] = []
 
@@ -103,35 +120,38 @@ async def search_user_by_name_surname(
     if query:
         users: list[User] = await UserRepository.search_user_by_name_surname_or_email(session=session, text=query)
     if not user.is_active:
-        return templates.TemplateResponse(request=request, name='banned.html', context={'user': user})
+        return templates.TemplateResponse(request=request, name='banned.html', context={'user': user, 'notifications': notifications})
     return templates.TemplateResponse(
         request=request, 
         name='all_users.html', 
-        context={'pagination': False, 'page': page,  'total_users': len(users),'users': users, 'user': user, 'pages': math.ceil(len(users)/50)})
+        context={'pagination': False, 'page': page, 'notifications': notifications, 'total_users': len(users),'users': users, 'user': user, 'pages': math.ceil(len(users)/50)})
 
 @user_router.get('/my_settings', status_code=200, name='settings:page')
 async def get_my_settings_template(
     request: Request,
-    user: User = Depends(get_current_user)
+    user: User = Depends(get_current_user),
+    notifications: list[NotificationOut] = Depends(get_all_notifications)
     ) -> HTMLResponse:
     if not user:
         return templates.TemplateResponse(request=request, name='not_logined.html')
-    return templates.TemplateResponse(request=request, name='settings.html', context={'user': user})
+    return templates.TemplateResponse(request=request, name='settings.html', context={'user': user, 'notifications': notifications})
 
 @user_router.get('/{user_id}', status_code=200, name='user_by_id:page')
 async def get_user_by_id(
     request: Request,
     user_id: int, 
     session: AsyncSession = Depends(get_async_session), 
-    user: User = Depends(get_admin_user)) -> HTMLResponse:
+    user: User = Depends(get_admin_user),
+    notifications: list[NotificationOut] = Depends(get_all_notifications)
+    ) -> HTMLResponse:
 
     user_by_id: User = await UserRepository.find_one_or_none(id=user_id, session=session)  
 
     if not user_by_id or not user:
         return templates.TemplateResponse(request=request, name='404.html', context={'user': user})
     if not user.is_active:
-        return templates.TemplateResponse(request=request, name='banned.html', context={'user': user})
-    return templates.TemplateResponse(request=request, name='user_by_id.html', context={'user': user, 'user_by_id': user_by_id})
+        return templates.TemplateResponse(request=request, name='banned.html', context={'user': user, 'notifications': notifications})
+    return templates.TemplateResponse(request=request, name='user_by_id.html', context={'user': user, 'user_by_id': user_by_id, 'notifications': notifications})
 
 
 @user_router.patch('/ban/{user_id}', status_code=200)
@@ -201,23 +221,25 @@ async def edit_time(
 @user_router.get('/forgot_password/reset', status_code=200, name='reset:page')
 async def get_forgot_password_template(
     request: Request, 
-    session: AsyncSession = Depends(get_async_session), 
+    notifications: list[NotificationOut] = Depends(get_all_notifications),
     user: User = Depends(get_current_user)) -> HTMLResponse:
 
-    return templates.TemplateResponse(request=request, name='forgot_password.html', context={'user': user})
+    return templates.TemplateResponse(request=request, name='forgot_password.html', context={'user': user, 'notifications': notifications})
 
 @user_router.get('/reset/reset_password', status_code=200, name='reset_password:page')
 async def get_reset_password_template(
     token: str, 
     request: Request, 
     user: User = Depends(get_current_user), 
-    session: AsyncSession = Depends(get_async_session)) -> HTMLResponse:
+    session: AsyncSession = Depends(get_async_session),
+    notifications: list[NotificationOut] = Depends(get_all_notifications)
+    
+    ) -> HTMLResponse:
 
     exist_user = await get_current_user(async_db=session, token=token)
-    print(exist_user)
     if not exist_user:
         return templates.TemplateResponse(request=request, name='expire_time.html', context={'user': user})
-    return templates.TemplateResponse(request=request, name='reset_password.html', context={'user': user, 'exist_user': exist_user})
+    return templates.TemplateResponse(request=request, name='reset_password.html', context={'user': user, 'exist_user': exist_user, 'notifications': notifications})
 
 @user_router.post('/forgot_password/reset', status_code=200)
 async def get_forgot_password_template(
@@ -236,8 +258,12 @@ async def get_forgot_password_template(
 
 
 @user_router.get('/reset/success_update_password', status_code=200, name='success_update_password')
-async def get_update_password_template(request: Request, user: User = Depends(get_current_user)) -> HTMLResponse:
-    return templates.TemplateResponse(request=request, name='success_update_password.html', context={'user': user})
+async def get_update_password_template(
+    request: Request, 
+    user: User = Depends(get_current_user),
+    notifications: list[NotificationOut] = Depends(get_all_notifications)
+    ) -> HTMLResponse:
+    return templates.TemplateResponse(request=request, name='success_update_password.html', context={'user': user, 'notifications': notifications})
 
 @user_router.patch("/forgot_password/reset")
 async def reset_password(

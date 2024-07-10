@@ -33,7 +33,7 @@ async def lifespan(app: FastAPI):
 app: FastAPI = FastAPI(
     title='Scheduler',
     version='0.1',
-    lifespan=lifespan
+    lifespan=lifespan,
 )
 
 #пагинация
@@ -49,7 +49,7 @@ app.include_router(notification_router)
 
 #мидлвары
 #app.add_middleware(HTTPSRedirectMiddleware)  #все запросы должны быть с https / ws
-app.add_middleware(RateLimitingMiddleware)
+# app.add_middleware(RateLimitingMiddleware)
 
 origins = [
     "http://localhost.tiangolo.com",
