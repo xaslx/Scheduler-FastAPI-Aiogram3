@@ -2,7 +2,7 @@ from .base_repo import BaseRepository
 from app.models.user_model import User
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, or_
-
+from sqlalchemy.orm import selectinload
 
 
 class UserRepository(BaseRepository):
@@ -18,4 +18,11 @@ class UserRepository(BaseRepository):
         ))
         res = await session.execute(query)
         return res.mappings().all()
+    
+    @classmethod
+    async def find_user_and_booking(cls, session: AsyncSession, **filter_by):
+        query = select(User).options(selectinload(cls.model.bookings)).filter_by(**filter_by)
+        result = await session.execute(query)
+        return result.scalars().one_or_none()
+
     

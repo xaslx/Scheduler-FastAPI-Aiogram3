@@ -14,12 +14,17 @@ from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
 from redis import asyncio as aioredis
 from config import settings
-from app.models.user_model import User
+from app.schemas.user_schema import UserOut
 from app.auth.dependencies import get_current_user
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi_pagination import add_pagination
 from fastapi.middleware.httpsredirect import HTTPSRedirectMiddleware
 from middleware import RateLimitingMiddleware
+from app.auth.dependencies import get_current_user
+from sqlalchemy.ext.asyncio import AsyncSession
+from database import async_session_maker
+
+
 
 
 @asynccontextmanager
@@ -73,7 +78,10 @@ app.add_middleware(
 app.mount("/app/static", StaticFiles(directory="app/static"), "static")
 
 
+
 @app.exception_handler(StarletteHTTPException)
 async def custom_http_exception_handler(request: Request, exc) -> HTMLResponse:
-    return RedirectResponse(url='/error/not_found')
+    async with async_session_maker() as session:
+        user: UserOut = await get_current_user(async_db=session, token=request.cookies.get('user_access_token'))
+    return templates.TemplateResponse(request=request, name='404.html', context={'user': user})
 

@@ -83,8 +83,11 @@
                     return new Date(calendar.getFullYear(), calendar.getMonth(), 1);
                 },
                 lastDay: function() {
-                    return new Date(calendar.getFullYear(), calendar.getMonth() + 1, 0);
+                    let currentYear = calendar.getFullYear();
+                    let currentMonth = calendar.getMonth();
+                    return new Date(currentYear, currentMonth + 1, 0).getDate();
                 },
+
                 firstDayNumber: function() {
                     return calendarControl.firstDay().getDay() + 1;
                 },
@@ -172,15 +175,13 @@
                     let prevDateCount = 0;
 
                     calendarControl.prevMonthLastDate = calendarControl.getPreviousMonthLastDate();
-                    let prevMonthDatesArray = [];
-                    let calendarDays = calendarControl.daysInMonth(calendar.getMonth() + 1, calendar.getFullYear());
+                    let calendarDays = calendarControl.daysInMonth(calendar.getMonth(), calendar.getFullYear());
 
                     // Dates of current month
                     for (let i = 1; i <= calendarDays; i++) {
                         if (i < calendarControl.firstDayNumber()) {
                             prevDateCount += 1;
                             document.querySelector(".calendar .calendar-body").innerHTML += `<div class="prev-dates prev-date">${calendarControl.prevMonthLastDate--}</div>`;
-                            prevMonthDatesArray.push(calendarControl.prevMonthLastDate + 1);
                         } else {
                             document.querySelector(".calendar .calendar-body").innerHTML += `<div class="number-item" data-num=${count}><a class="dateNumber" href="#">${count++}</a></div>`;
                         }
@@ -192,9 +193,9 @@
                     }
 
                     calendarControl.highlightToday();
-                    calendarControl.plotPrevMonthDates(prevMonthDatesArray);
                     calendarControl.plotNextMonthDates();
                 },
+
                 attachEvents: function() {
                     let prevBtn = document.querySelector(".calendar .calendar-prev a");
                     let nextBtn = document.querySelector(".calendar .calendar-next a");

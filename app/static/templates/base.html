@@ -63,6 +63,7 @@
                         <div id="user-dropdown" class="dropdown-menu">
                             <a href="{{ url_for('myprofile:page') }}">Мой профиль</a>
                             <a href="{{ url_for('settings:page') }}">Настройки</a>
+                            <a href="#">Мои клиенты</a>
                             {% if user.role == 'admin' or user.role == 'dev' %}
                                 <a href="{{ url_for('allusers:page') }}">Список пользователей</a>
                                 <a href="{{ url_for('createnot:page') }}">Создать уведомление</a>
@@ -181,6 +182,14 @@
         }
     </script>
     
+    <style>
+        @media (max-width: 600px) {
+            .user-name {
+                display: none;
+            }
+        }
+
+    </style>
     {% endblock %}
 </body>
 

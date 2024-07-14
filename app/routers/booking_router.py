@@ -7,12 +7,13 @@ from app.auth.dependencies import get_current_user, get_all_notifications
 from database import get_async_session
 from app.models.user_model import User
 from fastapi.responses import HTMLResponse
-from app.schemas.booking_schemas import BookingDate, BookingTime
-from datetime import datetime, date
+from app.schemas.booking_schemas import BookingDate, BookingTime, BookingOut
+from datetime import datetime, date, timedelta, timezone
 from app.utils.generate_time import generate_time_intervals
-from exceptions import UserNotFound
+from exceptions import UserNotFound, BookingNotFound
 from app.models.booking_model import Booking
 from app.schemas.notification_schemas import NotificationOut
+from fastapi.responses import RedirectResponse
 
 
 
@@ -41,30 +42,18 @@ async def add_booking(
     session: AsyncSession = Depends(get_async_session)
 ):
     user: User = await UserRepository.find_one_or_none(session=session, id=date_for_booking.user_id)
-
+    date_for = date_for_booking.date_for_booking.date() + timedelta(days=1)
     if not user:
         raise UserNotFound
-    if user.date_for_booking is None or (date_for_booking.date_for_booking.date() not in user.date_for_booking):
-        intervals: list[str] = await generate_time_intervals(user.start_time, user.end_time, user.interval)
-        res = await BookingRepository.add(session=session, date_for_booking=date_for_booking.date_for_booking, user_id=user.id, times=intervals)
+    intervals: list[str] = await generate_time_intervals(user.start_time, user.end_time, user.interval)
+    booking: BookingOut = await BookingRepository.get_booking(session=session, user_id=date_for_booking.user_id, date=date_for)
+    
+    if not booking:
+        await BookingRepository.add(session=session, date_for_booking=date_for, user_id=user.id, times=intervals)
 
-        user.date_for_booking.append(res)
-
-        await session.commit()
-        return {"message": "Booking added successfully"}
-
-        
-
-@booking_router.get('/{personal_link}/new')
-async def get_booking(
-    personal_link: str, date: date, 
-    session: AsyncSession = Depends(get_async_session), 
-    user: User = Depends(get_current_user),
-    notifications: list[NotificationOut] = Depends(get_all_notifications)
-    ):
-
-    user_link: User = await UserRepository.find_one_or_none(session=session, personal_link=personal_link)
-    if not user_link:
-        raise UserNotFound
-    booking: Booking = await BookingRepository.get_booking(user_id=user_link.id, session=session, date=date)
-
+@booking_router.patch('/edit_booking', status_code=200)
+async def edit_booking(booking_id: int, user: User = Depends(get_current_user), session: AsyncSession = Depends(get_async_session)):
+    # booking: BookingOut = await BookingRepository.find_one_or_none(session=session, id=booking_id)
+    # if not booking:
+    #     raise BookingNotFound
+    await BookingRepository.update_times(user_id=user.id, session=session, booking_id=booking_id)

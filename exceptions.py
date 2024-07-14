@@ -88,3 +88,8 @@ class TokenAbsentException(BaseException):
 class IncorrectTokenException(BaseException):
     status_code = status.HTTP_401_UNAUTHORIZED
     detail = "Неверный формат токена"
+
+
+class BookingNotFound(BaseException):
+    status_code = status.HTTP_404_NOT_FOUND
+    detail = 'Запись не найдена'

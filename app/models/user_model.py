@@ -29,7 +29,6 @@ class User(Base):
     start_time: Mapped[time] = mapped_column(Time, default=time(7, 0))
     end_time: Mapped[time] = mapped_column(Time, default=time(20, 0))
     interval: Mapped[int] = mapped_column(default=30)
-
     
 
     bookings: Mapped[list['Booking']] = relationship(back_populates='user')
