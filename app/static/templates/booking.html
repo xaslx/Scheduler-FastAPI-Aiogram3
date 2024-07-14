@@ -131,6 +131,9 @@
 
                     let selectedFullDate = new Date(selectedYear, selectedMonth, selectedDate);
 
+                    // Убираем время из currentDate для сравнения только по дате
+                    currentDate.setHours(0, 0, 0, 0);
+
                     if (selectedFullDate < currentDate) {
                         displayCustomNotification('Нельзя выбирать прошедшие даты!');
                     } else if (selectedFullDate > maxDate) {
@@ -140,6 +143,7 @@
                         sendBookingRequest(selectedFullDate, userId);
                     }
                 },
+
                 plotSelectors: function() {
                     document.querySelector(".calendar").innerHTML += `
                         <div class="calendar-inner">
@@ -175,25 +179,30 @@
                     let prevDateCount = 0;
 
                     calendarControl.prevMonthLastDate = calendarControl.getPreviousMonthLastDate();
-                    let calendarDays = calendarControl.daysInMonth(calendar.getMonth(), calendar.getFullYear());
+                    let calendarDays = calendarControl.daysInMonth(calendar.getMonth() + 1, calendar.getFullYear());
+                    let firstDay = calendarControl.firstDayNumber() - 1; // День недели первого дня месяца
+
+                    // Dates of previous month
+                    for (let i = firstDay; i > 0; i--) {
+                        document.querySelector(".calendar .calendar-body").innerHTML += `<div class="prev-dates prev-date">${calendarControl.prevMonthLastDate - i + 1}</div>`;
+                        prevDateCount++;
+                    }
 
                     // Dates of current month
                     for (let i = 1; i <= calendarDays; i++) {
-                        if (i < calendarControl.firstDayNumber()) {
-                            prevDateCount += 1;
-                            document.querySelector(".calendar .calendar-body").innerHTML += `<div class="prev-dates prev-date">${calendarControl.prevMonthLastDate--}</div>`;
-                        } else {
-                            document.querySelector(".calendar .calendar-body").innerHTML += `<div class="number-item" data-num=${count}><a class="dateNumber" href="#">${count++}</a></div>`;
-                        }
-                    }
-
-                    // Remaining dates after month dates
-                    for (let j = 0; j < prevDateCount + 1; j++) {
                         document.querySelector(".calendar .calendar-body").innerHTML += `<div class="number-item" data-num=${count}><a class="dateNumber" href="#">${count++}</a></div>`;
                     }
 
+                    // Dates of next month
+                    let remainingDays = (prevDateCount + calendarDays) % 7;
+                    if (remainingDays !== 0) {
+                        let nextMonthDaysCount = 7 - remainingDays;
+                        for (let i = 1; i <= nextMonthDaysCount; i++) {
+                            document.querySelector(".calendar .calendar-body").innerHTML += `<div class="next-dates">${i}</div>`;
+                        }
+                    }
+
                     calendarControl.highlightToday();
-                    calendarControl.plotNextMonthDates();
                 },
 
                 attachEvents: function() {
