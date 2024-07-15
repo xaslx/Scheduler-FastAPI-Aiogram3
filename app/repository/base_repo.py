@@ -20,7 +20,7 @@ class BaseRepository:
     
     @classmethod
     async def add(cls, session: AsyncSession, **data):
-        query = insert(cls.model).values(**data).returning(cls.model)
+        query = insert(cls.model).values(**data).returning(cls.model.id)
         result = await session.execute(query)
         await session.commit()
         return result.scalar()

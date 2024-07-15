@@ -93,3 +93,7 @@ class IncorrectTokenException(BaseException):
 class BookingNotFound(BaseException):
     status_code = status.HTTP_404_NOT_FOUND
     detail = 'Запись не найдена'
+
+class TimeNotFound(BaseException):
+    status_code = status.HTTP_404_NOT_FOUND
+    detail = 'Время для записи не найдено'

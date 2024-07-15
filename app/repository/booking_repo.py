@@ -1,9 +1,9 @@
 from .base_repo import BaseRepository
 from app.models.booking_model import Booking
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import insert, and_, select, update
+from sqlalchemy import Time, insert, and_, select, update
 from datetime import date
-
+from exceptions import TimeNotFound
 
 class BookingRepository(BaseRepository):
     model = Booking
@@ -18,7 +18,7 @@ class BookingRepository(BaseRepository):
             )
         )
         res = await session.execute(query)
-        return res.mappings().one_or_none()
+        return res.scalars().first()
 
     @classmethod
     async def get_booking(cls, user_id: int, session: AsyncSession, date: date):
@@ -30,10 +30,10 @@ class BookingRepository(BaseRepository):
         )
 
         res = await session.execute(query)
-        return res.mappings().one_or_none()
+        return res.scalars().first()
 
     @classmethod
-    async def update_times(cls, user_id: int, session: AsyncSession, booking_id: int):
+    async def update_times(cls, user_id: int, session: AsyncSession, booking_id: int, time: str):
         query = select(cls.model).where(
             and_(
                 cls.model.user_id == user_id,
@@ -42,8 +42,11 @@ class BookingRepository(BaseRepository):
         )
         result = await session.execute(query)
         booking = result.scalar_one_or_none()
-        booking.times.remove('16:00')
-        new_booking = update(cls.model).where(cls.model.id == booking_id).values(times=booking.times)
+        if time not in booking.times:
+            raise TimeNotFound()
+        booking.times.remove(time)
+        booking.selected_times.append(time)
+        new_booking = update(cls.model).where(cls.model.id == booking_id).values(times=booking.times, selected_times=booking.selected_times)
         await session.execute(new_booking)
         await session.commit()
 

@@ -186,12 +186,26 @@ async def edit_role_for_user(
         raise NotAccess
     await UserRepository.update(session=session, id=user_id, role=new_role.role)
 
-@user_router.delete('/delete_user/{user_id}', status_code=200, name='delete_user:page')
+@user_router.delete('/delete_user_for_admin/{user_id}', status_code=200, name='delete_user:page')
 async def delete_user(user_id: int, session: AsyncSession = Depends(get_async_session), admin: User = Depends(get_admin_user)):
     user: User = await UserRepository.find_one_or_none(session=session, id=user_id)
     if not user:
         raise UserNotFound
     if admin.role != 'dev':
+        raise NotAccess
+    await UserRepository.delete(session=session, id=user_id)
+
+@user_router.delete('/delete_user/{user_id}', name='del_user:page')
+async def del_user(
+    user_id: int, 
+    request: Request,
+    session: AsyncSession = Depends(get_async_session), 
+    user: User = Depends(get_current_user),
+    notifications: list[str] = Depends(get_all_notifications)) -> HTMLResponse:
+    
+    if not user:
+        return templates.TemplateResponse(request=request, name='404.html', context={'user': user, 'notifications': notifications})
+    if user.id != user_id:
         raise NotAccess
     await UserRepository.delete(session=session, id=user_id)
 

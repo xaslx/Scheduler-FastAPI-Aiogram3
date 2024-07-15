@@ -275,12 +275,15 @@
 
         function sendBookingRequest(selectedDate, userId) {
             const url = '/booking/add_booking';
+            
+            const dateWithoutTime = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate());
+            
             const data = {
-                date_for_booking: selectedDate.toISOString(), // Преобразуем дату в ISO формат
+                date_for_booking: dateWithoutTime.toISOString(), 
                 user_id: userId
             };
 
-            console.log('Отправка данных на сервер:', data); // Логирование отправляемых данных
+            console.log('Отправка данных на сервер:', data);
 
             fetch(url, {
                 method: 'POST',
@@ -289,20 +292,20 @@
                 },
                 body: JSON.stringify(data),
             })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.json();
-            })
+            .then(response => response.json())
             .then(data => {
-                // Обработка успешного ответа от сервера
-                console.log('Успешно отправлено', data);
+                if (data.redirect_url) {
+                    window.location.href = data.redirect_url;
+                } else {
+                    console.error('Ошибка в ответе:', data);
+                    displayCustomNotification('Ошибка в ответе сервера');
+                }
             })
             .catch(error => {
-                // Обработка ошибок
                 console.error('Ошибка отправки запроса:', error);
+                displayCustomNotification('Ошибка отправки запроса');
             });
         }
+
     </script>
 {% endblock %}
