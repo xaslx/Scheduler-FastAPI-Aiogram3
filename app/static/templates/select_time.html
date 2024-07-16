@@ -165,7 +165,7 @@
             const selectedTime = document.getElementById('confirmTime').innerText;
 
             try {
-                const response = await fetch(`/booking/edit_booking/${bookingId}?time=${selectedTime}`, {
+                const response = await fetch(`/booking/select_booking/${bookingId}?time=${selectedTime}`, {
                     method: 'PATCH',
                     headers: {
                         'Content-Type': 'application/json',

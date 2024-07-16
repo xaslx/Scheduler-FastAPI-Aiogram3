@@ -1,6 +1,9 @@
+from datetime import datetime, date
 from fastapi import APIRouter, Depends, Request, Query, Response
 from pydantic import EmailStr
 from app.auth.auth import get_password_hash
+from app.repository.booking_repo import BookingRepository
+from app.schemas.booking_schemas import BookingOut
 from database import get_async_session
 from app.auth.dependencies import get_current_user, get_admin_user, get_all_notifications
 from app.repository.user_repo import UserRepository
@@ -22,7 +25,7 @@ from fastapi_pagination.ext.sqlalchemy import paginate
 from fastapi_pagination import Page, Params
 from sqlalchemy import select
 import math
-
+from app.utils.generate_time import moscow_tz
 
 
 user_router: APIRouter = APIRouter(
@@ -39,6 +42,50 @@ async def show_my_profile_template(
     notifications: list[NotificationOut] = Depends(get_all_notifications)
     ) -> HTMLResponse:
     return templates.TemplateResponse('my_profile.html', {'request': request, 'user': user, 'notifications': notifications})
+
+@user_router.get('/clients', status_code=200, name='clients:page')
+async def get_my_clients(
+    request: Request,
+    session: AsyncSession = Depends(get_async_session),
+    user: User = Depends(get_current_user),
+    notifications: list[NotificationOut] = Depends(get_all_notifications)
+) -> HTMLResponse:
+    if not user:
+        return templates.TemplateResponse(request=request, name='404.html', context={'user': user, 'notifications': notifications})
+    bookings: BookingOut = await BookingRepository.find_all_booking(user_id=user.id, date=datetime.now(tz=moscow_tz).date(), session=session)
+    return templates.TemplateResponse(
+        request=request, name='my_clients.html', 
+        context={'user': user, 'notifications': notifications, 'clients': bookings})
+
+@user_router.get('/clients/', status_code=200, name='clients_by_date:page')
+async def get_my_clients_by_date(
+    date: Annotated[date, Query()],
+    user_id: Annotated[int, Query()],
+    request: Request,
+    session: AsyncSession = Depends(get_async_session),
+    user: User = Depends(get_current_user),
+    notifications: list[NotificationOut] = Depends(get_all_notifications)
+) -> HTMLResponse:
+    if not user or user.id != user_id:
+        return templates.TemplateResponse(request=request, name='404.html', context={
+            'user': user,
+            'notifications': notifications
+        })
+    booking: BookingOut = await BookingRepository.get_booking(user_id=user_id, date=date, session=session)
+    if not booking:
+        return templates.TemplateResponse(request=request, name='404.html', context={
+            'user': user,
+            'notifications': notifications
+        })
+    return templates.TemplateResponse(request=request, name='client_by_date.html', context={
+        'user': user,
+        'notifications': notifications,
+        'date': booking.date_for_booking,
+        'selected_times': booking.selected_times,
+        'booking': booking
+    })
+    
+
 
 @user_router.get('/edit_profile', status_code=200, name='edit:page')
 async def get_edit_my_profile_template(

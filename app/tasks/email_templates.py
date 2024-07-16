@@ -86,6 +86,40 @@ def success_update_password(
 
     return email
 
+def add_new_client(email_to: EmailStr, date: str, time: str):
+    email = EmailMessage()
+    email["Subject"] = "Новая запись!"
+    email["From"] = settings.SMTP_USER
+    email["To"] = email_to
+
+    email.set_content(
+        f"""
+        <h1>К вам записался новый клиент!</h1>
+        <p>Дата: <b>{date}</b></p>
+        <p>Время: <b>{time}</b></p>
+    """,
+        subtype="html",
+    )
+
+    return email
+
+def cancel_booking(email_to: EmailStr, date: str, time: str):
+    email = EmailMessage()
+    email["Subject"] = "Отмена записи!"
+    email["From"] = settings.SMTP_USER
+    email["To"] = email_to
+
+    email.set_content(
+        f"""
+        <h1>Вы отменили запись!</h1>
+        <p>Дата: <b>{date}</b></p>
+        <p>Время: <b>{time}</b></p>
+    """,
+        subtype="html",
+    )
+
+    return email
+
 def send_notification_for_all_users(
     email_to: EmailStr, message: str
 ):

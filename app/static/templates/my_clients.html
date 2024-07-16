@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block title %}Мои клиенты{% endblock %}
+
+{% block content %}
+    <h1>Ближайшие записи</h1>
+    <div class="clients-container">
+        {% for booking in clients %}
+            {% if booking.selected_times | length > 0 %}
+                <a href="/user/clients/?date={{ booking.date_for_booking }}&user_id={{ user.id }}" class="client-block">
+                    <h2>{{ booking.date_for_booking }}</h2>
+                    <p>{{ booking.selected_times | length }} записи(ей)</p>
+                </a>
+            {% endif %}
+        {% endfor %}
+    </div>
+{% endblock %}
+
+
+{% block scripts %}
+    {{ super() }}
+    <style>
+        .clients-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .client-block {
+            display: block;
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 250px;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            transition: background-color 0.3s;
+        }
+        .client-block:hover {
+            background-color: #e9ecef;
+        }
+        .client-block h2 {
+            font-size: 1.5em;
+            margin-bottom: 10px;
+        }
+        @media (max-width: 768px) {
+            .clients-container {
+                flex-direction: column;
+                align-items: center;
+            }
+            .client-block {
+                width: 100%;
+                max-width: 300px;
+                margin-bottom: 5px;
+            }
+        }
+    </style>
+{% endblock %}

@@ -68,6 +68,7 @@
 {% endblock %}
 
 {% block scripts %}
+{{ super() }}
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const editButton = document.querySelector('.edit-description-button');

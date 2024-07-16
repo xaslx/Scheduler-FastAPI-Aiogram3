@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+
+{% block title %}Записи на {{ date }}{% endblock %}
+
+{% block content %}
+    <h1>Записи на {{ date }}</h1>
+    <div class="custom-booking-container">
+        {% if selected_times %}
+            {% for time in selected_times %}
+                <div class="custom-booking-block">
+                    <p class="custom-booking-time">{{ time }}</p>
+                    <button class="custom-cancel-button" data-time="{{ time }}" data-id="{{ booking.id }}">Отменить</button>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p>Нет записей на эту дату.</p>
+        {% endif %}
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <style>
+        .custom-booking-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .custom-booking-block {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #ffffff;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 10px 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+        .custom-booking-time {
+            font-size: 1.2em;
+            margin: 0;
+            color: #333;
+        }
+        .custom-cancel-button {
+            background-color: #dc3545;
+            border: none;
+            color: white;
+            padding: 8px 12px;
+            font-size: 1em;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            width: 30%;
+        }
+        .custom-cancel-button:hover {
+            background-color: #c82333;
+        }
+
+        @media (max-width: 768px) {
+            .custom-booking-block {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+                max-width: 300px;
+                padding: 10px;
+            }
+            .custom-cancel-button {
+                padding: 10px;
+                margin: 0 auto;
+            }
+            .custom-booking-time {
+                margin: 0 auto;
+            }
+        }
+    </style>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const cancelButtons = document.querySelectorAll(".custom-cancel-button");
+            
+            cancelButtons.forEach(button => {
+                button.addEventListener("click", function() {
+                    const time = this.dataset.time;
+                    const bookingId = this.dataset.id;
+                    
+                    const confirmation = confirm(`Вы уверены, что хотите отменить запись на ${time}?`);
+                    
+                    if (confirmation) {
+                        fetch(`/booking/cancel_booking/${bookingId}?time=${time}`, {
+                            method: 'PATCH',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ date: "{{ date }}", time: time })
+                        })
+                        .then(response => {
+                            if (response.ok) {
+                                return response.json();
+                            } else {
+                                throw new Error('Ошибка при отмене бронирования');
+                            }
+                        })
+                        .then(data => {
+                            alert('Бронирование успешно отменено');
+                            this.closest(".custom-booking-block").remove();
+                        })
+                        .catch(error => {
+                            alert(error.message);
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+{% endblock %}

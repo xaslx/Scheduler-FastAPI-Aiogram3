@@ -4,7 +4,11 @@ from pydantic import EmailStr
 
 from config import settings
 from app.tasks.celery_app import celery
-from app.tasks.email_templates import send_notification_for_all_users, register_confirmation_template, forgot_password_email_template, password_changed_email_template, success_update_password
+from app.tasks.email_templates import (
+send_notification_for_all_users, register_confirmation_template, 
+ forgot_password_email_template, password_changed_email_template, 
+ success_update_password, add_new_client, cancel_booking
+ )
 
 
 @celery.task
@@ -47,6 +51,25 @@ def update_password(email: EmailStr, new_password: str):
             server.login(settings.SMTP_USER, settings.SMTP_PASS)
             server.send_message(msg_content)
 
+@celery.task
+def new_client(email: EmailStr, date: str, time: str):
+     msg_content = add_new_client(email_to=email, date=date, time=time)
+
+     with smtplib.SMTP_SSL(
+            settings.SMTP_HOST, settings.SMTP_PORT
+        ) as server:
+            server.login(settings.SMTP_USER, settings.SMTP_PASS)
+            server.send_message(msg_content)
+
+@celery.task
+def cancel_client(email: EmailStr, date: str, time: str):
+    msg_content = cancel_booking(email_to=email, date=date, time=time)
+
+    with smtplib.SMTP_SSL(
+            settings.SMTP_HOST, settings.SMTP_PORT
+        ) as server:
+            server.login(settings.SMTP_USER, settings.SMTP_PASS)
+            server.send_message(msg_content)
 
 @celery.task
 def send_notification(users: list, message: str):
