@@ -13,7 +13,7 @@
                         {{ user.name }} {{ user.surname }}
                     </h1>
                     {% if not user.is_active %}
-                        <span class="banned-status">Ваш аккаунт заблокирован</span>
+                        <span style="color: red;" class="banned-status">Ваш аккаунт заблокирован</span>
                     {% endif %}
                     <p><strong>ID:</strong> {{ user.id }}</p>
                     <p><strong>Email:</strong> {{ user.email }}</p>

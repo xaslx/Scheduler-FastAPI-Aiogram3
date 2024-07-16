@@ -32,13 +32,13 @@ class UserRegister(BaseModel):
     def validate_name(cls, value: str):
         if " " in value:
             raise IncorrectNameOrSurnameException
-        return value
+        return value.capitalize()
     
     @field_validator("surname")
     def validate_surname(cls, value: str):
         if " " in value:
             raise IncorrectNameOrSurnameException
-        return value
+        return value.capitalize()
 
     @field_validator("password")
     def validate_password(cls, value: str):

@@ -39,7 +39,6 @@
                     </strong></p>
                     
                     <p><strong>Email:</strong> {{ user_by_id.email }}</p>
-                    <p><strong>Активен:</strong> {{ user_by_id.is_active }}</p>
                     {% if user.id == user_by_id.id %}
                         <p style="color: red;">Нельзя блокировать/разблокировать самого себя</p>
                     {% else %}
