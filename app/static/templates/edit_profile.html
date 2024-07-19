@@ -29,6 +29,12 @@
 
 {% block scripts %}
     {{ super() }}
+    <style>@media (max-width: 768px) {
+        .registration-form {
+            width: 90%;
+            padding: 15px;
+        }
+    }</style>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('registration-form').addEventListener('submit', async function(event) {

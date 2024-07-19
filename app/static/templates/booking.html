@@ -308,4 +308,29 @@
         }
 
     </script>
+    <style>
+        @media (max-width: 768px) {
+        .container-booking {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .left-container {
+            order: 2;
+            width: 100%;
+            max-width: 400px;
+            margin: -10px 0;
+        }
+
+        .right-container {
+            order: 1;
+            width: 95%;
+            max-width: 400px;
+            margin: 20px 0;
+            margin-right: 20px;
+        }
+    }
+
+    </style>
 {% endblock %}

@@ -24,17 +24,20 @@
                         </span>
                     </p>
                     <p><strong>Ваша ссылка:</strong> 
-                        <a class="profile-link" href="{{ url_for('personal_link:page', personal_link=user.personal_link) }}" style="color: #007bff; text-decoration: none; margin-left: 10px;">{{ user.personal_link }}</a>
+                        <a id="personalLink" target="_blank" class="profile-link" href="{{ url_for('personal_link:page', personal_link=user.personal_link) }}" style="color: #007bff; text-decoration: none; margin-left: 10px;">{{ user.personal_link }}</a>
+                        <button class="copy-button" onclick="copyToClipboard('#personalLink')">Копировать</button>
                     </p>
                     <p><strong>Ваш телеграм:</strong> 
-                        <a class="profile-link" href="https://t.me/{{ user.telegram_link }}" target="_blank" style="color: #007bff; text-decoration: none; margin-left: 10px;">{{ user.telegram_link }}</a>
+                        <a id="telegramLink" class="profile-link" href="https://t.me/{{ user.telegram_link }}" target="_blank" style="color: #007bff; text-decoration: none; margin-left: 10px;">{{ user.telegram_link }}</a>
+                        <button class="copy-button" onclick="copyToClipboard('#telegramLink')">Копировать</button>
                     </p>
+                    
                     {% if user.is_active %}
                         <a href="{{ url_for('edit:page') }}" style="width: 60%;" class="edit-profile-button">Редактировать профиль</a>
                     {% endif %}
                     <a href="{{ url_for('edit_password:page') }}" style="width: 60%;" class="edit-profile-button">Изменить пароль</a>
                     <input type="hidden" id="userIdInput" name="user_id" value="{{ user.id }}">
-                    <button style="width: 68%;" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal" style="width: 60%;" class="delete_profile">Удалить профиль</button>
+                    <button style="width: 68%;" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal" class="delete_profile">Удалить профиль</button>
 
                 </div>
             </div>
@@ -81,6 +84,7 @@
             descriptionForm.style.display = 'block';
         });
     });
+
     document.addEventListener('DOMContentLoaded', function() {
         const deleteButton = document.querySelector('.delete_profile');
         const modal = document.getElementById('confirmDeleteModal');
@@ -101,27 +105,24 @@
         });
 
         confirmBtn.addEventListener('click', async function() {
-        const userId = document.getElementById('userIdInput').value;
-        try {
-            const response = await fetch(`/user/delete_user/${userId}`, {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json'
-               
+            const userId = document.getElementById('userIdInput').value;
+            try {
+                const response = await fetch(`/user/delete_user/${userId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                if (!response.ok) {
+                    throw new Error('Ошибка удаления пользователя');
                 }
-            });
-            if (!response.ok) {
-                throw new Error('Ошибка удаления пользователя');
+                location.reload();
+            } catch (error) {
+                console.error('Ошибка при удалении пользователя:', error);
+            } finally {
+                modal.style.display = 'none';
             }
-           
-            location.reload();
-        } catch (error) {
-            console.error('Ошибка при удалении пользователя:', error);
-      
-        } finally {
-            modal.style.display = 'none';
-        }
-    });
+        });
 
         window.addEventListener('click', function(event) {
             if (event.target == modal) {
@@ -130,6 +131,15 @@
         });
     });
 
+    function copyToClipboard(selector) {
+        const el = document.querySelector(selector);
+        const tempInput = document.createElement('input');
+        tempInput.value = el.tagName === 'A' ? el.href : el.innerText;
+        document.body.appendChild(tempInput);
+        tempInput.select();
+        document.execCommand('copy');
+        document.body.removeChild(tempInput);
+    }
 
 
 </script>
@@ -161,6 +171,22 @@
         transform: translate(-50%, -50%);
         text-align: center;
     }
+    .copy-button {
+        padding: 5px 5px; /* уменьшенные отступы */
+        font-size: 12px; /* уменьшенный размер шрифта */
+        cursor: pointer; /* указатель курсора при наведении */
+        border: 1px solid #007bff; /* граница кнопки */
+        background-color: #007bff; /* цвет фона */
+        color: white; /* цвет текста */
+        border-radius: 3px; /* закругленные углы */
+        margin-left: 5px; /* отступ слева */
+    }
+
+    .copy-button:hover {
+        background-color: #0056b3; /* цвет фона при наведении */
+        border-color: #0056b3; /* цвет границы при наведении */
+    }
+
 
     @media only screen and (max-width: 600px) {
         .modal-content {
@@ -168,6 +194,10 @@
             top: 35%;
             width: 40%;
             max-width: 60%;
+        }
+        .copy-button {
+            padding: 4px 4px;
+            font-size: 10px;
         }
     }
 

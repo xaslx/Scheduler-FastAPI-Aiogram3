@@ -93,94 +93,92 @@
     </footer>
     {% block scripts %}
     <script>
-        // JavaScript для открытия и закрытия всплывающих меню
         document.addEventListener('DOMContentLoaded', function() {
             const notificationItems = document.querySelectorAll('.notification-item');
+            const userPhoto = document.querySelector('.user-photo');
+            const notificationIcon = document.querySelector('.notification-icon');
+            const dropdowns = ['notification-list', 'user-dropdown'];
     
             notificationItems.forEach(item => {
                 item.addEventListener('click', function(event) {
-                    event.stopPropagation(); // Предотвращаем всплытие события до window.onclick
+                    event.stopPropagation(); 
                     const notificationUrl = item.querySelector('a').getAttribute('href');
                     window.location.href = notificationUrl;
                 });
             });
     
-            const userPhoto = document.querySelector('.user-photo');
-            userPhoto.addEventListener('click', function(event) {
-                event.stopPropagation(); // Предотвращаем всплытие события до window.onclick
+            function handleUserPhotoClick(event) {
+                event.stopPropagation();
                 toggleDropdown('user-dropdown');
-            });
-        });
-    
-        let activeDropdown = null;
-        let showTimeout = null;
-        let hideTimeout = null;
-    
-        function showDropdown(dropdownId) {
-            if (hideTimeout) clearTimeout(hideTimeout);
-            if (showTimeout) clearTimeout(showTimeout);
-    
-            if (activeDropdown && activeDropdown !== dropdownId) {
-                hideDropdown(activeDropdown);
             }
     
-            showTimeout = setTimeout(() => {
+            function handleNotificationIconClick(event) {
+                event.stopPropagation();
+                toggleDropdown('notification-list');
+            }
+    
+            userPhoto.addEventListener('click', handleUserPhotoClick);
+            notificationIcon.addEventListener('click', handleNotificationIconClick);
+    
+            if (window.innerWidth > 600) {
+                userPhoto.addEventListener('mouseover', function() {
+                    showDropdown('user-dropdown');
+                });
+                userPhoto.addEventListener('mouseout', function() {
+                    hideDropdown('user-dropdown');
+                });
+    
+                notificationIcon.addEventListener('mouseover', function() {
+                    showDropdown('notification-list');
+                });
+                notificationIcon.addEventListener('mouseout', function() {
+                    hideDropdown('notification-list');
+                });
+            }
+    
+            let activeDropdown = null;
+    
+            function showDropdown(dropdownId) {
+                hideDropdowns();
                 const dropdown = document.getElementById(dropdownId);
                 dropdown.classList.add('active');
                 activeDropdown = dropdownId;
-            }, 300);
-        }
+            }
     
-        function hideDropdown(dropdownId) {
-            if (showTimeout) clearTimeout(showTimeout);
-    
-            hideTimeout = setTimeout(() => {
+            function hideDropdown(dropdownId) {
                 const dropdown = document.getElementById(dropdownId);
-                dropdown.classList.remove('active');
+                if (dropdown) {
+                    dropdown.classList.remove('active');
+                    if (activeDropdown === dropdownId) {
+                        activeDropdown = null;
+                    }
+                }
+            }
+    
+            function hideDropdowns() {
+                dropdowns.forEach(id => hideDropdown(id));
+            }
+    
+            function toggleDropdown(dropdownId) {
                 if (activeDropdown === dropdownId) {
-                    activeDropdown = null;
-                }
-            }, 300);
-        }
-    
-        function toggleDropdown(dropdownId) {
-            if (activeDropdown === dropdownId) {
-                hideDropdown(dropdownId);
-            } else {
-                showDropdown(dropdownId);
-            }
-        }
-    
-        // Закрыть меню, если клик вне его
-        window.onclick = function(event) {
-            if (!event.target.closest('.notification-icon') && activeDropdown === 'notification-list') {
-                hideDropdown('notification-list');
-            }
-            if (!event.target.closest('.user-photo') && activeDropdown === 'user-dropdown') {
-                hideDropdown('user-dropdown');
-            }
-        }
-    
-        function logout(event) {
-            event.preventDefault();
-    
-            fetch('/auth/logout', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({})
-            })
-            .then(response => {
-                if (response.redirected) {
-                    window.location.href = response.url;
+                    hideDropdown(dropdownId);
                 } else {
-                    window.location.reload();
+                    showDropdown(dropdownId);
                 }
-            })
-            .catch(error => console.error('Ошибка:', error));
-        }
+            }
+    
+            document.addEventListener('click', function(event) {
+                if (!event.target.closest('.notification-icon') && activeDropdown === 'notification-list') {
+                    hideDropdown('notification-list');
+                }
+                if (!event.target.closest('.user-photo') && activeDropdown === 'user-dropdown') {
+                    hideDropdown('user-dropdown');
+                }
+            });
+        });
     </script>
+    
+    
     
     <style>
         @media (max-width: 600px) {
@@ -188,8 +186,29 @@
                 display: none;
             }
         }
-
+    
+        .notification-menu, .dropdown-menu {
+            display: none;
+            position: absolute;
+            background-color: #333;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 10px;
+            z-index: 1000;
+            opacity: 0;
+            transform: scale(0.95);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+    
+        .notification-menu.active, .dropdown-menu.active {
+            display: block;
+            opacity: 1;
+            transform: scale(1);
+            transition-delay: 0.5s;
+        }
     </style>
+    
+    
+    
     {% endblock %}
 </body>
 
