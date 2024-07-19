@@ -5,7 +5,7 @@ import re
 from exceptions import IncorrectNameOrSurnameException
 
 PASSWORD_CHECK = re.compile(r"^[a-zA-Z0-9_]{6,20}$")
-TELEGRAM_CHECK = re.compile(r"^[a-zA-Z0-9_@]{4,15}$")
+TELEGRAM_CHECK = re.compile(r"^[a-zA-Z0-9_@]{5,15}$")
 
 class UserOut(BaseModel):
     id: int
@@ -25,8 +25,8 @@ class UserRegister(BaseModel):
     name: str = Field(min_length=2, max_length=15)
     surname: str = Field(min_length=2, max_length=15)
     email: EmailStr = Field(max_length=30)
-    password: str
-    telegram_link: str | None = Field(min_length=4, max_length=15, default=None)
+    password: str = Field(min_length=6, max_length=20)
+    telegram_link: str | None = Field(min_length=5, max_length=15, default=None)
 
     @field_validator("name")
     def validate_name(cls, value: str):
@@ -51,11 +51,13 @@ class UserRegister(BaseModel):
         return value
     
     @field_validator("telegram_link")
-    def validate_telegram_link(cls, value: str):
+    def validate_telegram_link(cls, value: str | None = None):
+        if value is None:
+            return value
         if not TELEGRAM_CHECK.match(str(value)):
             raise HTTPException(
                 status_code=422,
-                detail=f"Имя пользователя в телеграм должно содержать только [англ.букв, цифры 0-9, знак _], быть минимум 4 символа "
+                detail=f"Имя пользователя в телеграм должно содержать только [англ.букв, цифры 0-9, знак _], быть минимум 5 символа "
                 f"и не должно превышать 15 символов",
             )
         return value

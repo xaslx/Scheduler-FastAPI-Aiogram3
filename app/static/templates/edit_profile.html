@@ -9,14 +9,17 @@
             <div class="form-group">
                 <label for="name">Имя:</label>
                 <input type="text" id="name" name="name" required placeholder="Иван" value="{{ user.name }}">
+                <div id="name-error" class="error-message"></div>
             </div>
             <div class="form-group">
                 <label for="surname">Фамилия:</label>
                 <input type="text" id="surname" name="surname" required placeholder="Иванов" value="{{ user.surname }}">
+                <div id="surname-error" class="error-message"></div>
             </div>
             <div class="form-group">
                 <label for="telegram_link">Телеграм:</label>
-                <input type="text" id="telegram_link" name="telegram_link" required placeholder="example" value="{{ user.telegram_link }}">
+                <input type="text" id="telegram_link" name="telegram_link" placeholder="example" value="{{ user.telegram_link }}">
+                <div id="telegram-link-error" class="error-message"></div>
             </div>
             <div class="form-group">
                 <label for="description">Описание:</label>
@@ -29,51 +32,113 @@
 
 {% block scripts %}
     {{ super() }}
-    <style>@media (max-width: 768px) {
-        .registration-form {
-            width: 90%;
-            padding: 15px;
+    <style>
+        .error-message {
+            color: red;
+            font-size: 14px;
+            margin-top: 5px;
+            opacity: 1;
+            transition: opacity 0.5s ease-out;
         }
-    }</style>
+
+        .error-message.fade-out {
+            opacity: 0;
+        }
+        @media (max-width: 768px) {
+            .registration-form {
+                width: 90%;
+                padding: 15px;
+            }
+        }
+    </style>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            function validateName(name) {
+                return /^[A-Za-zА-Яа-яЁё]{2,15}$/.test(name);
+            }
+
+            function validateSurname(surname) {
+                return /^[A-Za-zА-Яа-яЁё]{2,15}$/.test(surname);
+            }
+
+            function validateTelegramLink(link) {
+                return /^[A-Za-z0-9_]{5,15}$/.test(link);
+            }
+
+            function clearErrors() {
+                document.querySelectorAll('.error-message').forEach(el => {
+                    el.textContent = '';
+                    el.classList.remove('fade-out');
+                });
+            }
+
+            function showError(id, message) {
+                var errorElement = document.getElementById(id);
+                errorElement.textContent = message;
+                errorElement.classList.add('show');
+
+                setTimeout(function() {
+                    errorElement.classList.remove('show');
+                    setTimeout(function() {
+                        errorElement.textContent = '';
+                    }, 500);
+                }, 2000);
+            }
+
             document.getElementById('registration-form').addEventListener('submit', async function(event) {
                 event.preventDefault();
+                clearErrors();
 
-                var formData = {
-                    'name': document.getElementById('name').value.trim(),
-                    'surname': document.getElementById('surname').value.trim(),
-                    'telegram_link': document.getElementById('telegram_link').value.trim(),
-                    'description': document.getElementById('description').value.trim(),
-                };
+                var name = document.getElementById('name').value.trim();
+                var surname = document.getElementById('surname').value.trim();
+                var telegramLink = document.getElementById('telegram_link').value.trim();
+                var description = document.getElementById('description').value.trim();
 
-                // Удаляем пустые значения из formData
-                for (var key in formData) {
-                    if (formData[key] === "") {
-                        delete formData[key];
-                    }
+                var valid = true;
+
+                if (!validateName(name)) {
+                    showError('name-error', 'Имя должно содержать от 2 до 15 букв и не может содержать пробелы.');
+                    valid = false;
                 }
 
-                try {
-                    const response = await fetch('/user/edit_profile', {
-                        method: 'PATCH',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify(formData),
-                    });
+                if (!validateSurname(surname)) {
+                    showError('surname-error', 'Фамилия должна содержать от 2 до 15 букв и не может содержать пробелы.');
+                    valid = false;
+                }
 
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok ' + response.statusText);
+                if (telegramLink && !validateTelegramLink(telegramLink)) {
+                    showError('telegram-link-error', 'Имя пользователя в телеграм должно содержать только [англ.букв, цифры 0-9, знак _], быть минимум 4 символа и не должно превышать 15 символов.');
+                    valid = false;
+                }
+
+                if (valid) {
+                    var formData = {
+                        'name': name,
+                        'surname': surname,
+                        'telegram_link': telegramLink || null,
+                        'description': description
+                    };
+
+                    try {
+                        const response = await fetch('/user/edit_profile', {
+                            method: 'PATCH',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify(formData),
+                        });
+
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok ' + response.statusText);
+                        }
+
+                        const data = await response.json();
+                        console.log('Success:', data);
+
+                        window.location.href = "{{ url_for('myprofile:page') }}";
+                    } catch (error) {
+                        console.error('Error:', error);
                     }
-
-                    const data = await response.json();
-                    console.log('Success:', data);
-                    
-                    // Редирект на страницу профиля при успешном обновлении
-                    window.location.href = "{{ url_for('myprofile:page') }}";
-                } catch (error) {
-                    console.error('Error:', error);
                 }
             });
         });

@@ -8,17 +8,17 @@
         <form id="registration-form">
             <div class="form-group">
                 <label for="name">Имя:</label>
-                <input type="text" id="name" name="name" required>
+                <input placeholder="Например: Иван" type="text" id="name" name="name" required>
                 <div id="name-error" class="error-message"></div>
             </div>
             <div class="form-group">
                 <label for="surname">Фамилия:</label>
-                <input type="text" id="surname" name="surname" required>
+                <input placeholder="Например: Иванов" type="text" id="surname" name="surname" required>
                 <div id="surname-error" class="error-message"></div>
             </div>
             <div class="form-group">
                 <label for="email">Email:</label>
-                <input type="email" id="email" name="email" required>
+                <input placeholder="Например: example@gmail.com" type="email" id="email" name="email" required>
                 <div id="email-error" class="error-message"></div>
             </div>
             <div class="form-group password-group">
@@ -31,7 +31,7 @@
             </div>
             <div class="form-group">
                 <label for="telegram_link">Телеграм:</label>
-                <input type="text" id="telegram_link" name="telegram_link">
+                <input placeholder="Например: example" type="text" id="telegram_link" name="telegram_link">
                 <div id="telegram-link-error" class="error-message"></div>
             </div>
             <button type="submit">Зарегистрироваться</button>
@@ -48,6 +48,17 @@
         width: 100%;
         }
 
+        .error-message {
+            color: red;
+            font-size: 14px;
+            margin-top: 5px;
+            opacity: 1;
+            transition: opacity 0.5s ease-out;
+        }
+
+        .error-message.fade-out {
+            opacity: 0;
+        }
         .eye {
             position: absolute;
             right: 10px;
@@ -63,9 +74,10 @@
         }
     </style>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+            document.addEventListener('DOMContentLoaded', function() {
             var passwordInput = document.getElementById('password');
             var togglePassword = document.getElementById('toggle-password');
+            var form = document.getElementById('registration-form');
 
             togglePassword.addEventListener('click', function() {
                 if (passwordInput.type === 'password') {
@@ -75,38 +87,112 @@
                 }
             });
 
-            document.getElementById('registration-form').addEventListener('submit', function(event) {
-                event.preventDefault();
-                var formData = {
-                    'name': document.getElementById('name').value.trim(),
-                    'surname': document.getElementById('surname').value.trim(),
-                    'email': document.getElementById('email').value.trim(),
-                    'password': document.getElementById('password').value.trim(),
-                    'telegram_link': document.getElementById('telegram_link').value.trim()
-                };
+            function validateName(name) {
+                return /^[A-Za-zА-Яа-яЁё]{2,15}$/.test(name);
+            }
 
-                fetch('/auth/register', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(formData),
-                })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    console.log('Success:', data);
-                    window.location.href = '/auth/after_register';
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Произошла ошибка при регистрации. Пожалуйста, попробуйте позже.');
+            function validateSurname(surname) {
+                return /^[A-Za-zА-Яа-яЁё]{2,15}$/.test(surname);
+            }
+            
+            function validatePassword(password) {
+                return /^[A-Za-z0-9_]{6,20}$/.test(password);
+            }
+
+            function validateTelegramLink(link) {
+                return /^[A-Za-z0-9_]{4,15}$/.test(link);
+            }
+
+            function clearErrors() {
+                document.querySelectorAll('.error-message').forEach(el => {
+                    el.textContent = '';
+                    el.classList.remove('fade-out');
                 });
+            }
+
+            function showError(id, message) {
+            var errorElement = document.getElementById(id);
+            errorElement.textContent = message;
+            errorElement.classList.add('show');
+
+            setTimeout(function() {
+                errorElement.classList.remove('show');
+                setTimeout(function() {
+                    errorElement.textContent = '';
+                }, 500);
+            }, 2000);
+        }
+
+            form.addEventListener('submit', function(event) {
+                event.preventDefault();
+                clearErrors();
+
+                var name = document.getElementById('name').value.trim();
+                var surname = document.getElementById('surname').value.trim();
+                var email = document.getElementById('email').value.trim();
+                var password = document.getElementById('password').value.trim();
+                var telegramLink = document.getElementById('telegram_link').value.trim();
+
+                var valid = true;
+
+                if (!validateName(name)) {
+                    showError('name-error', 'Имя должно содержать от 2 до 15 букв и не может содержать пробелы.');
+                    valid = false;
+                }
+
+                if (!validateSurname(surname)) {
+                    showError('surname-error', 'Фамилия должна содержать от 2 до 15 букв и не может содержать пробелы.');
+                    valid = false;
+                }
+
+                if (!validatePassword(password)) {
+                    showError('password-error', 'Пароль должен содержать только [англ.букв, цифры 0-9, знак _], быть минимум 6 символов и не должен превышать 20 символов.');
+                    valid = false;
+                }
+
+                if (telegramLink && !validateTelegramLink(telegramLink)) {
+                    showError('telegram-link-error', 'Имя пользователя в телеграм должно содержать только [англ.букв, цифры 0-9, знак _], быть минимум 4 символа и не должно превышать 15 символов.');
+                    valid = false;
+                }
+
+                if (valid) {
+                    var formData = {
+                        'name': name,
+                        'surname': surname,
+                        'email': email,
+                        'password': password,
+                        'telegram_link': telegramLink || null
+                    };
+
+                    fetch('/auth/register', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(formData),
+                    })
+                    .then(response => {
+                        console.log('Response status:', response.status);
+                        return response.json().then(data => {
+                            console.log('Response data:', data);
+                            if (response.ok) {
+                       
+                                window.location.href = '/auth/after_register';
+                            } else {
+                    
+                                showError('email-error', data.detail || 'Пользователь с таким email уже существует.');
+                            }
+                        });
+                    })
+                    .catch(error => {
+                        console.error('Fetch error:', error);
+                    });
+                }
             });
         });
+
+
     </script>
+    
+    
 {% endblock %}

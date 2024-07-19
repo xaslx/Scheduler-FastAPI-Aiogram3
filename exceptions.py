@@ -11,8 +11,9 @@ class BaseException(HTTPException):
 
 # Пользователи
 class UserAlreadyExistsException(BaseException):
-    status_code = status.HTTP_409_CONFLICT
-    detail = "Пользователь уже существует"
+    status_code = 409
+    detail = 'Пользователь уже существует'
+
 
 
 class IncorrectEmailOrPasswordException(BaseException):

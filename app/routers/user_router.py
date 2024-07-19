@@ -126,7 +126,7 @@ async def edit_password(
 
 @user_router.patch('/edit_profile', status_code=201)
 async def edit_my_profile(new_user: UserUpdate, session: AsyncSession = Depends(get_async_session), user: User = Depends(get_current_user)):
-    await UserRepository.update(session=session, id=user.id, **new_user.model_dump())
+    await UserRepository.update(session=session, id=user.id, **new_user.model_dump(exclude={'password', 'email'}))
 
 
 @user_router.get('/all_users', status_code=200, name='allusers:page')

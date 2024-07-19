@@ -1,5 +1,7 @@
 from datetime import timedelta
-from fastapi import APIRouter, Depends, Response, Request, Body, Form
+from fastapi import APIRouter, Depends, HTTPException, Response, Request, Body, Form, status
+from app.auth.dependencies import get_all_notifications
+from app.schemas.notification_schemas import NotificationOut
 from database import get_async_session
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.auth.dependencies import get_current_user
@@ -11,7 +13,7 @@ from app.auth.auth import authenticate_user, create_access_token, get_password_h
 import secrets
 from app.utils.templating import templates
 from typing import Annotated
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 from app.tasks.tasks import register_confirmation_message
 
 
@@ -22,14 +24,22 @@ auth_router: APIRouter = APIRouter(
 
 
 @auth_router.get('/register', status_code=200)
-async def get_register_template(request: Request, user: User = Depends(get_current_user)) -> HTMLResponse:
-    return templates.TemplateResponse('register.html', {'request': request, 'user': user})
+async def get_register_template(
+    request: Request, 
+    user: User = Depends(get_current_user), 
+    notifications: list[NotificationOut] = Depends(get_all_notifications)) -> HTMLResponse:
+    return templates.TemplateResponse('register.html', {'request': request, 'user': user, 'notifications': notifications})
 
 @auth_router.post('/register', status_code=201)
 async def rigister_user(user: UserRegister, session: AsyncSession = Depends(get_async_session)):
     exist_user: User = await UserRepository.find_one_or_none(session=session, email=user.email)
     if exist_user:
-        raise UserAlreadyExistsException
+        return JSONResponse(content={'detail': 'Пользователь с таким email уже существует'}, status_code=409)
+    # if user.telegram_link:
+    #     exist_tg: User = await UserRepository.find_one_or_none(session=session, telegram_link=user.telegram_link)
+    #     if exist_tg:
+    #         return JSONResponse(content={'detail': 'Телеграм уже привязан к другому пользователю'}, status_code=409)
+
     hashed_password: str = get_password_hash(user.password)
     new_personal_link: str = secrets.token_hex(8)
     new_user: User = await UserRepository.add(
@@ -42,8 +52,12 @@ async def rigister_user(user: UserRegister, session: AsyncSession = Depends(get_
 
 
 @auth_router.get("/after_register", status_code=200)
-async def after_register_template(request: Request, user: User = Depends(get_current_user)) -> HTMLResponse:
-    return templates.TemplateResponse('after_register.html', {'request': request, 'user': user})
+async def after_register_template(
+    request: Request, 
+    user: User = Depends(get_current_user),
+    notifications: list[NotificationOut] = Depends(get_all_notifications)
+    ) -> HTMLResponse:
+    return templates.TemplateResponse('after_register.html', {'request': request, 'user': user, 'notifications': notifications})
 
 @auth_router.post('/login', status_code=200)
 async def login_user(response: Response, user: UserLogin, session: AsyncSession = Depends(get_async_session)) -> str:

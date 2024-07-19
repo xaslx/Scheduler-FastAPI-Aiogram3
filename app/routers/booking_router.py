@@ -46,11 +46,8 @@ async def add_booking(
     date_for = date_for_booking.date_for_booking.date() + timedelta(days=1)
     if not user:
         raise UserNotFound
-    print(user.start_time, user.end_time)
     intervals = await generate_time_intervals(user.start_time, user.end_time, user.interval)
-    print(intervals)
     booking: BookingOut = await BookingRepository.get_booking(session=session, user_id=date_for_booking.user_id, date=date_for)
-    print(booking)
     booking_id: int = booking.id if booking else 0
 
     if not booking or len(booking.times) == 0:
@@ -84,7 +81,7 @@ async def get_time(
         return templates.TemplateResponse(request=request, name='404.html', context={'user': user, 'notifications': notifications})
 
     return templates.TemplateResponse(request=request, name='select_time.html', 
-                                      context={'user': user, 'notifications': notifications, 'selected_times': booking.selected_times, 'times': booking.times, 'booking_id': booking_id})
+                                      context={'user_link': user_link, 'user': user, 'notifications': notifications, 'selected_times': booking.selected_times, 'times': booking.times, 'booking_id': booking_id})
 
 
 @booking_router.patch('/select_booking/{booking_id}', status_code=200)
@@ -97,8 +94,8 @@ async def select_booking(
  
     booking: BookingOut = await BookingRepository.find_one_or_none(session=session, id=booking_id)
     user_email: UserOut = await UserRepository.find_one_or_none(session=session, id=booking.user_id)
-    if not user_email:
-        raise UserNotFound()
+    if not user_email or not user_email.is_active:
+        raise NotAccess
     if not booking:
         raise BookingNotFound
     await BookingRepository.select_times(session=session, user_id=booking.user_id, booking_id=booking.id, time=time)

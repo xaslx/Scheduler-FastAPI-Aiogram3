@@ -9,8 +9,12 @@
             <div class="profile-header">
                 <img src="/app/static/default100.png" alt="Фото профиля" class="profile-photo">
                 <div class="profile-header-details">
-                    <h1 class="{% if not user.is_active %}inactive-user{% endif %}">
-                        {{ user.name }} {{ user.surname }}
+                    <h1>
+                        {% if user.is_active %}
+                            {{ user.name }} {{ user.surname }}
+                        {% else %}
+                            <span style="text-decoration: line-through;">{{ user.name }} {{ user.surname }}</span>
+                        {% endif %}
                     </h1>
                     {% if not user.is_active %}
                         <span style="color: red;" class="banned-status">Ваш аккаунт заблокирован</span>
@@ -240,7 +244,5 @@
     button#cancelDelete:hover {
         background-color: #c6c2c2;
     }
-
-
 </style>
 {% endblock %}

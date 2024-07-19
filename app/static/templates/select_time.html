@@ -4,33 +4,36 @@
 
 
 {% block content %}
-    <h1>Выберите время</h1>
-    <div class="time-container">
-        {% if times %}
-            {% for time in times %}
-                <button class="time-button green-button" onclick="showConfirmation('{{ time }}')">{{ time }}</button>
-            {% endfor %}
-        {% endif %}
-        {% if selected_times %}
-            {% for time in selected_times %}
-                <button class="time-button red-button" title="Выбранное время недоступно" onclick="showUnavailableNotification('{{ time }}')">{{ time }}</button>
-            {% endfor %}
-        {% endif %}
-    </div>
+    {% if user_link.is_active != false %}
+        <h1>Выберите время</h1>
+        <div class="time-container">
+            {% if times %}
+                {% for time in times %}
+                    <button class="time-button green-button" onclick="showConfirmation('{{ time }}')">{{ time }}</button>
+                {% endfor %}
+            {% endif %}
+            {% if selected_times %}
+                {% for time in selected_times %}
+                    <button class="time-button red-button" title="Выбранное время недоступно" onclick="showUnavailableNotification('{{ time }}')">{{ time }}</button>
+                {% endfor %}
+            {% endif %}
+        </div>
 
-    <input type="hidden" id="bookingId" value="{{ booking_id }}">
+        <input type="hidden" id="bookingId" value="{{ booking_id }}">
 
 
-    <div id="customConfirmationModal" class="custom-modal" style="display: none;">
-        <div class="custom-modal-content">
-            <p>Вы уверены, что хотите выбрать время <span id="confirmTime"></span>?</p>
-            <div>
-                <button class="custom-modal-confirm green-button" onclick="confirmSelection()">Да</button>
-                <button class="custom-modal-cancel red-button" onclick="hideConfirmation()">Отмена</button>
+        <div id="customConfirmationModal" class="custom-modal" style="display: none;">
+            <div class="custom-modal-content">
+                <p>Вы уверены, что хотите выбрать время <span id="confirmTime"></span>?</p>
+                <div>
+                    <button class="custom-modal-confirm green-button" onclick="confirmSelection()">Да</button>
+                    <button class="custom-modal-cancel red-button" onclick="hideConfirmation()">Отмена</button>
+                </div>
             </div>
         </div>
-    </div>
-
+    {% else %}
+        <h1 style="color: red;">Пользователь к которому вы хотите записаться, был заблокирован</h1>
+    {% endif %}
 {% endblock %}
 
 
