@@ -2,42 +2,44 @@
 
 {% block title %}Выберите время{% endblock %}
 
-
 {% block content %}
     {% if user_link.is_active != false %}
-        <h1>Выберите время</h1>
+        <h1>Выберите время на дату: {{ booking.date_for_booking }}</h1>
         <div class="time-container">
             {% if times %}
                 {% for time in times %}
                     <button class="time-button green-button" onclick="showConfirmation('{{ time }}')">{{ time }}</button>
                 {% endfor %}
             {% endif %}
+
             {% if selected_times %}
                 {% for time in selected_times %}
-                    <button class="time-button red-button" title="Выбранное время недоступно" onclick="showUnavailableNotification('{{ time }}')">{{ time }}</button>
+                    <button class="time-button red-button" title="Выбранное время недоступно" onclick="showUnavailableNotification('{{ time[0] }}')">{{ time[0] }}</button>
                 {% endfor %}
             {% endif %}
         </div>
 
         <input type="hidden" id="bookingId" value="{{ booking_id }}">
 
-
         <div id="customConfirmationModal" class="custom-modal" style="display: none;">
             <div class="custom-modal-content">
                 <p>Вы уверены, что хотите выбрать время <span id="confirmTime"></span>?</p>
-                <div>
+                <p>Введите свой телефон для связи и email. Также telegram по желанию.</p>
+                <div class="input-group">
+                    <input type="text" id="userPhone" placeholder="Телефон" required>
+                    <input type="email" id="userEmail" placeholder="Email" required>
+                    <input type="text" id="userTelegram" placeholder="Telegram">
+                </div>
+                <div class="button-group">
                     <button class="custom-modal-confirm green-button" onclick="confirmSelection()">Да</button>
                     <button class="custom-modal-cancel red-button" onclick="hideConfirmation()">Отмена</button>
                 </div>
             </div>
         </div>
     {% else %}
-        <h1 style="color: red;">Пользователь к которому вы хотите записаться, был заблокирован</h1>
+        <h1 style="color: red;">Пользователь, к которому вы хотите записаться, был заблокирован</h1>
     {% endif %}
 {% endblock %}
-
-
-
 
 {% block scripts %}
     {{ super() }}
@@ -54,7 +56,6 @@
         .time-button:hover {
             background-color: #45a049;
         }
-
       
         .custom-modal {
             position: fixed;
@@ -63,29 +64,51 @@
             top: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0,0,0,0.4);
+            background-color: rgba(0, 0, 0, 0.4);
             display: flex;
             align-items: center;
             justify-content: center;
         }
 
         .custom-modal-content {
-            background-color: #fefefe;
-            padding: 20px;
+            background-color: #fff;
+            padding: 30px;
             border: 1px solid #888;
-            max-width: 80%;
+            max-width: 400px;
+            width: 100%;
             text-align: center;
-            border-radius: 5px;
+            border-radius: 10px;
             position: relative;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
         }
 
-        .custom-modal-confirm {
-            margin: 5px;
+        .input-group {
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .input-group input {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        .button-group {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .custom-modal-confirm, .custom-modal-cancel {
+            flex: 1;
             padding: 10px 20px;
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            width: 45%;
+            font-size: 16px;
         }
 
         .custom-modal-confirm.green-button {
@@ -97,15 +120,6 @@
             background-color: #45a049;
         }
 
-        .custom-modal-cancel {
-            margin: 5px;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            width: 45%;
-        }
-
         .custom-modal-cancel.red-button {
             background-color: #f44336;
             color: white;
@@ -114,17 +128,15 @@
         .custom-modal-cancel.red-button:hover {
             background-color: #d32f2f;
         }
-        .custom-modal-confirm.green-button,
+
         .time-button.green-button {
             background-color: #4CAF50;
             color: white;
         }
 
-        .custom-modal-confirm.green-button:hover,
         .time-button.green-button:hover {
             background-color: #45a049;
         }
-
 
         .time-button.red-button {
             background-color: #f44336;
@@ -132,7 +144,6 @@
             color: white;
         }
 
-        .custom-modal-cancel.red-button:hover,
         .time-button.red-button:hover {
             background-color: #d32f2f;
         }
@@ -147,8 +158,6 @@
                 font-size: 14px;
             }
         }
-
-
     </style>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
@@ -166,13 +175,33 @@
         async function confirmSelection() {
             const bookingId = document.getElementById('bookingId').value;
             const selectedTime = document.getElementById('confirmTime').innerText;
+            const email = document.getElementById('userEmail').value;
+            const phone = document.getElementById('userPhone').value;
+            const telegram = document.getElementById('userTelegram').value || null;
+
+            if (!phone) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Ошибка!',
+                    text: 'Пожалуйста, укажите ваш телефон.',
+                });
+                return;
+            }
+
+            const data = {
+                time: selectedTime,
+                email: email,
+                phone_number: phone,
+                tg: telegram
+            };
 
             try {
-                const response = await fetch(`/booking/select_booking/${bookingId}?time=${selectedTime}`, {
+                const response = await fetch(`/booking/select_booking/${bookingId}`, {
                     method: 'PATCH',
                     headers: {
                         'Content-Type': 'application/json',
                     },
+                    body: JSON.stringify(data)
                 });
 
                 if (!response.ok) {
@@ -215,5 +244,4 @@
             });
         }
     </script>
-
 {% endblock %}

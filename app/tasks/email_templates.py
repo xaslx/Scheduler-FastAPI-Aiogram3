@@ -103,7 +103,7 @@ def add_new_client(email_to: EmailStr, date: str, time: str):
 
     return email
 
-def cancel_booking(email_to: EmailStr, date: str, time: str):
+def cancel_booking(email_to: EmailStr, date: str, time: str, description: str):
     email = EmailMessage()
     email["Subject"] = "Отмена записи!"
     email["From"] = settings.SMTP_USER
@@ -111,9 +111,12 @@ def cancel_booking(email_to: EmailStr, date: str, time: str):
 
     email.set_content(
         f"""
-        <h1>Вы отменили запись!</h1>
+        <h1>Запись отменена!</h1>
+
+        <p>Вам отменили запись:</p>
         <p>Дата: <b>{date}</b></p>
         <p>Время: <b>{time}</b></p>
+        <p>Причина: <b>{description}</b></p>
     """,
         subtype="html",
     )

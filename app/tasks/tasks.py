@@ -62,8 +62,8 @@ def new_client(email: EmailStr, date: str, time: str):
             server.send_message(msg_content)
 
 @celery.task
-def cancel_client(email: EmailStr, date: str, time: str):
-    msg_content = cancel_booking(email_to=email, date=date, time=time)
+def cancel_client(email: EmailStr, date: str, time: str, description: str):
+    msg_content = cancel_booking(email_to=email, date=date, time=time, description=description)
 
     with smtplib.SMTP_SSL(
             settings.SMTP_HOST, settings.SMTP_PORT

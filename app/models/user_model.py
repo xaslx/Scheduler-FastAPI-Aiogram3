@@ -5,7 +5,6 @@ from datetime import datetime, time
 from typing import TYPE_CHECKING
 from app.utils.generate_time import moscow_tz
 from .booking_model import Booking
-from .time_model import Times
 
 
 
@@ -31,4 +30,3 @@ class User(Base):
     
 
     bookings: Mapped[list['Booking']] = relationship('Booking', back_populates='user')
-    times: Mapped[list['Times']] = relationship('Times', back_populates='user')

@@ -8,109 +8,208 @@
         {% if selected_times %}
             {% for time in selected_times %}
                 <div class="custom-booking-block">
-                    <p class="custom-booking-time">{{ time }}</p>
-                    <button class="custom-cancel-button" data-time="{{ time }}" data-id="{{ booking.id }}">Отменить</button>
+                    <div class="custom-booking-info">
+                        Время: <b>{{ time[0] }}</b><br>
+                        Телефон клиента: <b>{{ time[1] }}</b><br>
+                        Email: <b>{{ time[2] }}</b><br>
+                        Telegram: <b>{{ time[3] if time[3] is not none else 'Не указан' }}</b>
+                    </div>
+                    <button class="custom-cancel-button" data-time="{{ time[0] }}" data-id="{{ booking.id }}" data-email="{{ time[2] }}">Отменить</button>
                 </div>
             {% endfor %}
         {% else %}
             <p>Нет записей на эту дату.</p>
         {% endif %}
     </div>
+    <div id="cancel-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Отмена записи</h2>
+            <p>Пожалуйста, укажите причину отмены:</p>
+            <textarea required id="cancel-reason" rows="4" cols="50" placeholder="Введите причину отмены..."></textarea>
+            <button id="confirm-cancel" class="confirm-button">Подтвердить</button>
+            <button id="cancel-cancel" class="cancel-button">Отмена</button>
+        </div>
+    </div>
 {% endblock %}
 
 {% block scripts %}
     {{ super() }}
     <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
         .custom-booking-container {
             display: flex;
             flex-direction: column;
             align-items: center;
             gap: 20px;
             margin-top: 20px;
+            text-align: left;
         }
         .custom-booking-block {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background-color: #ffffff;
+            flex-direction: column;
+            align-items: flex-start;
+            background-color: #f8f9fa;
             border: 1px solid #dee2e6;
             border-radius: 8px;
-            padding: 10px 20px;
+            padding: 15px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             width: 100%;
-            max-width: 400px;
+            max-width: 450px;
+            text-align: left;
         }
-        .custom-booking-time {
-            font-size: 1.2em;
-            margin: 0;
-            color: #333;
+        .custom-booking-info {
+            margin-bottom: 15px;
+            font-size: 1em;
+            color: #495057;
         }
         .custom-cancel-button {
-            background-color: #dc3545;
+            background-color: #e63946;
             border: none;
             color: white;
-            padding: 8px 12px;
+            padding: 10px;
             font-size: 1em;
             border-radius: 4px;
             cursor: pointer;
-            transition: background-color 0.3s;
-            width: 30%;
+            transition: background-color 0.3s, box-shadow 0.3s;
+            width: calc(100% - 30px);
+            margin: 0 15px;
         }
         .custom-cancel-button:hover {
-            background-color: #c82333;
+            background-color: #d62839;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
         }
-
         @media (max-width: 768px) {
             .custom-booking-block {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 10px;
-                max-width: 300px;
-                padding: 10px;
+                max-width: 350px;
             }
-            .custom-cancel-button {
-                padding: 10px;
-                margin: 0 auto;
+            .custom-booking-info {
+                font-size: 14px;
             }
-            .custom-booking-time {
-                margin: 0 auto;
-            }
+        }
+        .modal {
+            display: none; 
+            position: fixed; 
+            z-index: 1000; 
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.5);
+        }
+        .modal-content {
+            background-color: #fff;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 500px;
+            border-radius: 8px;
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .confirm-button,
+        .cancel-button {
+            background-color: #007bff;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 5px 2px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        .cancel-button {
+            background-color: #dc3545;
+        }
+        .confirm-button:hover {
+            background-color: #0056b3;
+        }
+        .cancel-button:hover {
+            background-color: #c82333;
+        }
+        textarea {
+            width: 100%;
+            padding: 10px;
+            box-sizing: border-box;
+            margin-bottom: 10px;
+            resize: none;
         }
     </style>
     <script>
         document.addEventListener("DOMContentLoaded", function() {
             const cancelButtons = document.querySelectorAll(".custom-cancel-button");
-            
+            const modal = document.getElementById("cancel-modal");
+            const closeModalButton = document.querySelector(".close");
+            const confirmCancelButton = document.getElementById("confirm-cancel");
+            const cancelCancelButton = document.getElementById("cancel-cancel");
+            let currentButton;
+
             cancelButtons.forEach(button => {
                 button.addEventListener("click", function() {
-                    const time = this.dataset.time;
-                    const bookingId = this.dataset.id;
-                    
-                    const confirmation = confirm(`Вы уверены, что хотите отменить запись на ${time}?`);
-                    
-                    if (confirmation) {
-                        fetch(`/booking/cancel_booking/${bookingId}?time=${time}`, {
-                            method: 'PATCH',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify({ date: "{{ date }}", time: time })
-                        })
-                        .then(response => {
-                            if (response.ok) {
-                                return response.json();
-                            } else {
-                                throw new Error('Ошибка при отмене бронирования');
-                            }
-                        })
-                        .then(data => {
-                            alert('Бронирование успешно отменено');
-                            this.closest(".custom-booking-block").remove();
-                        })
-                        .catch(error => {
-                            alert(error.message);
-                        });
+                    currentButton = this;
+                    modal.style.display = "block";
+                });
+            });
+
+            closeModalButton.addEventListener("click", function() {
+                modal.style.display = "none";
+            });
+
+            cancelCancelButton.addEventListener("click", function() {
+                modal.style.display = "none";
+            });
+
+            confirmCancelButton.addEventListener("click", function() {
+                const reason = document.getElementById("cancel-reason").value;
+                if (reason.length < 10 || reason.length > 200) {
+                    alert("Причина отмены должна быть от 10 до 200 символов.");
+                    return;
+                }
+                
+                const time = currentButton.dataset.time;
+                const email = currentButton.dataset.email;
+                const bookingId = currentButton.dataset.id;
+
+                console.log({ date: "{{ date }}", time: time, email: email, description: reason });
+                
+                fetch(`/booking/cancel_booking?booking_id=${bookingId}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ date: "{{ date }}", time: time, email: email, description: reason })
+                })
+                .then(response => {
+                    if (response.ok) {
+                        return response.json();
+                    } else {
+                        throw new Error('Ошибка при отмене записи');
                     }
+                })
+                .then(data => {
+                    alert('Запись успешно отменена');
+                    modal.style.display = "none";
+                    currentButton.closest(".custom-booking-block").remove();
+                })
+                .catch(error => {
+                    alert(error.message);
                 });
             });
         });

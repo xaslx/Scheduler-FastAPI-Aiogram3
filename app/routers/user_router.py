@@ -72,6 +72,7 @@ async def get_my_clients_by_date(
             'notifications': notifications
         })
     booking: BookingOut = await BookingRepository.get_booking(user_id=user_id, date=date, session=session)
+    print(booking.times, booking.selected_times)
     if not booking:
         return templates.TemplateResponse(request=request, name='404.html', context={
             'user': user,
@@ -113,7 +114,7 @@ async def edit_password(
     new_password: EditPassword,
     session: AsyncSession = Depends(get_async_session),
     user: User = Depends(get_current_user)):
-    
+
     if not user or (user.id != new_password.user_id):
         raise NotAccessError
     

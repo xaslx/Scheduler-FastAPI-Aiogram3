@@ -10,7 +10,7 @@ from database import Base
 from app.models.user_model import User #noqa
 from app.models.booking_model import Booking #noqa
 from app.models.notification_model import Notification #noqa
-from app.models.time_model import Times #noqa
+
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
