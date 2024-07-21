@@ -17,8 +17,8 @@ class UserAlreadyExistsException(BaseException):
 
 
 class IncorrectEmailOrPasswordException(BaseException):
-    status_code = status.HTTP_401_UNAUTHORIZED
-    detail = "Неверный email или пароль"
+    status_code = 401
+    detail = 'Неверный email или пароль'
 
 
 class IncorrectEmailOrPasswordExceptionNotEn(BaseException):
@@ -30,10 +30,9 @@ class UserNotFound(BaseException):
     status_code = status.HTTP_409_CONFLICT
     detail = "Пользователь не найден"
 
-class NotAccess(BaseException):
+class NotAccessError(BaseException):
     status_code = status.HTTP_409_CONFLICT
-    detail = 'Недостаточно прав'
-
+    detail = "Недостаточно прав"
 
 class UserIsNotPresentException(BaseException):
     status_code = status.HTTP_401_UNAUTHORIZED

@@ -1,11 +1,13 @@
 from fastapi import FastAPI, Request, Depends
 from fastapi.staticfiles import StaticFiles
+from app.repository.notification_repo import NotificationRepository
 from app.routers.auth_router import auth_router
 from app.routers.user_router import user_router
 from app.routers.main_router import main_router
 from app.routers.notification_router import notification_router
-from app.routers.not_found_router import not_found
+# from app.routers.not_found_router import not_found
 from app.routers.booking_router import booking_router
+from app.schemas.notification_schemas import NotificationOut
 from app.utils.templating import templates
 from fastapi.responses import HTMLResponse, RedirectResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
@@ -48,7 +50,7 @@ add_pagination(app)
 app.include_router(auth_router)
 app.include_router(user_router)
 app.include_router(main_router)
-app.include_router(not_found)
+# app.include_router(not_found)
 app.include_router(booking_router)
 app.include_router(notification_router)
 
@@ -79,9 +81,10 @@ app.mount("/app/static", StaticFiles(directory="app/static"), "static")
 
 
 
-@app.exception_handler(StarletteHTTPException)
-async def custom_http_exception_handler(request: Request, exc) -> HTMLResponse:
-    async with async_session_maker() as session:
+@app.exception_handler(404)
+async def custom_404_handler(request, __) -> HTMLResponse:
+    async with async_session_maker() as session: 
         user: UserOut = await get_current_user(async_db=session, token=request.cookies.get('user_access_token'))
-    return templates.TemplateResponse(request=request, name='404.html', context={'user': user})
+        notifications: list[NotificationOut] = await NotificationRepository.find_all_notif(session=session)
+    return templates.TemplateResponse(request=request, name='404.html', context={'user': user, 'notifications': notifications})
 

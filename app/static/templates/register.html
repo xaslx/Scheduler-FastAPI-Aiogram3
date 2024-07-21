@@ -18,7 +18,7 @@
             </div>
             <div class="form-group">
                 <label for="email">Email:</label>
-                <input placeholder="Например: example@gmail.com" type="email" id="email" name="email" required>
+                <input placeholder="Например: example@gmail.com" type="email" id="email" name="email" required maxlength="40">
                 <div id="email-error" class="error-message"></div>
             </div>
             <div class="form-group password-group">
@@ -96,7 +96,7 @@
             }
             
             function validatePassword(password) {
-                return /^[A-Za-z0-9_]{6,20}$/.test(password);
+                return /^[A-Za-z0-9_-]{6,30}$/.test(password);
             }
 
             function validateTelegramLink(link) {
@@ -146,7 +146,7 @@
                 }
 
                 if (!validatePassword(password)) {
-                    showError('password-error', 'Пароль должен содержать только [англ.букв, цифры 0-9, знак _], быть минимум 6 символов и не должен превышать 20 символов.');
+                    showError('password-error', 'Пароль должен содержать только [англ.букв, цифры 0-9, знак _ -], быть минимум 6 символов и не должен превышать 30 символов.');
                     valid = false;
                 }
 

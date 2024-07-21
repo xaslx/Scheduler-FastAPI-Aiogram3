@@ -8,7 +8,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from database import get_async_session
 from app.schemas.notification_schemas import NotificationOut
 
-
 main_router: APIRouter = APIRouter()
 
 

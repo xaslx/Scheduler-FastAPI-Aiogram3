@@ -11,7 +11,7 @@ from fastapi.responses import HTMLResponse, JSONResponse
 from app.schemas.booking_schemas import BookingDate, BookingTime, BookingOut
 from datetime import datetime, date, timedelta, timezone
 from app.utils.generate_time import generate_time_intervals
-from exceptions import NotAccess, UserNotFound, BookingNotFound
+from exceptions import NotAccessError, UserNotFound, BookingNotFound
 from app.models.booking_model import Booking
 from app.schemas.notification_schemas import NotificationOut
 from fastapi.responses import RedirectResponse
@@ -95,7 +95,7 @@ async def select_booking(
     booking: BookingOut = await BookingRepository.find_one_or_none(session=session, id=booking_id)
     user_email: UserOut = await UserRepository.find_one_or_none(session=session, id=booking.user_id)
     if not user_email or not user_email.is_active:
-        raise NotAccess
+        raise NotAccessError
     if not booking:
         raise BookingNotFound
     await BookingRepository.select_times(session=session, user_id=booking.user_id, booking_id=booking.id, time=time)
@@ -110,7 +110,7 @@ async def cancel_booking(
     ):
     booking: BookingOut = await BookingRepository.find_one_or_none(session=session, id=booking_id)
     if booking.user_id != user.id or not user:
-        raise NotAccess
+        raise NotAccessError
     if not booking:
         raise BookingNotFound
     await BookingRepository.cancel_times(session=session, user_id=booking.user_id, booking_id=booking.id, time=time)

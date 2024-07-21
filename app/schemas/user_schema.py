@@ -1,11 +1,70 @@
 from fastapi import HTTPException
-from pydantic import BaseModel, EmailStr, field_validator, Field, ConfigDict
+from fastapi.responses import JSONResponse
+from pydantic import BaseModel, EmailStr, field_validator, Field, ConfigDict, model_validator
 from datetime import datetime, time
 import re
 from exceptions import IncorrectNameOrSurnameException
 
-PASSWORD_CHECK = re.compile(r"^[a-zA-Z0-9_]{6,20}$")
-TELEGRAM_CHECK = re.compile(r"^[a-zA-Z0-9_@]{5,15}$")
+PASSWORD_CHECK = re.compile(r'^[a-zA-Z0-9_-]{6,30}$')
+TELEGRAM_CHECK = re.compile(r'^[a-zA-Z0-9_@]{5,15}$')
+
+
+class BaseValidators(BaseModel):
+    @model_validator(mode='before')
+    def check_name_and_surname(cls, value):
+        name = value.get('name')
+        surname = value.get('surname')
+        if name and ' ' in name:
+            raise HTTPException(
+                status_code=422,
+                detail='Имя не может содержать пробелы.'
+            )
+        if surname and ' ' in surname:
+            raise HTTPException(
+                status_code=422,
+                detail='Фамилия не может содержать пробелы.'
+            )
+        return value
+
+    @model_validator(mode='before')
+    def check_password(cls, value):
+        password = value.get('password')
+        if password and not PASSWORD_CHECK.match(password):
+            raise HTTPException(
+                status_code=422,
+                detail='Пароль должен содержать только [англ.букв, цифры 0-9, знак _ -], быть минимум 6 символов и не должен превышать 30 символов.'
+            )
+        return value
+    
+    @model_validator(mode='before')
+    def check_new_password(cls, value):
+        password = value.get('new_password')
+        if password and not PASSWORD_CHECK.match(password):
+            raise HTTPException(
+                status_code=422,
+                detail='Пароль должен содержать только [англ.букв, цифры 0-9, знак _ -], быть минимум 6 символов и не должен превышать 30 символов.'
+            )
+        return value
+    
+    @model_validator(mode='before')
+    def repeat_new_password(cls, value):
+        password = value.get('repeat_password')
+        if password and not PASSWORD_CHECK.match(password):
+            raise HTTPException(
+                status_code=422,
+                detail='Пароль должен содержать только [англ.букв, цифры 0-9, знак _ -], быть минимум 6 символов и не должен превышать 30 символов.'
+            )
+        return value
+
+    @model_validator(mode='before')
+    def check_telegram_link(cls, value):
+        telegram_link = value.get('telegram_link')
+        if telegram_link and not TELEGRAM_CHECK.match(telegram_link):
+            raise HTTPException(
+                status_code=422,
+                detail='Имя пользователя в телеграм должно содержать только [англ.букв, цифры 0-9, знак _], быть минимум 5 символов и не должно превышать 15 символов.'
+            )
+        return value
 
 class UserOut(BaseModel):
     id: int
@@ -21,54 +80,21 @@ class UserOut(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
-class UserRegister(BaseModel):
+class UserRegister(BaseValidators):
     name: str = Field(min_length=2, max_length=15)
     surname: str = Field(min_length=2, max_length=15)
-    email: EmailStr = Field(max_length=30)
+    email: EmailStr = Field(max_length=40)
     password: str = Field(min_length=6, max_length=20)
     telegram_link: str | None = Field(min_length=5, max_length=15, default=None)
 
-    @field_validator("name")
-    def validate_name(cls, value: str):
-        if " " in value:
-            raise IncorrectNameOrSurnameException
-        return value.capitalize()
-    
-    @field_validator("surname")
-    def validate_surname(cls, value: str):
-        if " " in value:
-            raise IncorrectNameOrSurnameException
-        return value.capitalize()
 
-    @field_validator("password")
-    def validate_password(cls, value: str):
-        if not PASSWORD_CHECK.match(str(value)):
-            raise HTTPException(
-                status_code=422,
-                detail=f"Пароль должен содержать только [англ.букв, цифры 0-9, знак _], быть минимум 6 символов "
-                f"и не должен превышать 20 символов",
-            )
-        return value
-    
-    @field_validator("telegram_link")
-    def validate_telegram_link(cls, value: str | None = None):
-        if value is None:
-            return value
-        if not TELEGRAM_CHECK.match(str(value)):
-            raise HTTPException(
-                status_code=422,
-                detail=f"Имя пользователя в телеграм должно содержать только [англ.букв, цифры 0-9, знак _], быть минимум 5 символа "
-                f"и не должно превышать 15 символов",
-            )
-        return value
-
-class UserUpdate(BaseModel):
+class UserUpdate(BaseValidators):
     name: str | None
     surname: str | None
     telegram_link: str | None
     description: str | None = Field(max_length=500, default=None)
 
-class UserLogin(BaseModel):
+class UserLogin(BaseValidators):
     email: EmailStr
     password: str
 
@@ -95,11 +121,12 @@ class ResetPassword(BaseModel):
     user_id: int | None = None
 
 
-class EditPassword(BaseModel):
+class EditPassword(BaseValidators):
     user_id: int
     email: EmailStr
     new_password: str
     repeat_password: str
 
+    
 class CreateMessage(BaseModel):
     message: str = Field(max_length=500)

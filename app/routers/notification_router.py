@@ -10,7 +10,7 @@ from app.tasks.tasks import send_notification
 from database import get_async_session
 from app.models.user_model import User
 from app.schemas.notification_schemas import CreateNotification, NotificationOut
-from exceptions import NotAccess
+from exceptions import NotAccessError
 from app.utils.templating import templates
 from typing import Annotated
 from fastapi_pagination.ext.sqlalchemy import paginate
@@ -91,7 +91,7 @@ async def create_notification(
     user: User = Depends(get_admin_user)
 ):
     if not user:
-        raise NotAccess
+        raise NotAccessError
     
     notifications: list[NotificationOut] = await NotificationRepository.find_all(session=session)
     if len(notifications) >= 30:
@@ -107,7 +107,7 @@ async def send_notification_for_all_users(
     user: User = Depends(get_admin_user)
 ):
     if not user:
-        raise NotAccess
+        raise NotAccessError
     
     users: list[User] = await UserRepository.find_all(session=session)
     emails: list[str] = [user.email for user in users]
@@ -124,5 +124,5 @@ async def delete_notification(
     if not notification:
         raise NotificationNotFound
     if not user:
-        raise NotAccess
+        raise NotAccessError
     await NotificationRepository.delete(session=session, id=notif_id)

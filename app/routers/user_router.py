@@ -12,7 +12,7 @@ from fastapi.templating import Jinja2Templates
 from app.models.user_model import User
 from app.schemas.user_schema import UserOut, UserUpdate, EditRole, EditEnabled, EditTime, ResetPassword, EditPassword, CreateMessage
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
-from exceptions import UserNotFound, NotAccess
+from exceptions import UserNotFound, NotAccessError
 from app.utils.templating import templates
 from typing import Annotated
 from fastapi.exceptions import HTTPException
@@ -96,26 +96,27 @@ async def get_edit_my_profile_template(
     return templates.TemplateResponse(request=request, name='edit_profile.html', context={'user': user, 'notifications': notifications})
     
 
-@user_router.get('/edit_password', status_code=200, name='edit_password:page')
+@user_router.get('/edit_password', name='edit_password:page')
 async def get_edit_my_password_template(
     request: Request, 
     user: User = Depends(get_current_user),
     notifications: list[NotificationOut] = Depends(get_all_notifications)
     ) -> HTMLResponse:
+
     if not user:
         return templates.TemplateResponse(request=request, name='not_logined.html', context={'user': user})
     return templates.TemplateResponse(request=request, name='edit_password.html', context={'user': user, 'notifications': notifications})
 
-@user_router.patch('/edit_password', status_code=200)
+@user_router.patch('/edit_password')
 async def edit_password(
     response: Response,
     new_password: EditPassword,
-    session: AsyncSession = Depends(get_async_session)):
-    if new_password.new_password != new_password.repeat_password:
-        raise HTTPException(
-            status_code=422,
-            detail='Пароли не совпадают'
-        )  
+    session: AsyncSession = Depends(get_async_session),
+    user: User = Depends(get_current_user)):
+    
+    if not user or (user.id != new_password.user_id):
+        raise NotAccessError
+    
     hashed_password: str = get_password_hash(new_password.new_password)
 
     await UserRepository.update(session=session, id=new_password.user_id, hashed_password=hashed_password)
@@ -208,7 +209,7 @@ async def ban_user(user_id: int, session: AsyncSession = Depends(get_async_sessi
         raise UserNotFound
     if admin.role == 'admin':
         if user_id == admin.id or user.role == 'admin':
-            raise NotAccess
+            raise NotAccessError
     await UserRepository.update(session=session, id=user_id, is_active=False)
 
 
@@ -219,7 +220,7 @@ async def unban_user(user_id: int, session: AsyncSession = Depends(get_async_ses
         raise UserNotFound
     if admin.role == 'admin' or user.role == 'admin':
         if user_id == admin.id:
-            raise NotAccess
+            raise NotAccessError
     await UserRepository.update(session=session, id=user_id, is_active=True)
 
 @user_router.patch('/edit_role/{user_id}', status_code=200, name='edit_role:page')
@@ -230,7 +231,7 @@ async def edit_role_for_user(
     admin: User = Depends(get_admin_user)
     ):
     if admin.role == 'admin':
-        raise NotAccess
+        raise NotAccessError
     await UserRepository.update(session=session, id=user_id, role=new_role.role)
 
 @user_router.delete('/delete_user_for_admin/{user_id}', status_code=200, name='delete_user:page')
@@ -239,7 +240,7 @@ async def delete_user(user_id: int, session: AsyncSession = Depends(get_async_se
     if not user:
         raise UserNotFound
     if admin.role != 'dev':
-        raise NotAccess
+        raise NotAccessError
     await UserRepository.delete(session=session, id=user_id)
 
 @user_router.delete('/delete_user/{user_id}', name='del_user:page')
@@ -253,7 +254,7 @@ async def del_user(
     if not user:
         return templates.TemplateResponse(request=request, name='404.html', context={'user': user, 'notifications': notifications})
     if user.id != user_id:
-        raise NotAccess
+        raise NotAccessError
     await UserRepository.delete(session=session, id=user_id)
 
 @user_router.patch('/edit_enabled/{user_id}')
