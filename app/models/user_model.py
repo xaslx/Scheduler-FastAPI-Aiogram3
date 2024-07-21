@@ -1,13 +1,12 @@
 from database import Base
 from sqlalchemy.orm import mapped_column, Mapped, relationship
-from sqlalchemy import String, DateTime, Time, ARRAY, Date, JSON
-from datetime import datetime, time, timezone
-from typing import Optional, TYPE_CHECKING
+from sqlalchemy import String, DateTime, Time
+from datetime import datetime, time
+from typing import TYPE_CHECKING
 from app.utils.generate_time import moscow_tz
+from .booking_model import Booking
+from .time_model import Times
 
-if TYPE_CHECKING:
-    from .booking_model import Booking
-    from .time_model import Times
 
 
 class User(Base):
@@ -31,5 +30,5 @@ class User(Base):
     interval: Mapped[int] = mapped_column(default=30)
     
 
-    bookings: Mapped[list['Booking']] = relationship(back_populates='user')
-    times: Mapped[list['Times']] = relationship(back_populates='user')
+    bookings: Mapped[list['Booking']] = relationship('Booking', back_populates='user')
+    times: Mapped[list['Times']] = relationship('Times', back_populates='user')

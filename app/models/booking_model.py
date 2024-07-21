@@ -1,8 +1,8 @@
 from database import Base
 from sqlalchemy.orm import mapped_column, Mapped, relationship
-from sqlalchemy import String, DateTime, ForeignKey, Date, Time, ARRAY, JSON
-from datetime import date, time, datetime
-from typing import Optional, TYPE_CHECKING
+from sqlalchemy import ForeignKey, Date, JSON
+from datetime import date
+from typing import TYPE_CHECKING
 
 
 if TYPE_CHECKING:
@@ -18,6 +18,8 @@ class Booking(Base):
     user_id: Mapped[int] = mapped_column(ForeignKey('users.id', ondelete='CASCADE'))
     times: Mapped[list[str]] = mapped_column(JSON, nullable=True)
     selected_times: Mapped[list[str]] = mapped_column(JSON, nullable=True, default=[])
-    user: Mapped['User'] = relationship(back_populates='bookings')
-    times: Mapped[list['Times']] = relationship(back_populates='booking')
+
+    user: Mapped['User'] = relationship('User', back_populates='bookings')
+    list_times: Mapped[list['Times']] = relationship('Times', back_populates='booking')
+
 

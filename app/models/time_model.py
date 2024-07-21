@@ -1,8 +1,7 @@
 from database import Base
 from sqlalchemy.orm import mapped_column, Mapped, relationship
-from sqlalchemy import String, DateTime, ForeignKey
-from datetime import date, time, datetime
-from typing import Optional, TYPE_CHECKING
+from sqlalchemy import ForeignKey
+from typing import TYPE_CHECKING
 
 
 if TYPE_CHECKING:
@@ -17,5 +16,6 @@ class Times(Base):
     user_id: Mapped[int] = mapped_column(ForeignKey('users.id'))
     booking_id: Mapped[int] = mapped_column(ForeignKey('bookings.id'))
     time: Mapped[str]
-    booking: Mapped['Booking'] = relationship(back_populates='times')
-    user: Mapped['User'] = relationship(back_populates='times')
+
+    user: Mapped['User'] = relationship('User', back_populates='times')
+    booking: Mapped['Booking'] = relationship('Booking', back_populates='list_times')
