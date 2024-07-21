@@ -7,7 +7,7 @@ from app.utils.generate_time import moscow_tz
 
 if TYPE_CHECKING:
     from .booking_model import Booking
-
+    from .time_model import Time
 
 
 class User(Base):
@@ -32,3 +32,4 @@ class User(Base):
     
 
     bookings: Mapped[list['Booking']] = relationship(back_populates='user')
+    times: Mapped[list['Time']] = relationship(back_populates='user')
