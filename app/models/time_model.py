@@ -10,7 +10,7 @@ if TYPE_CHECKING:
     from .booking_model import Booking
 
 
-class Time(Base):
+class Times(Base):
     __tablename__ = 'times'
 
     id: Mapped[int] = mapped_column(primary_key=True)

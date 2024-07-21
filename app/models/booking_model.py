@@ -7,7 +7,7 @@ from typing import Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from .user_model import User
-    from .time_model import Time
+    from .time_model import Times
 
 
 class Booking(Base):
@@ -19,5 +19,5 @@ class Booking(Base):
     times: Mapped[list[str]] = mapped_column(JSON, nullable=True)
     selected_times: Mapped[list[str]] = mapped_column(JSON, nullable=True, default=[])
     user: Mapped['User'] = relationship(back_populates='bookings')
-    times: Mapped[list['Time']] = relationship(back_populates='booking')
+    times: Mapped[list['Times']] = relationship(back_populates='booking')
 
