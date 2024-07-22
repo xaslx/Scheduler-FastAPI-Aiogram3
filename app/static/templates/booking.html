@@ -27,7 +27,7 @@
         <div class="user-info2">
             <p style="color: white; text-align: left;">Запись к: {{ user_link.name }} {{ user_link.surname }}</p>
             <p style="color: rgb(215, 203, 203); text-align: left;">Email: {{ user_link.email }}</p>
-            <p style="color: rgb(215, 203, 203); text-align: left;">Telegram: @{{ user_link.telegram_link }}</p>
+            <p style="color: rgb(215, 203, 203); text-align: left;">Telegram: {{ user_link.telegram_link if user_link.telegram_link else "Не указан" }}</p>
         </div>
         <div class="user-info2">
             <p style="color: white;">Описание</p>
@@ -132,7 +132,6 @@
 
                     let selectedFullDate = new Date(selectedYear, selectedMonth, selectedDate);
 
-                    // Убираем время из currentDate для сравнения только по дате
                     currentDate.setHours(0, 0, 0, 0);
 
                     if (selectedFullDate < currentDate) {

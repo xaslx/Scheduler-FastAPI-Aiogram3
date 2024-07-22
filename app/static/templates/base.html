@@ -68,6 +68,7 @@
                                 <a href="{{ url_for('allusers:page') }}">Список пользователей</a>
                                 <a href="{{ url_for('createnot:page') }}">Создать уведомление</a>
                             {% endif %}
+                            <a href="{{ url_for('help:page') }}">Помощь</a>
                             <a href="#" onclick="logout(event)">Выход</a>
                         </div>
                     </div>
@@ -179,18 +180,17 @@
             });
         });
         function logout(event) {
-        event.preventDefault();  // Предотвращаем переход по ссылке
+        event.preventDefault(); 
 
         fetch('/auth/logout', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            credentials: 'same-origin'  // отправляем куки, если это необходимо
         })
         .then(response => {
             if (response.ok) {
-                window.location.href = '/auth/login';  // Перенаправление после выхода
+                window.location.href = '/auth/login';
             } else {
                 return response.text().then(text => {
                     throw new Error(text);
@@ -198,7 +198,7 @@
             }
         })
         .catch(error => {
-            Swal.fire('Ошибка', 'Не удалось выполнить выход', 'error');  // Используем SweetAlert для показа ошибок
+            Swal.fire('Ошибка', 'Не удалось выполнить выход', 'error');
         });
     }
     </script>

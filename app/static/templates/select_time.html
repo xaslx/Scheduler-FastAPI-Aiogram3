@@ -23,12 +23,31 @@
 
         <div id="customConfirmationModal" class="custom-modal" style="display: none;">
             <div class="custom-modal-content">
-                <p>Вы уверены, что хотите выбрать время <span id="confirmTime"></span>?</p>
-                <p>Введите свой телефон для связи и email. Также telegram по желанию.</p>
+                <p><b>Вы уверены, что хотите выбрать время <span id="confirmTime"></span>?</b></p>
+                <p><b>Введите свое имя, а также телефон и email для связи. Telegram по желанию.</b></p>
                 <div class="input-group">
-                    <input type="text" id="userPhone" placeholder="Телефон" required>
-                    <input type="email" id="userEmail" placeholder="Email" required>
-                    <input type="text" id="userTelegram" placeholder="Telegram">
+                    <div class="input-wrapper">
+                        <span class="required">*</span>
+                        <input type="text" id="userName" placeholder="Имя" required>
+                        
+                    </div>
+                    <p id="nameError" class="error-message">Имя должно быть от 2 до 20 символов и не содержать пробелов.</p>
+                    
+                    <div class="input-wrapper">
+                        <span class="required">*</span>
+                        <input type="text" id="userPhone" placeholder="Телефон" required>
+                        
+                    </div>
+                    <p id="phoneError" style="color: red; display: none;">Телефон должен содержать только цифры</p>
+                    
+                    <div class="input-wrapper">
+                        <span class="required">*</span>
+                        <input type="email" id="userEmail" placeholder="Email" required name="email">
+                    </div>
+                    
+                    <div class="input-wrapper">
+                        <input type="text" id="userTelegram" placeholder="Telegram">
+                    </div>
                 </div>
                 <div class="button-group">
                     <button class="custom-modal-confirm green-button" onclick="confirmSelection()">Да</button>
@@ -56,7 +75,7 @@
         .time-button:hover {
             background-color: #45a049;
         }
-      
+
         .custom-modal {
             position: fixed;
             z-index: 1;
@@ -86,14 +105,36 @@
             margin-top: 20px;
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 15px;
         }
 
-        .input-group input {
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-wrapper input {
             padding: 10px;
             border: 1px solid #ccc;
             border-radius: 5px;
             font-size: 16px;
+            width: 100%;
+            padding-left: 30px;
+        }
+
+        .input-wrapper .required {
+            position: absolute;
+            left: 10px;
+            color: red;
+            font-size: 1.2em;
+        }
+
+        .error-message {
+            color: red;
+            font-size: 14px;
+            margin-top: 5px;
+            display: none;
         }
 
         .button-group {
@@ -150,8 +191,8 @@
 
         @media (max-width: 600px) {
             .custom-modal-content {
-                max-width: 75%; 
-                padding: 20px; 
+                max-width: 75%;
+                padding: 20px;
             }
 
             .swal2-popup {
@@ -175,9 +216,20 @@
         async function confirmSelection() {
             const bookingId = document.getElementById('bookingId').value;
             const selectedTime = document.getElementById('confirmTime').innerText;
+            const name = document.getElementById('userName').value;
             const email = document.getElementById('userEmail').value;
             const phone = document.getElementById('userPhone').value;
             const telegram = document.getElementById('userTelegram').value || null;
+
+    
+            const nameError = document.getElementById('nameError');
+            if (!name || name.length < 2 || name.length > 20 || /\s/.test(name)) {
+                nameError.style.display = 'block';
+                setTimeout(() => {
+                    nameError.style.display = 'none';
+                }, 2000);
+                return;
+            }
 
             if (!phone) {
                 Swal.fire({
@@ -188,8 +240,27 @@
                 return;
             }
 
+            if (!/^\d+$/.test(phone)) {
+                const phoneError = document.getElementById('phoneError');
+                phoneError.style.display = 'block';
+                setTimeout(() => {
+                    phoneError.style.display = 'none';
+                }, 3000);
+                return;
+            }
+
+            if (!email) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Ошибка!',
+                    text: 'Пожалуйста, укажите ваш email.',
+                });
+                return;
+            }
+
             const data = {
                 time: selectedTime,
+                name: name,
                 email: email,
                 phone_number: phone,
                 tg: telegram
@@ -212,7 +283,7 @@
                     icon: 'success',
                     title: 'Успех!',
                     text: 'Вы успешно сделали запись.',
-                    timer: 2000, 
+                    timer: 2000,
                     showConfirmButton: false,
                     onClose: () => {
                         reloadPage();
