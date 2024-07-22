@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+
+{% block title %}Помощь{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <p style="text-align: left;"><b>Здравствуйте, опишите вашу проблему, а также укажите email, чтобы впоследствии мы с Вами связались.</b></p>
+</div>
+<div class="form-container">
+    <form id="helpForm" class="styled-form">
+        <div class="form-group">
+            <label for="email">Email:</label>
+            <input placeholder="example@gmal.com" type="email" id="email" name="email" required>
+        </div>
+        <div class="form-group">
+            <label for="description">Описание проблемы:</label>
+            <textarea placeholder="мин. 10 символов, макс. 500" id="description" name="description" rows="5" required></textarea>
+        </div>
+        <button type="submit" class="submit-button">Отправить</button>
+    </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        .form-container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 500px;
+            margin: 20px auto;
+            box-sizing: border-box;
+        }
+        .styled-form .form-group {
+            margin-bottom: 15px;
+        }
+        .styled-form label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+        .styled-form input[type="email"],
+        .styled-form textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+            margin-top: 5px;
+            box-sizing: border-box;
+            resize: none;
+        }
+        .styled-form input[type="email"]:focus,
+        .styled-form textarea:focus {
+            border-color: #007bff;
+
+        }
+        .styled-form .submit-button {
+            background-color: #007bff;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        .styled-form .submit-button:hover {
+            background-color: #0056b3;
+        }
+
+        @media (max-width: 768px) {
+            .form-container {
+                width: 90%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .form-container {
+                width: 95%;
+                padding: 15px;
+            }
+            .styled-form input[type="email"],
+            .styled-form textarea {
+                width: 100%;
+                padding: 8px;
+            }
+            .styled-form .submit-button {
+                padding: 8px 16px;
+                font-size: 14px;
+            }
+        }
+        .swal2-popup-custom {
+            width: 80% !important;
+            max-width: 300px;
+            padding: 20px !important;
+        }
+
+    </style>
+    <script>
+        document.getElementById('helpForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+
+            const form = event.target;
+            const description = form.description.value;
+
+            if (description.length < 10 || description.length > 500) {
+                Swal.fire({
+                    title: 'Ошибка!',
+                    text: 'Описание должно быть не менее 10 и не более 500 символов.',
+                    icon: 'error',
+                    timer: 2000,
+                    showConfirmButton: false,
+                    customClass: {
+                        popup: 'swal2-popup-red'
+                    }
+                });
+                return;
+            }
+
+            const formData = new FormData(form);
+
+            const data = {
+                email: formData.get('email'),
+                description: formData.get('description')
+            };
+
+            try {
+                const response = await fetch('/help', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data),
+                });
+
+                if (response.ok) {
+                    Swal.fire({
+                        title: 'Успешно!',
+                        text: 'Ваш запрос был успешно отправлен.',
+                        icon: 'success',
+                        confirmButtonText: 'OK'
+                    });
+                    form.reset();
+                } else {
+                    const result = await response.json();
+                    Swal.fire({
+                        title: 'Ошибка!',
+                        text: result.detail || 'Произошла ошибка при отправке формы.',
+                        icon: 'error',
+                        confirmButtonText: 'OK'
+                    });
+                }
+            } catch (error) {
+                Swal.fire({
+                    title: 'Ошибка!',
+                    text: 'Произошла ошибка при отправке формы.',
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
+            }
+        });
+    </script>
+{% endblock %}
