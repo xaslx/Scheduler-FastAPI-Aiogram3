@@ -5,7 +5,6 @@ from app.routers.auth_router import auth_router
 from app.routers.user_router import user_router
 from app.routers.main_router import main_router
 from app.routers.notification_router import notification_router
-# from app.routers.not_found_router import not_found
 from app.routers.booking_router import booking_router
 from app.schemas.notification_schemas import NotificationOut
 from app.utils.templating import templates
@@ -50,7 +49,6 @@ add_pagination(app)
 app.include_router(auth_router)
 app.include_router(user_router)
 app.include_router(main_router)
-# app.include_router(not_found)
 app.include_router(booking_router)
 app.include_router(notification_router)
 
