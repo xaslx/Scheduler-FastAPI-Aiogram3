@@ -17,7 +17,7 @@ from app.models.booking_model import Booking
 from app.schemas.notification_schemas import NotificationOut
 from fastapi.responses import RedirectResponse
 from typing import Annotated
-from app.tasks.tasks import new_client, cancel_client
+from app.tasks.tasks import new_client, cancel_client, confirm_booking_for_client
 
 booking_router: APIRouter = APIRouter(
     prefix='/booking',
@@ -51,7 +51,7 @@ async def add_booking(
     booking: BookingOut = await BookingRepository.get_booking(session=session, user_id=date_for_booking.user_id, date=date_for)
     booking_id: int = booking.id if booking else 0
 
-    if not booking or (booking.times is None) or (len(booking.times) == 0):
+    if not booking:
         booking_id = await BookingRepository.add(session=session, date_for_booking=date_for, user_id=user.id, times=intervals)
     
     redirect_url = booking_router.url_path_for('gettime:page', personal_link=user.personal_link) + f'?date={date_for}&user_id={user.id}&booking_id={booking_id}'
@@ -70,18 +70,19 @@ async def get_time(
 ):
     user_link: User = await UserRepository.find_one_or_none(session=session, personal_link=personal_link)
 
+
     if not user_link.enabled:
         return templates.TemplateResponse(request=request, name='offbooking.html', context={'user': user, 'notifications': notifications})
-    
+
     if not user_link or user_link.id != user_id or user_link.personal_link != personal_link:
         return templates.TemplateResponse(request=request, name='404.html', context={'user': user, 'notifications': notifications})
 
     booking: BookingOut = await BookingRepository.find_booking(user_id=user_link.id, date=date, session=session)
     
-    
+
     if not booking or (booking.id != booking_id):
         return templates.TemplateResponse(request=request, name='404.html', context={'user': user, 'notifications': notifications})
-    print(booking.times)
+
     return templates.TemplateResponse(request=request, name='select_time.html', 
                                       context={'booking': booking, 'user_link': user_link, 'user': user, 'notifications': notifications, 'selected_times': booking.selected_times, 'times': booking.times, 'booking_id': booking_id})
 
@@ -104,7 +105,14 @@ async def select_booking(
         session=session, 
         user_id=booking.user_id, 
         booking_id=booking.id, 
-        time=(create_booking.time, create_booking.phone_number, create_booking.email, create_booking.tg))
+        time=(create_booking.time, create_booking.name, create_booking.phone_number, create_booking.email, create_booking.tg))
+    confirm_booking_for_client.delay(
+        email_to=create_booking.email,
+        tg=user_email.telegram_link if user_email.telegram_link else 'Не указан',
+        em=user_email.email,
+        time=create_booking.time,
+        date=str(booking.date_for_booking)
+    )
     new_client.delay(email=user_email.email, date=str(booking.date_for_booking), time=create_booking.time)
 
 @booking_router.patch('/cancel_booking', status_code=200)
@@ -115,7 +123,9 @@ async def cancel_booking(
     session: AsyncSession = Depends(get_async_session)
 ):
     booking: Booking = await BookingRepository.find_one_or_none(session=session, id=booking_id)
-    if not booking or booking.user_id != user.id:
+
+    if not booking or (booking.user_id != user.id) or not user:
         raise NotAccessError
     await BookingRepository.cancel_times(session=session, user_id=booking.user_id, booking_id=booking.id, time=cancel_data.time)
-    cancel_client.delay(email=cancel_data.email, date=cancel_data.date, time=cancel_data.time, description=cancel_data.description)
+    cancel_client.delay(message='Вам отменили запись.', email=cancel_data.email, date=cancel_data.date, time=cancel_data.time, description=cancel_data.description)
+    cancel_client.delay(message=f'Вы отменили запись клиенту.\n{cancel_data.email}', email=user.email, date=cancel_data.date, time=cancel_data.time, description=cancel_data.description)

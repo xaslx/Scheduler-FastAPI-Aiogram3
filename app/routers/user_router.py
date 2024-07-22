@@ -72,7 +72,6 @@ async def get_my_clients_by_date(
             'notifications': notifications
         })
     booking: BookingOut = await BookingRepository.get_booking(user_id=user_id, date=date, session=session)
-    print(booking.times, booking.selected_times)
     if not booking:
         return templates.TemplateResponse(request=request, name='404.html', context={
             'user': user,
@@ -140,7 +139,7 @@ async def get_all_users(
     notifications: list[NotificationOut] = Depends(get_all_notifications)
 ) -> Page[UserOut]:
     
-    res = await paginate(session, select(User).order_by(User.registered_at))
+    res: Page[UserOut] = await paginate(session, select(User).order_by(User.registered_at))
 
 
     if user is None or user.role == 'user':
