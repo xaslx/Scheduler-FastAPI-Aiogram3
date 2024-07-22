@@ -103,20 +103,43 @@ def add_new_client(email_to: EmailStr, date: str, time: str):
 
     return email
 
-def cancel_booking(email_to: EmailStr, date: str, time: str, description: str):
+def cancel_booking(message: str, email_to: EmailStr, date: str, time: str, description: str):
     email = EmailMessage()
     email["Subject"] = "Отмена записи!"
     email["From"] = settings.SMTP_USER
     email["To"] = email_to
 
+
     email.set_content(
         f"""
-        <h1>Запись отменена!</h1>
+        <h1>{message}</h1>
 
-        <p>Вам отменили запись:</p>
         <p>Дата: <b>{date}</b></p>
         <p>Время: <b>{time}</b></p>
         <p>Причина: <b>{description}</b></p>
+    """,
+        subtype="html",
+    )
+
+    return email
+
+
+def confirm_booking(
+        email_to: EmailStr, tg: str, em: EmailStr, time: str, date: str
+):
+    email = EmailMessage()
+    email["Subject"] = "Успешная запись"
+    email["From"] = settings.SMTP_USER
+    email["To"] = email_to
+
+    email.set_content(
+        f"""
+        <h1>Вы сделали запись</h1>
+        <p>Время: <b>{time}</b></p>
+        <p>Дата: <b>{date}</b></p>
+        <p>Если вы хотите отменить запись, то свяжитесь:</p></br>
+        <p>по Email: <b>{em}</b></p></br>
+        <p>или Telegram: <b>{tg}</b></p>
     """,
         subtype="html",
     )
@@ -135,6 +158,28 @@ def send_notification_for_all_users(
         f"""
         <h1>Уведомление</h1>
         <p>{message}</p>
+    """,
+        subtype="html",
+    )
+
+    return email
+
+def get_help(email_from: EmailStr, description: str):
+    email = EmailMessage()
+    email["Subject"] = "Помощь"
+    email["From"] = settings.SMTP_USER
+    email["To"] = settings.SMTP_USER
+
+    email.set_content(
+        f"""
+        <html>
+            <body>
+                Email: {email_from}<br>
+                <br>
+                Описание проблемы:<br>
+                <p><b>{description}</b></p>
+            </body>
+        </html>
     """,
         subtype="html",
     )
