@@ -73,7 +73,7 @@ class UserOut(BaseModel):
     email: EmailStr
     profile_photo: str
     role: str
-    telegram_link: str
+    telegram_link: str | None
     personal_link: str
     registered_at: datetime
     is_active: bool

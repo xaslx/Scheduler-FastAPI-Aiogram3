@@ -1,4 +1,4 @@
-from pydantic import BaseModel, ConfigDict, EmailStr, Field
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
 from datetime import datetime, date, time
 
 
@@ -25,7 +25,14 @@ class CancelBooking(BaseModel):
     description: str = Field(min_length=10, max_length=200)
 
 class CreateBooking(BaseModel):
+    name: str = Field(min_length=2, max_length=20)
     time: str
     email: EmailStr
     tg: str | None = None
     phone_number: str
+
+    @field_validator('phone_number')
+    def check_phone(cls, value: str):
+        if not value.isdigit():
+            raise ValueError('Телефона должен состоять только из цифр')
+        return value
