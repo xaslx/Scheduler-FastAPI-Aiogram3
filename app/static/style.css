@@ -84,8 +84,8 @@ p {
 .user-photo img {
     width: 32px;
     height: 32px;
-    border: 2px solid white; /* Белая рамка */
-    border-radius: 50%; /* Круглая форма */
+    border: 2px solid white;
+    border-radius: 50%;
 }
 
 .dropdown-menu {
@@ -109,19 +109,19 @@ p {
 .dropdown-menu a {
     display: block;
     padding: 10px 15px;
-    color: white; /* Белый текст */
+    color: white;
     text-decoration: none;
 }
 
 .dropdown-menu a:hover {
-    background-color: #444; /* Темнее фон при наведении */
+    background-color: #444;
 }
 
 .dropdown-header {
     padding: 10px 15px;
     border-bottom: 1px solid #444;
     font-weight: bold;
-    color: white; /* Белый текст */
+    color: white;
 }
 
 .dropdown-content {
@@ -131,18 +131,17 @@ p {
 
 
 /* Уведомления */
-/* Новые стили для уведомлений */
 .notification-menu {
     position: absolute;
     top: 100%;
     right: 0;
-    background: #333; /* Серый цвет фона */
-    width: 240px; /* Ширина блока уведомлений */
+    background: #333;
+    width: 240px; 
     z-index: 1000;
-    color: #333; /* Цвет текста */
+    color: #333;
     display: none;
     padding: 10px;
-    max-height: 300px; /* Пример максимальной высоты */
+    max-height: 300px;
     overflow-y: auto;
 }
 
@@ -158,8 +157,8 @@ p {
 .notification-item {
     padding: 10px 15px;
     cursor: pointer;
-    word-wrap: break-word; /* Разрывать слова при переполнении */
-    max-width: 100%; /* Максимальная ширина уведомления */
+    word-wrap: break-word;
+    max-width: 100%;
 }
 
 .notification-item:hover {
@@ -186,8 +185,8 @@ p {
 .notification-icon img {
     width: 24px;
     height: 24px;
-    border: 2px solid white; /* Белая рамка */
-    border-radius: 50%; /* Круглая форма */
+    border: 2px solid white;
+    border-radius: 50%;
 }
 .menu-header-notification {
     padding: 10px;
@@ -200,13 +199,13 @@ p {
 .view-all a {
     display: block;
     padding: 10px 15px;
-    color: #007bff; /* Цвет ссылки "Все уведомления" */
+    color: #007bff;
     text-decoration: none;
 }
 
 .view-all a:hover {
-    color: #0056b3; /* Цвет ссылки "Все уведомления" при наведении */
-    text-decoration: underline; /* Подчеркивание ссылки при наведении */
+    color: #0056b3;
+    text-decoration: underline;
 }
 
 /* Все уведомления */
@@ -220,16 +219,16 @@ p {
     background-color: #f0f0f0;
     padding: 15px;
     border-radius: 8px;
-    word-wrap: break-word;     /* Переносить слова на новую строку при переполнении */
+    word-wrap: break-word;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
 .notification-content-all {
     font-size: 16px;
     line-height: 1.6;
-    white-space: nowrap;        /* Запретить перенос текста на новую строку */
-    overflow: hidden;           /* Скрыть текст, выходящий за пределы блока */
-    text-overflow: ellipsis;    /* Добавить многоточие в конце обрезанного текста */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .notification-meta-all {
@@ -249,14 +248,14 @@ p {
 .profile-container {
     display: flex;
     justify-content: center;
-    align-items: flex-start; /* Выравнивание содержимого вверх */
-    gap: 20px; /* Промежуток между элементами внутри контейнера */
+    align-items: flex-start;
+    gap: 20px;
 }
 
 .profile-card {
-    background-color: #333; /* Темный фон */
+    background-color: #333;
     border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5); /* Более темная тень */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
     overflow: hidden;
     width: 100%;
     max-width: 600px;
@@ -266,7 +265,7 @@ p {
     display: flex;
     align-items: flex-start;
     padding: 20px;
-    background: linear-gradient(135deg, #333, #444); /* Темный градиент */
+    background: linear-gradient(135deg, #333, #444);
 }
 
 .profile-photo {
@@ -278,7 +277,7 @@ p {
 }
 
 .profile-header-details {
-    color: #fff; /* Белый цвет текста */
+    color: #fff;
     flex: 1;
     display: flex;
     flex-direction: column;
@@ -290,30 +289,30 @@ p {
 .profile-header-details h1 {
     font-size: 24px;
     margin: 0;
-    color: #fff; /* Белый цвет текста */
+    color: #fff;
 }
 
 .profile-header-details p {
     margin: 5px 0;
     font-size: 16px;
-    color: #fff; /* Белый цвет текста */
+    color: #fff;
 }
 
 .profile-header-details strong {
-    color: #aaa; /* Цвет подписей */
+    color: #aaa;
 }
 
 .profile-description {
-    background-color: #444; /* Цвет фона блока с описанием */
+    background-color: #444;
     border-radius: 8px;
     padding: 20px;
-    width: calc(100% - 40px); /* Вычисляем ширину: 100% ширины минус двойные отступы по 20px */
-    margin-left: auto; /* Отодвигаем блок описания вправо */
-    margin-right: 20px; /* Добавляем отступ справа */
+    width: calc(100% - 40px);
+    margin-left: auto;
+    margin-right: 20px;
 }
 
 .profile-description h2 {
-    color: #fff; /* Белый цвет заголовка описания */
+    color: #fff;
     font-size: 20px;
     margin-bottom: 10px;
 }
@@ -355,7 +354,7 @@ p {
 }
 
 .form-group input {
-    width: calc(100% - 24px); /* Учитываем внешние отступы */
+    width: calc(100% - 24px);
     padding: 12px;
     font-size: 16px;
     border: 1px solid #cccccc;
@@ -381,14 +380,14 @@ button[type="submit"] {
     cursor: pointer;
     font-size: 16px;
     transition: background-color 0.3s ease-in-out;
-    margin-top: 10px; /* Добавим небольшой отступ сверху */
+    margin-top: 10px;
 }
 
 button[type="submit"]:hover {
     background-color: #0056b3;
 }
 footer {
-    background-color: #2c2c2c; /* Серый цвет */
+    background-color: #2c2c2c;
     color: white;
     text-align: center;
     padding: 10px 0;
@@ -401,9 +400,9 @@ footer .social-link {
     text-decoration: none;
 }
 footer .social-link img {
-    width: 30px; /* Ширина иконки */
-    height: 30px; /* Высота иконки */
-    margin-right: 8px; /* Отступ справа от иконки */
+    width: 30px;
+    height: 30px;
+    margin-right: 8px;
 }
 .copy {
     color: white;
@@ -433,10 +432,10 @@ footer .social-link img {
     font-size: 14px;
 }
 .custom-hr {
-    border: none; /* Убираем стандартную границу */
-    border-top: 1px solid white; /* Белая линия сверху */
-    width: 100%; /* На всю ширину */
-    margin: 10px 0; /* Отступы сверху и снизу */
+    border: none;
+    border-top: 1px solid white;
+    width: 100%;
+    margin: 10px 0;
 }
 .registration-form .form-group input,
 .registration-form .form-group textarea {
@@ -447,7 +446,7 @@ footer .social-link img {
     height: 100px;
 }
 .registration-form .form-group textarea {
-    font-size: 16px; /* Увеличиваем размер шрифта внутри textarea */
+    font-size: 16px;
 }
 
 .edit-profile-button:hover {
@@ -530,19 +529,19 @@ footer .social-link img {
 }
 @media (max-width: 768px) {
     .profile-photo {
-        display: none; /* Скрываем фото профиля на мобильных устройствах */
+        display: none;
     }
 
     .profile-details h1 {
-        font-size: 20px; /* Уменьшаем размер шрифта имени пользователя */
+        font-size: 20px;
     }
 
     .profile-details p {
-        font-size: 14px; /* Уменьшаем размер шрифта для остального текста */
+        font-size: 14px;
     }
 
     .edit-profile-button {
-        font-size: 14px; /* Уменьшаем размер кнопок для мобильных устройств */
+        font-size: 14px;
     }
 }
 
@@ -573,40 +572,40 @@ footer .social-link img {
 .user-info2 {
     font-family: 'IBM Plex Sans', sans-serif;
     text-align: center;
-    margin: 20px auto; /* отступ сверху и снизу, автоматическое выравнивание по горизонтали */
-    color: #FFF; /* цвет текста */
-    background-color: #333; /* цвет фона */
+    margin: 20px auto;
+    color: #FFF;
+    background-color: #333;
     padding: 10px;
     border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* тень */
-    width: 375px; /* фиксированная ширина блока */
-    max-width: 100%; /* максимальная ширина до 400px или ширина экрана */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    width: 375px;
+    max-width: 100%;
 }
 
 
 .calendar-container {
     font-family: 'IBM Plex Sans', sans-serif;
     position: relative;
-    max-width: 400px; /* максимальная ширина */
-    min-width: 320px; /* минимальная ширина */
-    background: var(--calendar-bg-color); /* переменная для цвета фона */
-    color: var(--calendar-font-color); /* переменная для цвета текста */
-    margin: 20px auto; /* внешние отступы */
-    box-sizing: border-box; /* учитывать границы внутри размеров элемента */
-    overflow: hidden; /* скрытие содержимого, выходящего за границы */
-    font-weight: normal; /* обычный текст */
-    border-radius: var(--calendar-border-radius); /* изменение радиуса границы */
-    margin-top: 20px; /* отступ сверху */
+    max-width: 400px;
+    min-width: 320px;
+    background: var(--calendar-bg-color);
+    color: var(--calendar-font-color);
+    margin: 20px auto;
+    box-sizing: border-box;
+    overflow: hidden;
+    font-weight: normal;
+    border-radius: var(--calendar-border-radius);
+    margin-top: 20px;
 }
 .blocked-user-message {
     background-color: #333;
     color: white;
     border-radius: 10px;
     padding: 20px;
-    margin: 20px auto; /* центрируем блок по горизонтали */
+    margin: 20px auto;
     min-width: 300px;
-    max-width: 360px; /* задаем максимальную ширину блока */
-    text-align: center; /* выравниваем текст по центру */
+    max-width: 360px;
+    text-align: center;
     height: 100px;
 }
 
@@ -735,50 +734,50 @@ footer .social-link img {
     pointer-events: none;
 }
 .prev-date {
-    color: #ccc; /* Серый цвет для прошедших дат */
-    cursor: not-allowed; /* Изменение курсора на "не разрешено" */
+    color: #ccc;
+    cursor: not-allowed;
 }
 .custom-swal {
-    font-size: 1rem; /* Размер шрифта в относительных единицах */
-    border-radius: 8px; /* Закругление углов */
+    font-size: 1rem;
+    border-radius: 8px;
 }
 
 .custom-swal-title {
-    font-size: 1.2rem; /* Размер заголовка */
-    font-weight: bold; /* Жирный текст */
+    font-size: 1.2rem;
+    font-weight: bold;
 }
 
 .custom-swal-content {
-    font-size: 1rem; /* Размер текста в уведомлении */
-    line-height: 1.5; /* Межстрочный интервал */
+    font-size: 1rem;
+    line-height: 1.5;
 }
 
 
 /* модальное окно */
 /* Модальное окно (фон) */
 .modal {
-    display: none; /* Скрыто по умолчанию */
-    position: fixed; /* Остается на месте (фиксируется) */
-    z-index: 1; /* На переднем плане */
+    display: none;
+    position: fixed;
+    z-index: 1;
     left: 0;
     top: 0;
-    width: 100%; /* Полная ширина */
-    height: 100%; /* Полная высота */
-    overflow: auto; /* Включить прокрутку при необходимости */
-    background-color: rgb(0,0,0); /* Черный цвет с прозрачностью */
-    background-color: rgba(0,0,0,0.4); /* Черный с непрозрачностью */
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgb(0,0,0);
+    background-color: rgba(0,0,0,0.4);
     padding-top: 60px;
 }
 
 /* Модальное окно (контейнер) */
 .modal-content {
     background-color: #fefefe;
-    margin: 5% auto; /* 5% сверху и по центру */
+    margin: 5% auto;
     padding: 20px;
     border: 1px solid #888;
-    width: 25%; /* Ширина 25% */
-    border-radius: 10px; /* Закругление углов */
-    box-shadow: 0 5px 15px rgba(0,0,0,0.3); /* Тень */
+    width: 25%;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
 }
 
 /* Кнопка закрытия модального окна */
@@ -798,35 +797,35 @@ footer .social-link img {
 
 /* Кнопки подтверждения и отмены */
 .confirm-button {
-    background-color: #f44336; /* Красный */
+    background-color: #f44336;
     color: white;
     padding: 14px 20px;
     margin: 8px 0;
     border: none;
     cursor: pointer;
     width: 100%;
-    border-radius: 10px; /* Закругление углов */
-    transition: transform 0.2s ease-in-out; /* Плавное изменение */
+    border-radius: 10px;
+    transition: transform 0.2s ease-in-out;
 }
 
 .cancel-button {
-    background-color: #ccc; /* Серый */
+    background-color: #ccc;
     color: black;
     padding: 14px 20px;
     margin: 8px 0;
     border: none;
     cursor: pointer;
     width: 100%;
-    border-radius: 10px; /* Закругление углов */
-    transition: transform 0.2s ease-in-out; /* Плавное изменение */
+    border-radius: 10px;
+    transition: transform 0.2s ease-in-out;
 }
 
 .confirm-button:hover,
 .cancel-button:hover {
-    transform: scale(1.05); /* Увеличение размера на 5% при наведении */
+    transform: scale(1.05);
 }
 .registration-form {
-    width: 60%; /* Увеличена ширина формы */
+    width: 60%;
     margin: 0 auto;
 }
 
@@ -840,7 +839,7 @@ footer .social-link img {
     top: 50%;
     transform: translateY(-50%);
     cursor: pointer;
-    width: 20px; /* Размер иконки */
+    width: 20px;
     height: 20px;
 }
 
@@ -848,15 +847,15 @@ footer .social-link img {
 /* booking */ 
 .container-booking {
     display: flex;
-    justify-content: space-between; /* Располагает блоки по сторонам */
+    justify-content: space-between;
 }
 
 .left-container {
-    flex: 1; /* Занимает оставшееся пространство */
-    margin-right: -300px; /* Меньший отступ справа для разделения блоков */
+    flex: 1;
+    margin-right: -300px;
 }
 
 .right-container {
-    flex: 1; /* Занимает оставшееся пространство */
-    margin-left: -300px; /* Меньший отступ слева для разделения блоков */
+    flex: 1;
+    margin-left: -300px;
 }

@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, Request, Query
-
+from datetime import time
 from app.schemas.user_schema import UserOut
 from app.utils.templating import templates
 from app.repository.booking_repo import BookingRepository
@@ -18,6 +18,8 @@ from app.schemas.notification_schemas import NotificationOut
 from fastapi.responses import RedirectResponse
 from typing import Annotated
 from app.tasks.tasks import new_client, cancel_client, confirm_booking_for_client
+from app.utils.generate_time import moscow_tz
+
 
 booking_router: APIRouter = APIRouter(
     prefix='/booking',
@@ -57,6 +59,8 @@ async def add_booking(
     redirect_url = booking_router.url_path_for('gettime:page', personal_link=user.personal_link) + f'?date={date_for}&user_id={user.id}&booking_id={booking_id}'
     return JSONResponse(content={"redirect_url": redirect_url}, status_code=200)
 
+from datetime import datetime, timedelta
+
 @booking_router.get('/{personal_link}/select_time', status_code=200, name='gettime:page')
 async def get_time(
     personal_link: str,
@@ -70,7 +74,6 @@ async def get_time(
 ):
     user_link: User = await UserRepository.find_one_or_none(session=session, personal_link=personal_link)
 
-
     if not user_link.enabled:
         return templates.TemplateResponse(request=request, name='offbooking.html', context={'user': user, 'notifications': notifications})
 
@@ -78,13 +81,21 @@ async def get_time(
         return templates.TemplateResponse(request=request, name='404.html', context={'user': user, 'notifications': notifications})
 
     booking: BookingOut = await BookingRepository.find_booking(user_id=user_link.id, date=date, session=session)
-    
 
     if not booking or (booking.id != booking_id):
         return templates.TemplateResponse(request=request, name='404.html', context={'user': user, 'notifications': notifications})
 
+    now = datetime.now()
+    current_time = now.strftime("%H:%M")
+    current_date = now.date()
+
+    if booking.date_for_booking == current_date:
+        available_times = [time for time in booking.times if time > current_time]
+    else:
+        available_times = booking.times
+
     return templates.TemplateResponse(request=request, name='select_time.html', 
-                                      context={'booking': booking, 'user_link': user_link, 'user': user, 'notifications': notifications, 'selected_times': booking.selected_times, 'times': booking.times, 'booking_id': booking_id})
+                                      context={'booking': booking, 'user_link': user_link, 'user': user, 'notifications': notifications, 'selected_times': booking.selected_times, 'times': available_times, 'booking_id': booking_id})
 
 
 @booking_router.patch('/select_booking/{booking_id}', status_code=200)

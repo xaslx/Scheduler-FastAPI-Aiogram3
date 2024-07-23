@@ -4,7 +4,7 @@
 
 {% block content %}
     {% if user_link.is_active != false %}
-        <h1>Выберите время на дату: {{ booking.date_for_booking }}</h1>
+        <h1>Выберите время на дату: <span style="color: rgb(34, 158, 34);">{{ booking.date_for_booking }}</span>, время указано Московское.</h1>
         <div class="time-container">
             {% if times %}
                 {% for time in times %}

@@ -94,38 +94,6 @@
     </footer>
     {% block scripts %}
     <script src="/app/static/js/main.js"></script>
-    
-    
-    
-    <style>
-        @media (max-width: 600px) {
-            .user-name {
-                display: none;
-            }
-        }
-    
-        .notification-menu, .dropdown-menu {
-            display: none;
-            position: absolute;
-            background-color: #333;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            padding: 10px;
-            z-index: 1000;
-            opacity: 0;
-            transform: scale(0.95);
-            transition: opacity 0.3s ease, transform 0.3s ease;
-        }
-    
-        .notification-menu.active, .dropdown-menu.active {
-            display: block;
-            opacity: 1;
-            transform: scale(1);
-            transition-delay: 0.5s;
-        }
-    </style>
-    
-    
-    
     {% endblock %}
 </body>
 
