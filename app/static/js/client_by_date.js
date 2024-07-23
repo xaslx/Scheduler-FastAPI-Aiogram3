@@ -4,6 +4,7 @@ document.addEventListener("DOMContentLoaded", function() {
     const closeModalButton = document.querySelector(".close");
     const confirmCancelButton = document.getElementById("confirm-cancel");
     const cancelCancelButton = document.getElementById("cancel-cancel");
+    const date = document.getElementById('booking-date').value;
     let currentButton;
 
     cancelButtons.forEach(button => {
@@ -32,14 +33,14 @@ document.addEventListener("DOMContentLoaded", function() {
         const email = currentButton.dataset.email;
         const bookingId = currentButton.dataset.id;
 
-        console.log({ date: "{{ date }}", time: time, email: email, description: reason });
+        console.log({ date: date, time: time, email: email, description: reason });
         
         fetch(`/booking/cancel_booking?booking_id=${bookingId}`, {
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ date: "{{ date }}", time: time, email: email, description: reason })
+            body: JSON.stringify({ date: date, time: time, email: email, description: reason })
         })
         .then(response => {
             if (response.ok) {

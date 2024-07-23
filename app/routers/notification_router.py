@@ -46,9 +46,11 @@ async def get_all_notification(
 @notification_router.get('/create', status_code=200, name='createnot:page')
 async def get_create_notification_template(
     request: Request, 
-    user: User = Depends(get_current_user),
+    user: User = Depends(get_admin_user),
     notifications: list[NotificationOut] = Depends(get_all_notifications)
     ) -> HTMLResponse:
+    if not user:
+        return templates.TemplateResponse(request=request, name='404.html', context={'user': user, 'notifications': notifications})
     return templates.TemplateResponse(request=request, name='create_notification.html', context={'user': user, 'notifications': notifications})
 
 @notification_router.get('/create_notification_email', status_code=200, name='create_notification:page')

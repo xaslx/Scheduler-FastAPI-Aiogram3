@@ -276,7 +276,7 @@ async def edit_time(
     session: AsyncSession = Depends(get_async_session),
     user: User = Depends(get_current_user)
 ):
-    
+    print(new_time)
     await UserRepository.update(session=session, id=user_id, **new_time.model_dump(exclude_unset=True))
 
 

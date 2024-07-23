@@ -69,15 +69,22 @@ function saveNewRole(userId) {
 let userIdToDelete;
 
 function showDeleteModal(userId) {
+    if (isNaN(userId) || userId <= 0) {
+        console.error('Invalid user ID:', userId);
+        return;
+    }
     userIdToDelete = userId;
     document.getElementById('deleteModal').style.display = 'block';
 }
+
 
 function closeDeleteModal() {
     document.getElementById('deleteModal').style.display = 'none';
 }
 
+
 function deleteUser() {
+    console.log('Deleting user with ID:', userIdToDelete);
     fetch(`/user/delete_user_for_admin/${userIdToDelete}`, {
         method: 'DELETE',
         headers: {
@@ -85,19 +92,24 @@ function deleteUser() {
         }
     })
     .then(response => {
+        console.log(`Response status: ${response.status}`);
         if (!response.ok) {
-            throw new Error('Network response was not ok');
+            return response.text().then(text => {
+                throw new Error(`Error: ${text}`);
+            });
         }
         return response.json();
     })
     .then(data => {
-        console.log('Пользователь удален:', data);
-        window.location.href = '{{ url_for("allusers:page") }}';
+        console.log('User deleted:', data);
+        window.location.href = '/user/all_users';
     })
     .catch(error => {
-        console.error('Произошла ошибка при удалении пользователя:', error);
+        console.error('Error deleting user:', error);
     });
 }
+
+
 
 window.onclick = function(event) {
     if (event.target == document.getElementById('deleteModal')) {

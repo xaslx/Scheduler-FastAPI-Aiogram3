@@ -9,7 +9,7 @@
             <div class="profile-header">
                 <img src="/app/static/default100.png" alt="Фото профиля" class="profile-photo">
                 <div class="profile-header-details">
-                    <h1>
+                    <h1 class="profile-name">
                         {% if not user_by_id.is_active %}
                             <span style="text-decoration: line-through;">{{ user_by_id.name }} {{ user_by_id.surname }}</span>
                             <span style="color: red; margin-left: 10px;">banned</span>
@@ -31,7 +31,7 @@
                             <button type="button" onclick="saveNewRole('{{ user_by_id.id }}')" class="save-role-button" style="margin-left: 10px;">Сохранить</button>
                         {% endif %}
                     </p>
-                    <p><strong>Персональная ссылка:</strong> 
+                    <p><strong>Ссылка:</strong> 
                         <a class="profile-link" href="{{ url_for('personal_link:page', personal_link=user_by_id.personal_link) }}" style="color: #007bff; text-decoration: none; margin-left: 10px;">{{ user_by_id.personal_link }}</a>
                     </p>
                     <p><strong>
@@ -67,9 +67,27 @@
         <button onclick="closeDeleteModal()" class="cancel-button">Нет</button>
     </div>
 </div>
+
 {% endblock %}
 
 {% block scripts %}
 {{ super() }}
+<style>
+    .profile-header-details h1 {
+        font-size: 24px;
+    }
+
+
+    @media (max-width: 600px) {
+        .profile-header-details h1 {
+            font-size: 18px;
+        }
+
+        .modal-content {
+            width: 90%;
+            max-width: 500px;
+        }
+    }
+</style>
 <script src="/app/static/js/user_by_id.js"></script>
 {% endblock %}

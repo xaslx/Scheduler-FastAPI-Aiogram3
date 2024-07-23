@@ -81,7 +81,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const data = await response.json();
                 console.log('Success:', data);
 
-                window.location.href = "{{ url_for('myprofile:page') }}";
+                window.location.href = profilePageUrl; // Используем переменную
             } catch (error) {
                 console.error('Error:', error);
             }

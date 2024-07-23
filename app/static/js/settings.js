@@ -2,12 +2,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const toggleSwitch = document.querySelector('.switch input[type="checkbox"]');
     const editLink = document.querySelector('.edit-profile-button');
     const timeSettingsForm = document.getElementById('time-settings-form');
+    const userId = editLink.getAttribute('data-user-id');
     
     toggleSwitch.addEventListener('change', function() {
         const isChecked = this.checked;
-        const userId = '{{ user.id }}';
         
-    
         fetch(`/user/edit_enabled/${userId}`, {
             method: 'PATCH',
             headers: {
@@ -25,20 +24,16 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .then(data => {
             console.log('PATCH request successful', data);
-         
             editLink.disabled = !isChecked;
         })
         .catch(error => {
             console.error('Error during PATCH request:', error);
-       
         });
     });
 
     editLink.addEventListener('click', function(event) {
         event.preventDefault();
 
-        const userId = '{{ user.id }}';
-        
         const formData = new FormData(timeSettingsForm);
         const data = {
             start_time: formData.get('start_time'),
@@ -46,7 +41,6 @@ document.addEventListener('DOMContentLoaded', function() {
             interval: formData.get('interval')
         };
 
-  
         fetch(`/user/edit_time/${userId}`, {
             method: 'PATCH',
             headers: {
@@ -56,18 +50,17 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .then(response => {
             if (!response.ok) {
+                console.log(JSON.stringify(data));
                 throw new Error('Network response was not ok');
             }
             return response.json();
         })
         .then(data => {
             console.log('PATCH request successful', data);
-    
             displayCustomNotification('Сохранено');
         })
         .catch(error => {
             console.error('Error during PATCH request:', error);
-     
         });
     });
 
@@ -83,7 +76,7 @@ document.addEventListener('DOMContentLoaded', function() {
             customClass: {
                 popup: 'custom-swal',
                 title: 'custom-swal-title',
-                content: 'custom-swal-content' 
+                content: 'custom-swal-content'
             },
             width: '70%',
             padding: '1rem',

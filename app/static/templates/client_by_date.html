@@ -4,6 +4,8 @@
 
 {% block content %}
     <h1>Записи на {{ date }}</h1>
+    <input type="hidden" id="booking-date" value="{{ date }}">
+
     <div class="custom-booking-container">
         {% if selected_times %}
             {% for time in selected_times %}
