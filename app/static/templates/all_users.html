@@ -4,7 +4,6 @@
 
 {% block content %}
 <div class="container mt-5">
-    <!-- Улучшенное поле для поиска -->
     <div class="row justify-content-center mb-4">
         <div class="col-md-6">
             <form action="/user/search_user" method="GET" class="d-flex align-items-center">
@@ -18,7 +17,6 @@
         </div>
     </div>
 
-    <!-- Результаты поиска -->
     <div class="row">
         <div class="col-12">
             {% if users %}
@@ -42,27 +40,27 @@
                 {% endfor %}
 
                 {% if pagination %}
-                <!-- Пагинация -->
+        
                 <nav aria-label="Page navigation">
                     <ul class="pagination justify-content-center">
-                        <!-- Кнопка "Предыдущая страница" -->
+                  
                         <li class="page-item {% if page == 1 %}disabled{% endif %}">
                             <a class="page-link" href="/user/all_users/?page={{ page-1 }}" aria-label="Previous">
                                 <span aria-hidden="true">&laquo;</span>
                             </a>
                         </li>
 
-                        <!-- Первая страница -->
+                  
                         <li class="page-item {% if page == 1 %}active{% endif %}">
                             <a class="page-link" href="/user/all_users/?page=1">1</a>
                         </li>
 
-                        <!-- Троеточие если текущая страница больше 4 -->
+                  
                         {% if page > 4 %}
                         <li class="page-item disabled"><span class="page-link">...</span></li>
                         {% endif %}
 
-                        <!-- Центральные страницы -->
+                   
                         {% for p in range(2, pages) %}
                             {% if p >= page-2 and p <= page+2 %}
                                 <li class="page-item {% if p == page %}active{% endif %}">
@@ -71,17 +69,17 @@
                             {% endif %}
                         {% endfor %}
 
-                        <!-- Троеточие если текущая страница меньше чем pages-3 -->
+              
                         {% if page < pages-3 %}
                         <li class="page-item disabled"><span class="page-link">...</span></li>
                         {% endif %}
 
-                        <!-- Последняя страница -->
+                 
                         <li class="page-item {% if page == pages %}active{% endif %}">
                             <a class="page-link" href="/user/all_users/?page={{ pages }}">{{ pages }}</a>
                         </li>
 
-                        <!-- Кнопка "Следующая страница" -->
+              
                         <li class="page-item {% if page == pages %}disabled{% endif %}">
                             <a class="page-link" href="/user/all_users/?page={{ page+1 }}" aria-label="Next">
                                 <span aria-hidden="true">&raquo;</span>
@@ -178,30 +176,30 @@
         font-size: 14px;
     }
 
-    /* Стили для улучшенного поля поиска */
+ 
     .search-input {
-        border: 1px solid #ced4da; /* Цвет рамки */
-        border-radius: 20px; /* Закругленные углы */
-        padding: 10px 15px; /* Внутренние отступы */
-        transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out; /* Плавное изменение стилей */
-        max-width: 300px; /* Максимальная ширина поля */
+        border: 1px solid #ced4da;
+        border-radius: 20px;
+        padding: 10px 15px;
+        transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+        max-width: 300px;
     }
 
     .search-input:focus {
-        border-color: #80bdff; /* Цвет рамки при фокусе */
-        outline: 0; /* Убираем стандартную рамку фокуса */
-        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25); /* Тень при фокусе */
+        border-color: #80bdff;
+        outline: 0;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
     }
 
     .search-btn {
-        border-radius: 20px; /* Закругленные углы кнопки */
-        padding: 10px 20px; /* Внутренние отступы кнопки */
-        margin-left: -1px; /* Расположение кнопки рядом с полем ввода */
+        border-radius: 20px;
+        padding: 10px 20px;
+        margin-left: -1px;
     }
 
     @media (max-width: 768px) {
         .user-card {
-            width: 92%; /* При ширине экрана до 768px, ширина карты будет 100% */
+            width: 92%;
         }
     }
 </style>

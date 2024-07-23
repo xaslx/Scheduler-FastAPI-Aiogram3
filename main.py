@@ -27,7 +27,6 @@ from database import async_session_maker
 
 
 
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     redis = aioredis.from_url(f"redis://{settings.REDIS_HOST}", encoding="utf-8", decode_responses=True)

@@ -24,7 +24,7 @@
         </div>
     </div>
 
-    <!-- Модальное окно для подтверждения удаления -->
+   
     <div id="deleteConfirmationModal" class="modal">
         <div class="modal-content">
             <span class="close">&times;</span>
@@ -39,68 +39,12 @@
 
 {% block scripts %}
     {{ super() }}
-    <script>
-        // Получаем модальное окно и кнопки
-        var modal = document.getElementById('deleteConfirmationModal');
-        var confirmButton = document.getElementById('confirmDelete');
-        var cancelButton = document.getElementById('cancelDelete');
-
-        // Получаем все крестики
-        var deleteIcons = document.querySelectorAll('.delete-icon');
-
-        deleteIcons.forEach(function(icon) {
-            icon.addEventListener('click', function() {
-                var notificationId = this.getAttribute('data-notification-id');
-
-                // Показываем модальное окно
-                modal.style.display = 'block';
-
-                // Обработчик клика по кнопке "Да"
-                confirmButton.onclick = function() {
-                    // Отправляем DELETE запрос
-                    fetch('/notification/' + notificationId, {
-                        method: 'DELETE',
-                    })
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error('Ошибка удаления');
-                        }
-                        // Если удаление прошло успешно, обновляем страницу
-                        window.location.reload();
-                    })
-                    .catch(error => {
-                        console.error('Ошибка удаления:', error);
-                        alert('Произошла ошибка при удалении уведомления.');
-                    })
-                    .finally(() => {
-                        modal.style.display = 'none'; // Закрываем модальное окно в любом случае
-                    });
-                }
-
-                // Обработчик клика по кнопке "Нет" или закрытие модального окна
-                cancelButton.onclick = function() {
-                    modal.style.display = 'none';
-                }
-
-                // Закрытие модального окна при клике на крестик
-                var closeIcon = document.querySelector('.close');
-                closeIcon.onclick = function() {
-                    modal.style.display = 'none';
-                }
-            });
-        });
-        // Закрытие модального окна при клике вне его области
-        window.onclick = function(event) {
-            if (event.target == modal) {
-                modal.style.display = 'none';
-            }
-        }
-    </script>
+    <script src="/app/static/js/all_notifications.js"></script>
 
     <style>
-        /* Стили для модального окна */
+     
         .modal {
-            display: none; /* Скрыть модальное окно по умолчанию */
+            display: none; 
             position: fixed;
             z-index: 1000;
             left: 0;

@@ -20,64 +20,7 @@
     {{ super() }}
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const form = document.getElementById('registration-form');
-
-            form.addEventListener('submit', function(event) {
-                event.preventDefault(); // Предотвращаем стандартное действие отправки формы
-
-                const formData = new FormData(form);
-                const message = formData.get('message');
-
-                fetch('/notification/send_notification_email', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ message })
-                })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    console.log('Notification sent:', data);
-
-                    // Показать уведомление с использованием SweetAlert2
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Уведомление отправлено',
-                        text: `Количество пользователей, которые получат уведомление: ${data.user_count}`,
-                        showConfirmButton: true,
-                        customClass: {
-                            container: 'swal2-custom',
-                            popup: 'swal2-custom-popup',
-                            title: 'swal2-custom-title',
-                            content: 'swal2-custom-content'
-                        }
-                    });
-                })
-                .catch(error => {
-                    console.error('Error sending notification:', error);
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Ошибка',
-                        text: 'Произошла ошибка при отправке уведомления.',
-                        showConfirmButton: true,
-                        customClass: {
-                            container: 'swal2-custom',
-                            popup: 'swal2-custom-popup',
-                            title: 'swal2-custom-title',
-                            content: 'swal2-custom-content'
-                        }
-                    });
-                });
-            });
-        });
-    </script>
+    <script src="/app/static/js/create_notif_email.js"></script>
 {% endblock %}
 
 <style>
@@ -133,7 +76,6 @@
         margin-top: 5px;
     }
 
-    /* Custom styles for SweetAlert2 */
     .swal2-custom {
         width: 80%;
         max-width: 300px;

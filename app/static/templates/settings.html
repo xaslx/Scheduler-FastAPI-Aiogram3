@@ -48,10 +48,10 @@
         .center-wrapper {
             display: flex;
             justify-content: center;
-            align-items: flex-start; /* Выравнивание по верхнему краю */
-            min-height: 100vh; /* Минимальная высота контейнера - высота экрана */
-            padding-top: 20px; /* Отступ сверху для отступа от верхнего края экрана */
-            background-color: #fdf5e6; /* Цвет фона страницы */
+            align-items: flex-start;
+            min-height: 100vh;
+            padding-top: 20px;
+            background-color: #fdf5e6;
         }
 
         .custom-block {
@@ -59,8 +59,8 @@
             background-color: #333;
             border-radius: 8px;
             width: 50%;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Тень для визуального эффекта */
-            color: white; /* Цвет текста по умолчанию */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            color: white;
         }
 
         .full-width-line {
@@ -79,12 +79,12 @@
 
         .toggle-container span {
             font-size: 16px;
-            color: white; /* Цвет текста */
+            color: white;
         }
 
         .time-container label {
             font-size: 16px;
-            color: white; /* Цвет текста */
+            color: white;
             margin-right: 10px;
         }
 
@@ -150,102 +150,5 @@
             }
         }
     </style>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const toggleSwitch = document.querySelector('.switch input[type="checkbox"]');
-            const editLink = document.querySelector('.edit-profile-button');
-            const timeSettingsForm = document.getElementById('time-settings-form');
-            
-            toggleSwitch.addEventListener('change', function() {
-                const isChecked = this.checked;
-                const userId = '{{ user.id }}'; // Замените на реальный способ получения ID пользователя
-                
-                // Выполнение PATCH-запроса для изменения состояния enabled
-                fetch(`/user/edit_enabled/${userId}`, {
-                    method: 'PATCH',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        enabled: isChecked
-                    })
-                })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    console.log('PATCH request successful', data);
-                    // Дополнительные действия при успешной обработке запроса
-                    editLink.disabled = !isChecked; // Деактивируем ссылку, если isChecked === false
-                })
-                .catch(error => {
-                    console.error('Error during PATCH request:', error);
-                    // Обработка ошибок
-                });
-            });
-
-            editLink.addEventListener('click', function(event) {
-                event.preventDefault(); // Предотвращаем переход по ссылке
-
-                const userId = '{{ user.id }}'; // Замените на реальный способ получения ID пользователя
-                
-                const formData = new FormData(timeSettingsForm);
-                const data = {
-                    start_time: formData.get('start_time'),
-                    end_time: formData.get('end_time'),
-                    interval: formData.get('interval')
-                };
-
-                // Выполнение PATCH-запроса для изменения времени и интервала
-                fetch(`/user/edit_time/${userId}`, {
-                    method: 'PATCH',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(data)
-                })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    console.log('PATCH request successful', data);
-                    // Дополнительные действия при успешной обработке запроса
-                    displayCustomNotification('Сохранено');
-                })
-                .catch(error => {
-                    console.error('Error during PATCH request:', error);
-                    // Обработка ошибок
-                });
-            });
-
-            function displayCustomNotification(message) {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Успех!',
-                    text: message,
-                    timer: 2500, // Закрыть через 3 секунды
-                    timerProgressBar: true,
-                    position: 'top',
-                    toast: true,
-                    customClass: {
-                        popup: 'custom-swal', // Основной класс уведомления
-                        title: 'custom-swal-title', // Класс для заголовка
-                        content: 'custom-swal-content' // Класс для содержимого
-                    },
-                    width: '70%', // Ширина уведомления
-                    padding: '1rem', // Отступы внутри уведомления
-                    background: '#fff', // Фон уведомления
-                    textColor: '#333', // Цвет текста
-                    showConfirmButton: false, // Не показывать кнопку подтверждения
-                });
-            }
-        });
-
-    </script>
+    <script src="/app/static/js/settings.js"></script>
 {% endblock %}

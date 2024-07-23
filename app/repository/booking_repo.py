@@ -1,11 +1,9 @@
 from .base_repo import BaseRepository
 from app.models.booking_model import Booking
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import Time, insert, and_, select, update
+from sqlalchemy import and_, select, update
 from datetime import date
 from exceptions import TimeNotFound
-
-from app.models.user_model import User
 
 
 class BookingRepository(BaseRepository):
