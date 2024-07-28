@@ -1,7 +1,8 @@
-from datetime import timedelta
+from datetime import datetime, timedelta
 from fastapi import APIRouter, Depends, HTTPException, Response, Request, Body, Form, status
 from app.auth.dependencies import get_all_notifications
 from app.schemas.notification_schemas import NotificationOut
+from app.utils.current_time import current_time
 from database import get_async_session
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.auth.dependencies import get_current_user
@@ -9,7 +10,7 @@ from app.schemas.user_schema import UserRegister, UserOut, UserLogin
 from app.repository.user_repo import UserRepository
 from app.models.user_model import User
 from exceptions import UserAlreadyExistsException, UserNotFound
-from app.auth.auth import authenticate_user, create_access_token, get_password_hash
+from app.auth.auth import authenticate_user, get_password_hash, create_access_token
 import secrets
 from app.utils.templating import templates
 from typing import Annotated
@@ -62,13 +63,15 @@ async def login_user(response: Response, user: UserLogin, session: AsyncSession 
     )
     if not user:
         raise UserNotFound
-    access_token: str = create_access_token({"sub": str(user.id)})
+    
+    access_token, expire = create_access_token({"sub": str(user.id)})
+    max_age = (expire - datetime.utcnow()).total_seconds()
+    
     response.set_cookie(
         "user_access_token",
         access_token,
         httponly=True,
-        expires=timedelta(hours=1),
-        max_age=3600,
+        max_age=max_age
     )
     return access_token
 

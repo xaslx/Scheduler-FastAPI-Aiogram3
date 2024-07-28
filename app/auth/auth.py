@@ -22,12 +22,14 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 
 def create_access_token(data: dict) -> str:
     to_encode: dict = data.copy()
-    expire: datetime = datetime.utcnow() + timedelta(hours=1)
+    expire: datetime = datetime.utcnow() + timedelta(days=15)
     to_encode.update({"exp": expire})
     encode_jwt = jwt.encode(
         to_encode, settings.SECRET_KEY, settings.ALGORITHM
     )
-    return encode_jwt
+
+    return encode_jwt, expire
+
 
 async def authenticate_user(
     email: EmailStr,

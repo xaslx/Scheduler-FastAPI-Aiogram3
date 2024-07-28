@@ -19,7 +19,6 @@ from fastapi.exceptions import HTTPException
 from app.tasks.tasks import reset_password_email, password_changed, update_password, send_notification
 import secrets
 from app.auth.authentication import generate_token
-from app.schemas.jwt_token import Token
 from app.schemas.notification_schemas import NotificationOut
 from fastapi_pagination.ext.sqlalchemy import paginate
 from fastapi_pagination import Page, Params
