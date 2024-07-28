@@ -18,7 +18,7 @@ class User(Base):
     role: Mapped[str] = mapped_column(String(255), default='user')
     email: Mapped[str] = mapped_column(String(255), unique=True)
     personal_link: Mapped[str] = mapped_column(String(255), unique=True)
-    telegram_link: Mapped[str] = mapped_column(String(255), unique=True, default=None, nullable=True)
+    telegram_link: Mapped[str] = mapped_column(String(255), default=None, nullable=True)
     hashed_password: Mapped[str]
     registered_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now(moscow_tz).replace(tzinfo=None))
     is_active: Mapped[bool] = mapped_column(default=True)
