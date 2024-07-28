@@ -34,11 +34,7 @@ async def get_register_template(
 async def rigister_user(user: UserRegister, session: AsyncSession = Depends(get_async_session)):
     exist_user: User = await UserRepository.find_one_or_none(session=session, email=user.email)
     if exist_user:
-        return JSONResponse(content={'detail': 'Пользователь с таким email уже существует'}, status_code=409)
-    # if user.telegram_link:
-    #     exist_tg: User = await UserRepository.find_one_or_none(session=session, telegram_link=user.telegram_link)
-    #     if exist_tg:
-    #         return JSONResponse(content={'detail': 'Телеграм уже привязан к другому пользователю'}, status_code=409)
+        raise UserAlreadyExistsException
 
     hashed_password: str = get_password_hash(user.password)
     new_personal_link: str = secrets.token_hex(8)

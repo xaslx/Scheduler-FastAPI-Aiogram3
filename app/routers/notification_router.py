@@ -92,6 +92,7 @@ async def create_notification(
     session: AsyncSession = Depends(get_async_session),
     user: User = Depends(get_admin_user)
 ):
+
     if not user:
         raise NotAccessError
     
