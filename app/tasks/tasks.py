@@ -1,4 +1,5 @@
 import smtplib
+from time import sleep
 
 from pydantic import EmailStr
 
@@ -77,6 +78,7 @@ def send_notification(users: list, message: str):
     for user in users:
         msg_content = send_notification_for_all_users(user, message)
 
+        sleep(1)
         with smtplib.SMTP_SSL(
             settings.SMTP_HOST, settings.SMTP_PORT
         ) as server:
