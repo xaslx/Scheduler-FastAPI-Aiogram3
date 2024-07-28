@@ -11,7 +11,7 @@ TELEGRAM_CHECK = re.compile(r'^[a-zA-Z0-9_@]{5,15}$')
 
 class BaseValidators(BaseModel):
     @model_validator(mode='before')
-    def check_name_and_surname(cls, value):
+    def check_name_and_surname(cls, value: str):
         name = value.get('name')
         surname = value.get('surname')
         if name and ' ' in name:
@@ -24,6 +24,10 @@ class BaseValidators(BaseModel):
                 status_code=422,
                 detail='Фамилия не может содержать пробелы.'
             )
+        if name:
+            value['name'] = name.capitalize()
+        if surname:
+            value['surname'] = surname.capitalize()
         return value
 
     @model_validator(mode='before')
