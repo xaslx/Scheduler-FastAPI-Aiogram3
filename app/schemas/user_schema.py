@@ -120,7 +120,7 @@ class EditTime(BaseModel):
 
     @field_validator("interval")
     def validate_interval(cls, value: int):
-        if value < 10 or type(value) != int:
+        if value < 10 or not isinstance(value, int):
             return 10
         return value
 
