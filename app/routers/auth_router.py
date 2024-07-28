@@ -60,7 +60,7 @@ async def rigister_user(
 @auth_router.get("/after_register", status_code=200)
 async def after_register_template(
     request: Request,
-    user: User = Depends(get_current_user),
+    user: UserOut = Depends(get_current_user),
     notifications: list[NotificationOut] = Depends(get_all_notifications),
 ) -> HTMLResponse:
     return templates.TemplateResponse(
@@ -91,7 +91,7 @@ async def login_user(
 
 @auth_router.get("/login", status_code=200)
 async def get_login_template(
-    request: Request, user: User = Depends(get_current_user)
+    request: Request, user: UserOut = Depends(get_current_user)
 ) -> HTMLResponse:
     
     return templates.TemplateResponse(

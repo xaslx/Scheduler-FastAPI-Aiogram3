@@ -7,6 +7,7 @@ from app.models.user_model import User
 from app.repository.notification_repo import NotificationRepository
 from app.schemas.help_schemas import GetHelp
 from app.schemas.notification_schemas import NotificationOut
+from app.schemas.user_schema import UserOut
 from app.tasks.tasks import help_message
 from app.utils.templating import templates
 from database import get_async_session
@@ -19,7 +20,7 @@ main_router: APIRouter = APIRouter()
 async def get_main_page(
     request: Request,
     session: AsyncSession = Depends(get_async_session),
-    user: User = Depends(get_current_user),
+    user: UserOut = Depends(get_current_user),
 ) -> HTMLResponse:
     notifications: list[NotificationOut] = await NotificationRepository.find_all_notif(
         session=session
@@ -34,8 +35,8 @@ async def get_main_page(
 @main_router.get("/help", status_code=200, name="help:page")
 async def get_help_template(
     request: Request,
-    user: User = Depends(get_current_user),
-    notifications: NotificationOut = Depends(get_all_notifications),
+    user: UserOut = Depends(get_current_user),
+    notifications: list[NotificationOut] = Depends(get_all_notifications),
 ) -> HTMLResponse:
     if not user:
         return templates.TemplateResponse(
@@ -51,7 +52,7 @@ async def get_help_template(
 
 
 @main_router.post("/help", status_code=200)
-async def get_help(help: GetHelp, user: User = Depends(get_current_user)):
+async def get_help(help: GetHelp, user: UserOut = Depends(get_current_user)):
     if not user:
         raise NotAccessError
     help_message.delay(email=help.email, description=help.description)

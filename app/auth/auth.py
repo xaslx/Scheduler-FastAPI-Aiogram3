@@ -6,7 +6,9 @@ from passlib.context import CryptContext
 from pydantic import EmailStr
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.models.user_model import User
 from app.repository.user_repo import UserRepository
+from app.schemas.user_schema import UserOut
 from config import settings
 from database import get_async_session
 from exceptions import IncorrectEmailOrPasswordException
@@ -35,8 +37,8 @@ async def authenticate_user(
     email: EmailStr,
     password: str,
     async_db: AsyncSession = Depends(get_async_session),
-):
-    user = await UserRepository.find_one_or_none(email=email, session=async_db)
+) -> UserOut:
+    user: User = await UserRepository.find_one_or_none(email=email, session=async_db)
     if not (user and verify_password(password, user.hashed_password)):
         raise IncorrectEmailOrPasswordException
     return user

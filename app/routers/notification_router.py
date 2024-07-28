@@ -15,7 +15,7 @@ from app.repository.notification_repo import NotificationRepository
 from app.repository.user_repo import UserRepository
 from app.schemas.notification_schemas import (CreateNotification,
                                               NotificationOut)
-from app.schemas.user_schema import CreateMessage
+from app.schemas.user_schema import CreateMessage, UserOut
 from app.tasks.tasks import send_notification
 from app.utils.current_time import current_time
 from app.utils.templating import templates
@@ -29,26 +29,16 @@ notification_router: APIRouter = APIRouter(prefix="/notification", tags=["Уве
 async def get_all_notification(
     request: Request,
     session: AsyncSession = Depends(get_async_session),
-    page: Annotated[int, Query()] = 1,
-    user: User = Depends(get_current_user),
+    user: UserOut = Depends(get_current_user),
     notifications: list[NotificationOut] = Depends(get_all_notifications),
-) -> Page[NotificationOut]:
-    res = await paginate(
-        session, select(Notification).order_by(desc(Notification.created_at))
-    )
-    if not user:
-        return templates.TemplateResponse(
-            request=request, name="not_logined.html", context={"user": user}
-        )
+) -> HTMLResponse:
+    all_notifications: list[NotificationOut] = await NotificationRepository.find_all(session=session)
     return templates.TemplateResponse(
         request=request,
         name="all_notifications.html",
         context={
             "user": user,
-            "all_notifications": res.items,
-            "total": res.total,
-            "page": page,
-            "pages": res.pages,
+            "all_notifications": sorted(all_notifications, key=lambda notif: notif.created_at, reverse=True),
             "notifications": notifications,
         },
     )
@@ -57,10 +47,10 @@ async def get_all_notification(
 @notification_router.get("/create", status_code=200, name="createnot:page")
 async def get_create_notification_template(
     request: Request,
-    user: User = Depends(get_admin_user),
+    user: UserOut = Depends(get_admin_user),
     notifications: list[NotificationOut] = Depends(get_all_notifications),
 ) -> HTMLResponse:
-    print(current_time())
+ 
     if not user:
         return templates.TemplateResponse(
             request=request,
@@ -79,7 +69,7 @@ async def get_create_notification_template(
 )
 async def get_create_notification_email_template(
     request: Request,
-    user: User = Depends(get_admin_user),
+    user: UserOut = Depends(get_admin_user),
     notifications: list[NotificationOut] = Depends(get_all_notifications),
 ) -> HTMLResponse:
     if not user:
@@ -98,7 +88,7 @@ async def get_create_notification_email_template(
 )
 async def get_create_notification_website_template(
     request: Request,
-    user: User = Depends(get_admin_user),
+    user: UserOut = Depends(get_admin_user),
     notifications: list[NotificationOut] = Depends(get_all_notifications),
 ) -> HTMLResponse:
     if not user:
@@ -117,7 +107,7 @@ async def get_notification_by_id(
     request: Request,
     notif_id: int,
     session: AsyncSession = Depends(get_async_session),
-    user: User = Depends(get_current_user),
+    user: UserOut = Depends(get_current_user),
     notifications: list[NotificationOut] = Depends(get_all_notifications),
 ) -> HTMLResponse:
     notification: NotificationOut = await NotificationRepository.find_one_or_none(
@@ -144,7 +134,7 @@ async def get_notification_by_id(
 async def create_notification(
     new_notification: CreateNotification,
     session: AsyncSession = Depends(get_async_session),
-    user: User = Depends(get_admin_user),
+    user: UserOut = Depends(get_admin_user),
 ):
 
     if not user:
@@ -153,6 +143,7 @@ async def create_notification(
     notifications: list[NotificationOut] = await NotificationRepository.find_all(
         session=session
     )
+
     if len(notifications) >= 30:
         await NotificationRepository.delete(session=session, id=notifications[0].id)
     await NotificationRepository.add(session=session, **new_notification.model_dump())
@@ -163,12 +154,12 @@ async def create_notification(
 async def send_notification_for_all_users(
     message: CreateMessage,
     session: AsyncSession = Depends(get_async_session),
-    user: User = Depends(get_admin_user),
+    user: UserOut = Depends(get_admin_user),
 ):
     if not user:
         raise NotAccessError
 
-    users: list[User] = await UserRepository.find_all(session=session)
+    users: list[UserOut] = await UserRepository.find_all(session=session)
     emails: list[str] = [user.email for user in users]
     send_notification.delay(users=emails, message=message.message)
     return {"user_count": len(emails)}
@@ -178,7 +169,7 @@ async def send_notification_for_all_users(
 async def delete_notification(
     notif_id: int,
     session: AsyncSession = Depends(get_async_session),
-    user: User = Depends(get_admin_user),
+    user: UserOut = Depends(get_admin_user),
 ):
     notification: NotificationOut = await NotificationRepository.find_one_or_none(
         session=session, id=notif_id

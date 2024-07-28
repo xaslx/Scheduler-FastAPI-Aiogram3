@@ -81,7 +81,11 @@ class UserOut(BaseModel):
     personal_link: str
     registered_at: datetime
     is_active: bool
-
+    start_time: time
+    end_time: time
+    interval: int
+    enabled: bool
+    
     model_config = ConfigDict(from_attributes=True)
 
 

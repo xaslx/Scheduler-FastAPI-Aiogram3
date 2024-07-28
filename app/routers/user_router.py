@@ -36,7 +36,7 @@ user_router: APIRouter = APIRouter(prefix="/user", tags=["Пользовател
 @user_router.get("/my_profile", status_code=200, name="myprofile:page")
 async def show_my_profile_template(
     request: Request,
-    user: User = Depends(get_current_user),
+    user: UserOut = Depends(get_current_user),
     notifications: list[NotificationOut] = Depends(get_all_notifications),
 ) -> HTMLResponse:
     return templates.TemplateResponse(
@@ -49,14 +49,12 @@ async def show_my_profile_template(
 async def get_my_clients(
     request: Request,
     session: AsyncSession = Depends(get_async_session),
-    user: User = Depends(get_current_user),
+    user: UserOut = Depends(get_current_user),
     notifications: list[NotificationOut] = Depends(get_all_notifications),
 ) -> HTMLResponse:
     if not user:
         return templates.TemplateResponse(
-            request=request,
-            name="404.html",
-            context={"user": user, "notifications": notifications},
+            request=request, name="not_logined.html", context={"user": user}
         )
     bookings: BookingOut = await BookingRepository.find_all_booking(
         user_id=user.id, date=datetime.now(tz=moscow_tz).date(), session=session
@@ -74,7 +72,7 @@ async def get_my_clients_by_date(
     user_id: Annotated[int, Query()],
     request: Request,
     session: AsyncSession = Depends(get_async_session),
-    user: User = Depends(get_current_user),
+    user: UserOut = Depends(get_current_user),
     notifications: list[NotificationOut] = Depends(get_all_notifications),
 ) -> HTMLResponse:
     if not user or user.id != user_id:
@@ -108,9 +106,13 @@ async def get_my_clients_by_date(
 @user_router.get("/edit_profile", status_code=200, name="edit:page")
 async def get_edit_my_profile_template(
     request: Request,
-    user: User = Depends(get_current_user),
+    user: UserOut = Depends(get_current_user),
     notifications: list[NotificationOut] = Depends(get_all_notifications),
 ) -> HTMLResponse:
+    if not user:
+        return templates.TemplateResponse(
+            request=request, name="not_logined.html", context={"user": user}
+        )
     return templates.TemplateResponse(
         request=request,
         name="edit_profile.html",
@@ -118,10 +120,10 @@ async def get_edit_my_profile_template(
     )
 
 
-@user_router.get("/edit_password", name="edit_password:page")
+@user_router.get("/edit_password", name="edit_password:page", status_code=200)
 async def get_edit_my_password_template(
     request: Request,
-    user: User = Depends(get_current_user),
+    user: UserOut = Depends(get_current_user),
     notifications: list[NotificationOut] = Depends(get_all_notifications),
 ) -> HTMLResponse:
 
@@ -136,12 +138,12 @@ async def get_edit_my_password_template(
     )
 
 
-@user_router.patch("/edit_password")
+@user_router.patch("/edit_password", status_code=200)
 async def edit_password(
     response: Response,
     new_password: EditPassword,
     session: AsyncSession = Depends(get_async_session),
-    user: User = Depends(get_current_user),
+    user: UserOut = Depends(get_current_user),
 ):
 
     if not user or (user.id != new_password.user_id):
@@ -158,12 +160,15 @@ async def edit_password(
     response.delete_cookie("user_access_token")
 
 
-@user_router.patch("/edit_profile", status_code=201)
+@user_router.patch("/edit_profile", status_code=200)
 async def edit_my_profile(
     new_user: UserUpdate,
     session: AsyncSession = Depends(get_async_session),
-    user: User = Depends(get_current_user),
+    user: UserOut = Depends(get_current_user),
 ):
+    if not user:
+        raise NotAccessError
+    
     await UserRepository.update(
         session=session,
         id=user.id,
@@ -176,7 +181,7 @@ async def get_all_users(
     request: Request,
     page: Annotated[int, Query()] = 1,
     session: AsyncSession = Depends(get_async_session),
-    user: User = Depends(get_admin_user),
+    user: UserOut = Depends(get_admin_user),
     notifications: list[NotificationOut] = Depends(get_all_notifications),
 ) -> Page[UserOut]:
 
@@ -218,7 +223,7 @@ async def search_user_by_name_surname(
     request: Request,
     query: str | None = None,
     session: AsyncSession = Depends(get_async_session),
-    user: User = Depends(get_admin_user),
+    user: UserOut = Depends(get_admin_user),
     page: Annotated[int, Query()] = 1,
     notifications: list[NotificationOut] = Depends(get_all_notifications),
 ) -> HTMLResponse:
@@ -228,15 +233,15 @@ async def search_user_by_name_surname(
         return templates.TemplateResponse(
             request=request, name="404.html", context={"user": user}
         )
-    if query:
-        users: list[User] = await UserRepository.search_user_by_name_surname_or_email(
-            session=session, text=query
-        )
     if not user.is_active:
         return templates.TemplateResponse(
             request=request,
             name="banned.html",
             context={"user": user, "notifications": notifications},
+        )
+    if query:
+        users: list[UserOut] = await UserRepository.search_user_by_name_surname_or_email(
+            session=session, text=query
         )
     return templates.TemplateResponse(
         request=request,
@@ -256,7 +261,7 @@ async def search_user_by_name_surname(
 @user_router.get("/my_settings", status_code=200, name="settings:page")
 async def get_my_settings_template(
     request: Request,
-    user: User = Depends(get_current_user),
+    user: UserOut = Depends(get_current_user),
     notifications: list[NotificationOut] = Depends(get_all_notifications),
 ) -> HTMLResponse:
     if not user:
@@ -273,11 +278,11 @@ async def get_user_by_id(
     request: Request,
     user_id: int,
     session: AsyncSession = Depends(get_async_session),
-    user: User = Depends(get_admin_user),
+    user: UserOut = Depends(get_admin_user),
     notifications: list[NotificationOut] = Depends(get_all_notifications),
 ) -> HTMLResponse:
 
-    user_by_id: User = await UserRepository.find_one_or_none(
+    user_by_id: UserOut = await UserRepository.find_one_or_none(
         id=user_id, session=session
     )
 
@@ -306,9 +311,11 @@ async def get_user_by_id(
 async def ban_user(
     user_id: int,
     session: AsyncSession = Depends(get_async_session),
-    admin: User = Depends(get_admin_user),
+    admin: UserOut = Depends(get_admin_user),
 ):
-    user: User = await UserRepository.find_one_or_none(id=user_id, session=session)
+    if not admin:
+        raise NotAccessError
+    user: UserOut = await UserRepository.find_one_or_none(id=user_id, session=session)
     if not user:
         raise UserNotFound
     if admin.role == "admin":
@@ -321,9 +328,11 @@ async def ban_user(
 async def unban_user(
     user_id: int,
     session: AsyncSession = Depends(get_async_session),
-    admin: User = Depends(get_admin_user),
+    admin: UserOut = Depends(get_admin_user),
 ):
-    user: User = await UserRepository.find_one_or_none(id=user_id, session=session)
+    if not admin:
+        raise NotAccessError
+    user: UserOut = await UserRepository.find_one_or_none(id=user_id, session=session)
     if not user:
         raise UserNotFound
     if admin.role == "admin" or user.role == "admin":
@@ -337,7 +346,7 @@ async def edit_role_for_user(
     new_role: EditRole,
     user_id: int,
     session: AsyncSession = Depends(get_async_session),
-    admin: User = Depends(get_admin_user),
+    admin: UserOut = Depends(get_admin_user),
 ):
     if admin.role == "admin":
         raise NotAccessError
@@ -350,9 +359,9 @@ async def edit_role_for_user(
 async def delete_user(
     user_id: int,
     session: AsyncSession = Depends(get_async_session),
-    admin: User = Depends(get_admin_user),
+    admin: UserOut = Depends(get_admin_user),
 ):
-    user: User = await UserRepository.find_one_or_none(session=session, id=user_id)
+    user: UserOut = await UserRepository.find_one_or_none(session=session, id=user_id)
     if not user:
         raise UserNotFound
     if admin.role != "dev":
@@ -365,7 +374,7 @@ async def del_user(
     user_id: int,
     request: Request,
     session: AsyncSession = Depends(get_async_session),
-    user: User = Depends(get_current_user),
+    user: UserOut = Depends(get_current_user),
     notifications: list[str] = Depends(get_all_notifications),
 ) -> HTMLResponse:
 
@@ -385,10 +394,10 @@ async def edit_enabled(
     enabled: EditEnabled,
     user_id: int,
     session: AsyncSession = Depends(get_async_session),
-    user: User = Depends(get_current_user),
+    user: UserOut = Depends(get_current_user),
 ):
-    if user is None:
-        return templates.TemplateResponse()
+    if not user:
+        raise NotAccessError
     await UserRepository.update(session=session, id=user_id, enabled=enabled.enabled)
 
 
@@ -397,9 +406,10 @@ async def edit_time(
     new_time: EditTime,
     user_id: int,
     session: AsyncSession = Depends(get_async_session),
-    user: User = Depends(get_current_user),
+    user: UserOut = Depends(get_current_user),
 ):
-    print(new_time)
+    if not user:
+        raise NotAccessError
     await UserRepository.update(
         session=session, id=user_id, **new_time.model_dump(exclude_unset=True)
     )
@@ -409,7 +419,7 @@ async def edit_time(
 async def get_forgot_password_template(
     request: Request,
     notifications: list[NotificationOut] = Depends(get_all_notifications),
-    user: User = Depends(get_current_user),
+    user: UserOut = Depends(get_current_user),
 ) -> HTMLResponse:
 
     return templates.TemplateResponse(
@@ -423,12 +433,12 @@ async def get_forgot_password_template(
 async def get_reset_password_template(
     token: str,
     request: Request,
-    user: User = Depends(get_current_user),
+    user: UserOut = Depends(get_current_user),
     session: AsyncSession = Depends(get_async_session),
     notifications: list[NotificationOut] = Depends(get_all_notifications),
 ) -> HTMLResponse:
 
-    exist_user = await get_current_user(async_db=session, token=token)
+    exist_user: UserOut = await get_current_user(async_db=session, token=token)
     if not exist_user:
         return templates.TemplateResponse(
             request=request, name="expire_time.html", context={"user": user}
@@ -448,10 +458,9 @@ async def get_reset_password_template(
 async def get_forgot_password_template(
     email: ResetPassword,
     session: AsyncSession = Depends(get_async_session),
-    user: User = Depends(get_current_user),
 ):
 
-    exist_user: User = await UserRepository.find_one_or_none(
+    exist_user: UserOut = await UserRepository.find_one_or_none(
         session=session, email=email.email
     )
     if not exist_user:
@@ -465,7 +474,7 @@ async def get_forgot_password_template(
 )
 async def get_update_password_template(
     request: Request,
-    user: User = Depends(get_current_user),
+    user: UserOut = Depends(get_current_user),
     notifications: list[NotificationOut] = Depends(get_all_notifications),
 ) -> HTMLResponse:
     return templates.TemplateResponse(
@@ -486,4 +495,3 @@ async def reset_password(
         id=user_id.user_id, hashed_password=hashed_password, session=session
     )
     password_changed.delay(email=user_id.email, new_password=new_password)
-    return JSONResponse(content={"message": "Password successfully updated"})

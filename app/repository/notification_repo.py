@@ -14,3 +14,5 @@ class NotificationRepository(BaseRepository):
         query = select(cls.model).order_by(cls.model.created_at.desc()).limit(3)
         res = await session.execute(query)
         return res.scalars().all()
+    
+    

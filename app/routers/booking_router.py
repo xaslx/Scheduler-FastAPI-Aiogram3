@@ -28,11 +28,11 @@ booking_router: APIRouter = APIRouter(prefix="/booking", tags=["Запись"])
 async def get_booking_by_link(
     personal_link: str,
     request: Request,
-    user: User = Depends(get_current_user),
+    user: UserOut = Depends(get_current_user),
     notifications: list[NotificationOut] = Depends(get_all_notifications),
     session: AsyncSession = Depends(get_async_session),
 ) -> HTMLResponse:
-    user_link: User = await UserRepository.find_one_or_none(
+    user_link: UserOut = await UserRepository.find_one_or_none(
         session=session, personal_link=personal_link
     )
     if user_link is None:
@@ -51,27 +51,29 @@ async def get_booking_by_link(
 @booking_router.post("/add_booking", status_code=201)
 async def add_booking(
     date_for_booking: BookingDate, session: AsyncSession = Depends(get_async_session)
-):
-    user: User = await UserRepository.find_one_or_none(
+) -> JSONResponse:
+    user: UserOut = await UserRepository.find_one_or_none(
         session=session, id=date_for_booking.user_id
     )
-    date_for = date_for_booking.date_for_booking.date() + timedelta(days=1)
+    date_for: date = date_for_booking.date_for_booking.date() + timedelta(days=1)
+
     if not user:
         raise UserNotFound
-    intervals = await generate_time_intervals(
+    intervals: list[str] = await generate_time_intervals(
         user.start_time, user.end_time, user.interval
     )
+
     booking: BookingOut = await BookingRepository.get_booking(
         session=session, user_id=date_for_booking.user_id, date=date_for
     )
     booking_id: int = booking.id if booking else 0
 
     if not booking:
-        booking_id = await BookingRepository.add(
+        booking_id: BookingOut = await BookingRepository.add(
             session=session, date_for_booking=date_for, user_id=user.id, times=intervals
         )
 
-    redirect_url = (
+    redirect_url: str = (
         booking_router.url_path_for("gettime:page", personal_link=user.personal_link)
         + f"?date={date_for}&user_id={user.id}&booking_id={booking_id}"
     )
@@ -88,10 +90,10 @@ async def get_time(
     user_id: Annotated[int, Query()],
     request: Request,
     session: AsyncSession = Depends(get_async_session),
-    user: User = Depends(get_current_user),
-    notifications: list = Depends(get_all_notifications),
-):
-    user_link: User = await UserRepository.find_one_or_none(
+    user: UserOut = Depends(get_current_user),
+    notifications: list[NotificationOut] = Depends(get_all_notifications),
+) -> HTMLResponse:
+    user_link: UserOut = await UserRepository.find_one_or_none(
         session=session, personal_link=personal_link
     )
 
@@ -124,8 +126,8 @@ async def get_time(
             context={"user": user, "notifications": notifications},
         )
 
-    now = datetime.now()
-    current_time = now.strftime("%H:%M")
+    now: datetime = datetime.now()
+    current_time: str = now.strftime("%H:%M")
     current_date = now.date()
 
     if booking.date_for_booking == current_date:
@@ -152,10 +154,8 @@ async def get_time(
 async def select_booking(
     booking_id: int,
     create_booking: CreateBooking,
-    user: User = Depends(get_current_user),
     session: AsyncSession = Depends(get_async_session),
-):
-
+) -> None:
     booking: BookingOut = await BookingRepository.find_one_or_none(
         session=session, id=booking_id
     )
@@ -196,9 +196,9 @@ async def select_booking(
 async def cancel_booking(
     cancel_data: CancelBooking,
     booking_id: Annotated[int, Query()],
-    user: User = Depends(get_current_user),
+    user: UserOut = Depends(get_current_user),
     session: AsyncSession = Depends(get_async_session),
-):
+) -> None:
     booking: Booking = await BookingRepository.find_one_or_none(
         session=session, id=booking_id
     )
