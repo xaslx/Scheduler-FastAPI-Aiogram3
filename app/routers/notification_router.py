@@ -1,29 +1,26 @@
-from fastapi import APIRouter, Depends, Request, Query, status
+from typing import Annotated
+
+from fastapi import APIRouter, Depends, Query, Request, status
 from fastapi.responses import HTMLResponse
-from sqlalchemy import select, desc
-from app.auth.dependencies import (
-    get_current_user,
-    get_admin_user,
-    get_all_notifications,
-)
+from fastapi_pagination import Page
+from fastapi_pagination.ext.sqlalchemy import paginate
+from sqlalchemy import desc, select
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.repository.user_repo import UserRepository
+
+from app.auth.dependencies import (get_admin_user, get_all_notifications,
+                                   get_current_user)
+from app.models.notification_model import Notification
+from app.models.user_model import User
 from app.repository.notification_repo import NotificationRepository
+from app.repository.user_repo import UserRepository
+from app.schemas.notification_schemas import (CreateNotification,
+                                              NotificationOut)
 from app.schemas.user_schema import CreateMessage
 from app.tasks.tasks import send_notification
 from app.utils.current_time import current_time
-from database import get_async_session
-from app.models.user_model import User
-from app.schemas.notification_schemas import CreateNotification, NotificationOut
-from exceptions import NotAccessError
 from app.utils.templating import templates
-from typing import Annotated
-from fastapi_pagination.ext.sqlalchemy import paginate
-from fastapi_pagination import Page
-from app.models.notification_model import Notification
-from app.schemas.notification_schemas import NotificationOut
-from exceptions import NotificationNotFound
-
+from database import get_async_session
+from exceptions import NotAccessError, NotificationNotFound
 
 notification_router: APIRouter = APIRouter(prefix="/notification", tags=["Уведомления"])
 

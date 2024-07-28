@@ -1,31 +1,24 @@
-from datetime import datetime, timedelta
-from fastapi import (
-    APIRouter,
-    Depends,
-    HTTPException,
-    Response,
-    Request,
-    Body,
-    Form,
-    status,
-)
-from app.auth.dependencies import get_all_notifications
-from app.schemas.notification_schemas import NotificationOut
-from app.utils.current_time import current_time
-from database import get_async_session
-from sqlalchemy.ext.asyncio import AsyncSession
-from app.auth.dependencies import get_current_user
-from app.schemas.user_schema import UserRegister, UserOut, UserLogin
-from app.repository.user_repo import UserRepository
-from app.models.user_model import User
-from exceptions import UserAlreadyExistsException, UserNotFound
-from app.auth.auth import authenticate_user, get_password_hash, create_access_token
 import secrets
-from app.utils.templating import templates
+from datetime import datetime, timedelta
 from typing import Annotated
-from fastapi.responses import HTMLResponse, JSONResponse
-from app.tasks.tasks import register_confirmation_message
 
+from fastapi import (APIRouter, Body, Depends, Form, HTTPException, Request,
+                     Response, status)
+from fastapi.responses import HTMLResponse, JSONResponse
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.auth.auth import (authenticate_user, create_access_token,
+                           get_password_hash)
+from app.auth.dependencies import get_all_notifications, get_current_user
+from app.models.user_model import User
+from app.repository.user_repo import UserRepository
+from app.schemas.notification_schemas import NotificationOut
+from app.schemas.user_schema import UserLogin, UserOut, UserRegister
+from app.tasks.tasks import register_confirmation_message
+from app.utils.current_time import current_time
+from app.utils.templating import templates
+from database import get_async_session
+from exceptions import UserAlreadyExistsException, UserNotFound
 
 auth_router: APIRouter = APIRouter(
     prefix="/auth", tags=["Аутентификация и Авторизация"]

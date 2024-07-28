@@ -1,8 +1,10 @@
-from .base_repo import BaseRepository
-from app.models.user_model import User
+from sqlalchemy import or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, or_
 from sqlalchemy.orm import selectinload
+
+from app.models.user_model import User
+
+from .base_repo import BaseRepository
 
 
 class UserRepository(BaseRepository):

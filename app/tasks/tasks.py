@@ -3,19 +3,16 @@ from time import sleep
 
 from pydantic import EmailStr
 
-from config import settings
 from app.tasks.celery_app import celery
-from app.tasks.email_templates import (
-    send_notification_for_all_users,
-    register_confirmation_template,
-    forgot_password_email_template,
-    password_changed_email_template,
-    success_update_password,
-    add_new_client,
-    cancel_booking,
-    get_help,
-    confirm_booking,
-)
+from app.tasks.email_templates import (add_new_client, cancel_booking,
+                                       confirm_booking,
+                                       forgot_password_email_template,
+                                       get_help,
+                                       password_changed_email_template,
+                                       register_confirmation_template,
+                                       send_notification_for_all_users,
+                                       success_update_password)
+from config import settings
 
 
 @celery.task

@@ -1,16 +1,16 @@
-from fastapi import APIRouter, Request, Depends
-from app.models.user_model import User
-from app.auth.dependencies import get_current_user
-from app.auth.dependencies import get_all_notifications
-from app.schemas.help_schemas import GetHelp
-from app.utils.templating import templates
+from fastapi import APIRouter, Depends, Request
 from fastapi.responses import HTMLResponse
-from app.repository.notification_repo import NotificationRepository
 from sqlalchemy.ext.asyncio import AsyncSession
-from database import get_async_session
+
+from app.auth.dependencies import get_all_notifications, get_current_user
+from app.models.user_model import User
+from app.repository.notification_repo import NotificationRepository
+from app.schemas.help_schemas import GetHelp
 from app.schemas.notification_schemas import NotificationOut
-from exceptions import NotAccessError
 from app.tasks.tasks import help_message
+from app.utils.templating import templates
+from database import get_async_session
+from exceptions import NotAccessError
 
 main_router: APIRouter = APIRouter()
 

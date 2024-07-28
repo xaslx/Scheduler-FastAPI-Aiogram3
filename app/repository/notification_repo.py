@@ -1,7 +1,9 @@
-from .base_repo import BaseRepository
-from app.models.notification_model import Notification
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.models.notification_model import Notification
+
+from .base_repo import BaseRepository
 
 
 class NotificationRepository(BaseRepository):

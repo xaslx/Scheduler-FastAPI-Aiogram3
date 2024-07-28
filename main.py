@@ -1,29 +1,30 @@
-from fastapi import FastAPI, Request, Depends
-from fastapi.staticfiles import StaticFiles
-from app.repository.notification_repo import NotificationRepository
-from app.routers.auth_router import auth_router
-from app.routers.user_router import user_router
-from app.routers.main_router import main_router
-from app.routers.notification_router import notification_router
-from app.routers.booking_router import booking_router
-from app.schemas.notification_schemas import NotificationOut
-from app.utils.templating import templates
-from fastapi.responses import HTMLResponse, RedirectResponse
-from starlette.exceptions import HTTPException as StarletteHTTPException
 from contextlib import asynccontextmanager
+
+from fastapi import Depends, FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.httpsredirect import HTTPSRedirectMiddleware
+from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.staticfiles import StaticFiles
 from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
-from redis import asyncio as aioredis
-from config import settings
-from app.schemas.user_schema import UserOut
-from app.auth.dependencies import get_current_user
-from fastapi.middleware.cors import CORSMiddleware
 from fastapi_pagination import add_pagination
-from fastapi.middleware.httpsredirect import HTTPSRedirectMiddleware
-from middleware import RateLimitingMiddleware
-from app.auth.dependencies import get_current_user
+from redis import asyncio as aioredis
 from sqlalchemy.ext.asyncio import AsyncSession
+from starlette.exceptions import HTTPException as StarletteHTTPException
+
+from app.auth.dependencies import get_current_user
+from app.repository.notification_repo import NotificationRepository
+from app.routers.auth_router import auth_router
+from app.routers.booking_router import booking_router
+from app.routers.main_router import main_router
+from app.routers.notification_router import notification_router
+from app.routers.user_router import user_router
+from app.schemas.notification_schemas import NotificationOut
+from app.schemas.user_schema import UserOut
+from app.utils.templating import templates
+from config import settings
 from database import async_session_maker
+from middleware import RateLimitingMiddleware
 
 
 @asynccontextmanager

@@ -1,9 +1,11 @@
-from database import Base
 from datetime import datetime
+
+from sqlalchemy import DateTime, ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column
-from sqlalchemy import ForeignKey, DateTime, String
-from app.utils.generate_time import moscow_tz
+
 from app.utils.current_time import current_time
+from app.utils.generate_time import moscow_tz
+from database import Base
 
 
 class Notification(Base):

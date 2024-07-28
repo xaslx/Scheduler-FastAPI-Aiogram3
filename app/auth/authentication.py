@@ -2,8 +2,8 @@ from datetime import datetime, timedelta
 
 from jose import jwt
 
-from config import settings
 from app.models.user_model import User
+from config import settings
 
 
 async def generate_token(user: User):

@@ -1,5 +1,6 @@
+from datetime import date, datetime, time
+
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
-from datetime import datetime, date, time
 
 
 class BookingDate(BaseModel):

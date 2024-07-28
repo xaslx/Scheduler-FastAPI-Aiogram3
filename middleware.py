@@ -1,7 +1,8 @@
 from datetime import datetime, timedelta
 
-from fastapi.responses import HTMLResponse, FileResponse
+from fastapi.responses import FileResponse, HTMLResponse
 from starlette.middleware.base import BaseHTTPMiddleware
+
 from app.utils.templating import templates
 
 

@@ -1,11 +1,14 @@
-from database import Base
-from sqlalchemy.orm import mapped_column, Mapped, relationship
-from sqlalchemy import String, DateTime, Time
 from datetime import datetime, time
 from typing import TYPE_CHECKING
-from app.utils.generate_time import moscow_tz
-from .booking_model import Booking
+
+from sqlalchemy import DateTime, String, Time
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 from app.utils.current_time import current_time
+from app.utils.generate_time import moscow_tz
+from database import Base
+
+from .booking_model import Booking
 
 
 class User(Base):

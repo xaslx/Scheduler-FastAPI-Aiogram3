@@ -1,19 +1,16 @@
 from fastapi import Depends, Request
 from jose import ExpiredSignatureError, JWTError, jwt
 from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.models.user_model import User
+from app.repository.notification_repo import NotificationRepository
+from app.repository.user_repo import UserRepository
 from app.schemas.notification_schemas import NotificationOut
 from config import settings
 from database import get_async_session
-from exceptions import (
-    IncorrectTokenException,
-    TokenAbsentException,
-    TokenExpiredException,
-    UserIsNotAdmin,
-    UserIsNotPresentException,
-)
-from app.models.user_model import User
-from app.repository.user_repo import UserRepository
-from app.repository.notification_repo import NotificationRepository
+from exceptions import (IncorrectTokenException, TokenAbsentException,
+                        TokenExpiredException, UserIsNotAdmin,
+                        UserIsNotPresentException)
 
 
 def get_token(request: Request):

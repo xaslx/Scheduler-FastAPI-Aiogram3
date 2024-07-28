@@ -1,15 +1,11 @@
+import re
+from datetime import datetime, time
+
 from fastapi import HTTPException
 from fastapi.responses import JSONResponse
-from pydantic import (
-    BaseModel,
-    EmailStr,
-    field_validator,
-    Field,
-    ConfigDict,
-    model_validator,
-)
-from datetime import datetime, time
-import re
+from pydantic import (BaseModel, ConfigDict, EmailStr, Field, field_validator,
+                      model_validator)
+
 from exceptions import IncorrectNameOrSurnameException
 
 PASSWORD_CHECK = re.compile(r"^[a-zA-Z0-9_-]{6,30}$")

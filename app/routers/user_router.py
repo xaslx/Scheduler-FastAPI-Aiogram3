@@ -1,49 +1,36 @@
-from datetime import datetime, date
-from fastapi import APIRouter, Depends, Request, Query, Response
-from pydantic import EmailStr
-from app.auth.auth import get_password_hash
-from app.repository.booking_repo import BookingRepository
-from app.schemas.booking_schemas import BookingOut
-from database import get_async_session
-from app.auth.dependencies import (
-    get_current_user,
-    get_admin_user,
-    get_all_notifications,
-)
-from app.repository.user_repo import UserRepository
-from sqlalchemy.ext.asyncio import AsyncSession
-from fastapi.templating import Jinja2Templates
-from app.models.user_model import User
-from app.schemas.user_schema import (
-    UserOut,
-    UserUpdate,
-    EditRole,
-    EditEnabled,
-    EditTime,
-    ResetPassword,
-    EditPassword,
-    CreateMessage,
-)
-from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
-from exceptions import UserNotFound, NotAccessError
-from app.utils.templating import templates
-from typing import Annotated
-from fastapi.exceptions import HTTPException
-from app.tasks.tasks import (
-    reset_password_email,
-    password_changed,
-    update_password,
-    send_notification,
-)
-import secrets
-from app.auth.authentication import generate_token
-from app.schemas.notification_schemas import NotificationOut
-from fastapi_pagination.ext.sqlalchemy import paginate
-from fastapi_pagination import Page, Params
-from sqlalchemy import select
 import math
-from app.utils.generate_time import moscow_tz
+import secrets
+from datetime import date, datetime
+from typing import Annotated
 
+from fastapi import APIRouter, Depends, Query, Request, Response
+from fastapi.exceptions import HTTPException
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
+from fastapi.templating import Jinja2Templates
+from fastapi_pagination import Page, Params
+from fastapi_pagination.ext.sqlalchemy import paginate
+from pydantic import EmailStr
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.auth.auth import get_password_hash
+from app.auth.authentication import generate_token
+from app.auth.dependencies import (get_admin_user, get_all_notifications,
+                                   get_current_user)
+from app.models.user_model import User
+from app.repository.booking_repo import BookingRepository
+from app.repository.user_repo import UserRepository
+from app.schemas.booking_schemas import BookingOut
+from app.schemas.notification_schemas import NotificationOut
+from app.schemas.user_schema import (CreateMessage, EditEnabled, EditPassword,
+                                     EditRole, EditTime, ResetPassword,
+                                     UserOut, UserUpdate)
+from app.tasks.tasks import (password_changed, reset_password_email,
+                             send_notification, update_password)
+from app.utils.generate_time import moscow_tz
+from app.utils.templating import templates
+from database import get_async_session
+from exceptions import NotAccessError, UserNotFound
 
 user_router: APIRouter = APIRouter(prefix="/user", tags=["Пользователи"])
 

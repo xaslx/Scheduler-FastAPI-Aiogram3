@@ -6,11 +6,10 @@ from passlib.context import CryptContext
 from pydantic import EmailStr
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.repository.user_repo import UserRepository
 from config import settings
 from database import get_async_session
 from exceptions import IncorrectEmailOrPasswordException
-from app.repository.user_repo import UserRepository
-
 
 pwd_context: CryptContext = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
