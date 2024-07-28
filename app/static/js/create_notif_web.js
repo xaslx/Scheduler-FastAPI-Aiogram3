@@ -1,20 +1,21 @@
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('Document loaded, initializing CKEditor...');
+    var quill = new Quill('#editor-container', {
+        theme: 'snow'
+    });
 
-    CKEDITOR.replace('editor-container');
 
     const form = document.getElementById('notification-form');
 
     form.addEventListener('submit', async function(event) {
         event.preventDefault();
-        console.log('Form submission prevented.');
+    
 
-        const description = CKEDITOR.instances['editor-container'].getData();
-        console.log('Description from CKEditor:', description);
+        const description = quill.root.innerHTML;
+    
 
         if (description.length < 15 || description.length > 500) {
             document.getElementById('description-error').textContent = 'Описание должно быть от 15 до 500 символов.';
-            console.log('Description length error.');
+
             return;
         } else {
             document.getElementById('description-error').textContent = '';
@@ -23,7 +24,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const title = form.querySelector('#title').value;
         if (title.length < 5 || title.length > 60) {
             document.getElementById('title-error').textContent = 'Заголовок должен быть от 5 до 60 символов.';
-            console.log('Title length error.');
+
             return;
         } else {
             document.getElementById('title-error').textContent = '';
