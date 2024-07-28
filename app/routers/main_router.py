@@ -12,6 +12,8 @@ from app.tasks.tasks import help_message
 from app.utils.templating import templates
 from database import get_async_session
 from exceptions import NotAccessError
+from logger import logger
+
 
 main_router: APIRouter = APIRouter()
 

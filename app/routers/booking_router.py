@@ -115,7 +115,7 @@ async def get_time(
             context={"user": user, "notifications": notifications},
         )
 
-    booking: BookingOut = await BookingRepository.find_booking(
+    booking: BookingOut = await BookingRepository.get_booking(
         user_id=user_link.id, date=date, session=session
     )
 

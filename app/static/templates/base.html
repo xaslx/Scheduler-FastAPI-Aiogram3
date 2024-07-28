@@ -94,6 +94,14 @@
     </footer>
     {% block scripts %}
     <script src="/app/static/js/main.js"></script>
+    <style>
+        @media only screen and (max-width: 768px) {
+            .user-info .user-name {
+                display: none;
+            }
+        }
+
+    </style>
     {% endblock %}
 </body>
 

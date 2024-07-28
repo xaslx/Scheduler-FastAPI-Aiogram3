@@ -2,92 +2,118 @@ from datetime import date
 
 from sqlalchemy import and_, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.exc import SQLAlchemyError
 
 from app.models.booking_model import Booking
 from exceptions import TimeNotFound
 
 from .base_repo import BaseRepository
-
+from logger import logger
 
 class BookingRepository(BaseRepository):
     model = Booking
 
     @classmethod
-    async def find_booking(cls, user_id: int, date: date, session: AsyncSession):
-        query = select(cls.model).where(
-            and_(cls.model.user_id == user_id, cls.model.date_for_booking == date)
-        )
-        res = await session.execute(query)
-        return res.scalars().first()
-
-    @classmethod
     async def find_all_booking(cls, user_id: int, date: date, session: AsyncSession):
-        query = (
-            select(cls.model)
-            .where(
-                and_(cls.model.user_id == user_id, cls.model.date_for_booking >= date)
+        try:
+            query = (
+                select(cls.model)
+                .where(
+                    and_(cls.model.user_id == user_id, cls.model.date_for_booking >= date)
+                )
+                .order_by(cls.model.date_for_booking)
             )
-            .order_by(cls.model.date_for_booking)
-        )
-        res = await session.execute(query)
-        return res.scalars().all()
+            res = await session.execute(query)
+            return res.scalars().all()
+        except (SQLAlchemyError, Exception) as e:
+            if isinstance(e, SQLAlchemyError):
+                msg = 'Database Exc: Не удалось найти все записи.'
+            else:
+                msg = 'Unknown Exc: Не удалось найти все записи.'
+            logger.error(msg, extra={'user_id': user_id, 'date': date})
+            return None
+
 
     @classmethod
     async def get_booking(cls, user_id: int, session: AsyncSession, date: date):
-        query = select(cls.model).where(
-            and_(cls.model.user_id == user_id, cls.model.date_for_booking == date)
-        )
+        try:
+            query = select(cls.model).where(
+                and_(cls.model.user_id == user_id, cls.model.date_for_booking == date)
+            )
 
-        res = await session.execute(query)
-        return res.scalars().first()
+            res = await session.execute(query)
+            return res.scalars().first()
+        except (SQLAlchemyError, Exception) as e:
+            if isinstance(e, SQLAlchemyError):
+                msg = 'Database Exc: Не удалось получить запись.'
+            else:
+                msg = 'Unknown Exc: Не удалось получить запись.'
+            logger.error(msg, extra={'user_id': user_id, 'date': date})
+            return None
 
     @classmethod
     async def select_times(
         cls, user_id: int, session: AsyncSession, booking_id: int, time: tuple[str]
     ):
-        query = select(cls.model).where(
-            and_(cls.model.user_id == user_id, cls.model.id == booking_id)
-        )
-        result = await session.execute(query)
-        booking = result.scalar_one_or_none()
+        try:
+            query = select(cls.model).where(
+                and_(cls.model.user_id == user_id, cls.model.id == booking_id)
+            )
+            result = await session.execute(query)
+            booking = result.scalar_one_or_none()
 
-        booking.times.remove(time[0])
-        booking.selected_times.append((time))
-        new_booking = (
-            update(cls.model)
-            .where(cls.model.id == booking_id)
-            .values(times=booking.times, selected_times=booking.selected_times)
-        )
-        await session.execute(new_booking)
-        await session.commit()
+            booking.times.remove(time[0])
+            booking.selected_times.append((time))
+            new_booking = (
+                update(cls.model)
+                .where(cls.model.id == booking_id)
+                .values(times=booking.times, selected_times=booking.selected_times)
+            )
+            await session.execute(new_booking)
+            await session.commit()
+        except (SQLAlchemyError, Exception) as e:
+            if isinstance(e, SQLAlchemyError):
+                msg = 'Database Exc: Не удалось сделать запись.'
+            else:
+                msg = 'Unknown Exc: Не удалось сделать запись.'
+            logger.error(msg, extra={'user_id': user_id, 'booking_id': booking_id, 'time': time})
+            return None
 
     @classmethod
     async def cancel_times(
         cls, user_id: int, session: AsyncSession, booking_id: int, time: tuple[str]
     ):
-        query = select(cls.model).where(
-            and_(cls.model.user_id == user_id, cls.model.id == booking_id)
-        )
+        try:
+            query = select(cls.model).where(
+                and_(cls.model.user_id == user_id, cls.model.id == booking_id)
+            )
 
-        result = await session.execute(query)
-        booking = result.scalar_one_or_none()
+            result = await session.execute(query)
+            booking = result.scalar_one_or_none()
 
-        item_to_remove = None
-        for item in booking.selected_times:
-            if item[0] == time:
-                item_to_remove = item
-                break
+            item_to_remove = None
+            for item in booking.selected_times:
+                if item[0] == time:
+                    item_to_remove = item
+                    break
 
-        if item_to_remove:
-            booking.selected_times.remove(item_to_remove)
-        else:
-            raise TimeNotFound
+            if item_to_remove:
+                booking.selected_times.remove(item_to_remove)
+            else:
+                raise TimeNotFound
 
-        booking.times.append(item_to_remove[0])
-        new_booking = (
-            update(cls.model)
-            .where(cls.model.id == booking_id)
-            .values(times=booking.times, selected_times=booking.selected_times)
-        )
-        await session.execute(new_booking)
-        await session.commit()
+            booking.times.append(item_to_remove[0])
+            new_booking = (
+                update(cls.model)
+                .where(cls.model.id == booking_id)
+                .values(times=booking.times, selected_times=booking.selected_times)
+            )
+            await session.execute(new_booking)
+            await session.commit()
+        except (SQLAlchemyError, Exception) as e:
+            if isinstance(e, SQLAlchemyError):
+                msg = 'Database Exc: Не удалось получить запись.'
+            else:
+                msg = 'Unknown Exc: Не удалось получить запись.'
+            logger.error(msg, extra={'user_id': user_id, 'booking_id': booking_id, 'time': time})
+            return None

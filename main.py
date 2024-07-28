@@ -1,6 +1,6 @@
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
@@ -8,6 +8,7 @@ from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
 from fastapi_pagination import add_pagination
 from redis import asyncio as aioredis
+import sentry_sdk
 
 from app.auth.dependencies import get_current_user
 from app.repository.notification_repo import NotificationRepository
@@ -24,6 +25,14 @@ from database import async_session_maker
 from middleware import RateLimitingMiddleware
 
 
+
+sentry_sdk.init(
+    dsn=settings.dsn,
+    traces_sample_rate=1.0,
+    profiles_sample_rate=1.0
+)
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     redis = aioredis.from_url(
@@ -38,6 +47,7 @@ app: FastAPI = FastAPI(
     version="0.1",
     lifespan=lifespan,
 )
+
 
 # пагинация
 add_pagination(app)
@@ -75,7 +85,7 @@ app.mount("/app/static", StaticFiles(directory="app/static"), "static")
 
 
 @app.exception_handler(404)
-async def custom_404_handler(request, __) -> HTMLResponse:
+async def custom_404_handler(request: Request, __) -> HTMLResponse:
     async with async_session_maker() as session:
         user: UserOut = await get_current_user(
             async_db=session, token=request.cookies.get("user_access_token")
