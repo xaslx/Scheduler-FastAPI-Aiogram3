@@ -7,6 +7,7 @@ from app.repository.user_repo import UserRepository
 from app.repository.notification_repo import NotificationRepository
 from app.schemas.user_schema import CreateMessage
 from app.tasks.tasks import send_notification
+from app.utils.current_time import current_time
 from database import get_async_session
 from app.models.user_model import User
 from app.schemas.notification_schemas import CreateNotification, NotificationOut
@@ -49,6 +50,7 @@ async def get_create_notification_template(
     user: User = Depends(get_admin_user),
     notifications: list[NotificationOut] = Depends(get_all_notifications)
     ) -> HTMLResponse:
+    print(current_time())
     if not user:
         return templates.TemplateResponse(request=request, name='404.html', context={'user': user, 'notifications': notifications})
     return templates.TemplateResponse(request=request, name='create_notification.html', context={'user': user, 'notifications': notifications})
