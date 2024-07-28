@@ -5,7 +5,7 @@ from datetime import datetime, time
 from typing import TYPE_CHECKING
 from app.utils.generate_time import moscow_tz
 from .booking_model import Booking
-
+from app.utils.current_time import current_time
 
 
 class User(Base):
@@ -20,7 +20,7 @@ class User(Base):
     personal_link: Mapped[str] = mapped_column(String(255), unique=True)
     telegram_link: Mapped[str] = mapped_column(String(255), default=None, nullable=True)
     hashed_password: Mapped[str]
-    registered_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now(moscow_tz).replace(tzinfo=None))
+    registered_at: Mapped[datetime] = mapped_column(DateTime, default=current_time())
     is_active: Mapped[bool] = mapped_column(default=True)
     description: Mapped[str | None] = mapped_column(String(500), default=None, nullable=True)
     enabled: Mapped[bool] = mapped_column(default=True)
