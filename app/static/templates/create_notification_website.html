@@ -14,7 +14,7 @@
             <div class="form-group">
                 <label style="color: green;" for="description">Описание (от 15 до 500 символов)</label>
                 <div id="editor-container" style="height: 200px;"></div>
-                <textarea id="description" name="description" style="display:none;" required></textarea>
+                <textarea maxlength="500" minlength="10" id="description" name="description" style="display:none;" required></textarea>
                 <div id="description-error" class="error-message"></div>
             </div>
             <button type="submit">Отправить</button>
