@@ -78,9 +78,6 @@ async def add_booking(
     return JSONResponse(content={"redirect_url": redirect_url}, status_code=200)
 
 
-from datetime import datetime, timedelta
-
-
 @booking_router.get(
     "/{personal_link}/select_time", status_code=200, name="gettime:page"
 )
