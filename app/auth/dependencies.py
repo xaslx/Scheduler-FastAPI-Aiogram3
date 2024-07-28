@@ -15,6 +15,7 @@ from app.models.user_model import User
 from app.repository.user_repo import UserRepository
 from app.repository.notification_repo import NotificationRepository
 
+
 def get_token(request: Request):
     token: str = request.cookies.get("user_access_token")
     if not token:
@@ -37,9 +38,7 @@ async def get_current_user(
     user_id: str = payload.get("sub")
     if not user_id:
         raise UserIsNotPresentException
-    user = await UserRepository.find_one_or_none(
-            id=int(user_id), session=async_db
-        )
+    user = await UserRepository.find_one_or_none(id=int(user_id), session=async_db)
     if not user:
         return None
     return user
@@ -55,5 +54,7 @@ async def get_admin_user(user: User = Depends(get_current_user)):
 
 
 async def get_all_notifications(session: AsyncSession = Depends(get_async_session)):
-    notifications: list[NotificationOut] = await NotificationRepository.find_all_notif(session=session)
+    notifications: list[NotificationOut] = await NotificationRepository.find_all_notif(
+        session=session
+    )
     return notifications

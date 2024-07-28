@@ -1,7 +1,6 @@
 from pydantic_settings import SettingsConfigDict, BaseSettings
 
 
-
 class Settings(BaseSettings):
     MODE: str
     LOG_LEVEL: str
@@ -30,5 +29,6 @@ class Settings(BaseSettings):
         return f"postgresql+asyncpg://{self.DB_USER}:{self.DB_PASS}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
 
     model_config = SettingsConfigDict(env_file=".env")
+
 
 settings: Settings = Settings()

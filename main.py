@@ -26,34 +26,33 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from database import async_session_maker
 
 
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    redis = aioredis.from_url(f"redis://{settings.REDIS_HOST}", encoding="utf-8", decode_responses=True)
+    redis = aioredis.from_url(
+        f"redis://{settings.REDIS_HOST}", encoding="utf-8", decode_responses=True
+    )
     FastAPICache.init(RedisBackend(redis), prefix="cache")
     yield
 
 
-
 app: FastAPI = FastAPI(
-    title='Scheduler',
-    version='0.1',
+    title="Scheduler",
+    version="0.1",
     lifespan=lifespan,
 )
 
-#пагинация
+# пагинация
 add_pagination(app)
 
-#роутеры
+# роутеры
 app.include_router(auth_router)
 app.include_router(user_router)
 app.include_router(main_router)
 app.include_router(booking_router)
 app.include_router(notification_router)
 
-#мидлвары
-#app.add_middleware(HTTPSRedirectMiddleware)  #все запросы должны быть с https / ws
-# app.add_middleware(RateLimitingMiddleware)
+
+app.add_middleware(RateLimitingMiddleware)
 
 origins = [
     "http://localhost.tiangolo.com",
@@ -62,7 +61,7 @@ origins = [
     "http://localhost:8000",
     "http://localhost:8000",
     "https://127.0.0.1:8000",
-    "http://127.0.0.1:8000"
+    "http://127.0.0.1:8000",
 ]
 
 app.add_middleware(
@@ -77,11 +76,17 @@ app.add_middleware(
 app.mount("/app/static", StaticFiles(directory="app/static"), "static")
 
 
-
 @app.exception_handler(404)
 async def custom_404_handler(request, __) -> HTMLResponse:
-    async with async_session_maker() as session: 
-        user: UserOut = await get_current_user(async_db=session, token=request.cookies.get('user_access_token'))
-        notifications: list[NotificationOut] = await NotificationRepository.find_all_notif(session=session)
-    return templates.TemplateResponse(request=request, name='404.html', context={'user': user, 'notifications': notifications})
-
+    async with async_session_maker() as session:
+        user: UserOut = await get_current_user(
+            async_db=session, token=request.cookies.get("user_access_token")
+        )
+        notifications: list[NotificationOut] = (
+            await NotificationRepository.find_all_notif(session=session)
+        )
+    return templates.TemplateResponse(
+        request=request,
+        name="404.html",
+        context={"user": user, "notifications": notifications},
+    )

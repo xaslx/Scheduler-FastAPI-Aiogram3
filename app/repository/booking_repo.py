@@ -12,63 +12,58 @@ class BookingRepository(BaseRepository):
     @classmethod
     async def find_booking(cls, user_id: int, date: date, session: AsyncSession):
         query = select(cls.model).where(
-            and_(
-                cls.model.user_id == user_id,
-                cls.model.date_for_booking == date
-            )
+            and_(cls.model.user_id == user_id, cls.model.date_for_booking == date)
         )
         res = await session.execute(query)
         return res.scalars().first()
 
-    
     @classmethod
     async def find_all_booking(cls, user_id: int, date: date, session: AsyncSession):
-        query = select(cls.model).where(
-            and_(
-                cls.model.user_id == user_id,
-                cls.model.date_for_booking >= date
+        query = (
+            select(cls.model)
+            .where(
+                and_(cls.model.user_id == user_id, cls.model.date_for_booking >= date)
             )
-        ).order_by(cls.model.date_for_booking)
+            .order_by(cls.model.date_for_booking)
+        )
         res = await session.execute(query)
         return res.scalars().all()
-
 
     @classmethod
     async def get_booking(cls, user_id: int, session: AsyncSession, date: date):
         query = select(cls.model).where(
-            and_(
-                cls.model.user_id == user_id,
-                cls.model.date_for_booking == date
-            )
+            and_(cls.model.user_id == user_id, cls.model.date_for_booking == date)
         )
 
         res = await session.execute(query)
         return res.scalars().first()
 
     @classmethod
-    async def select_times(cls, user_id: int, session: AsyncSession, booking_id: int, time: tuple[str]):
+    async def select_times(
+        cls, user_id: int, session: AsyncSession, booking_id: int, time: tuple[str]
+    ):
         query = select(cls.model).where(
-            and_(
-                cls.model.user_id == user_id,
-                cls.model.id == booking_id
-            )
+            and_(cls.model.user_id == user_id, cls.model.id == booking_id)
         )
         result = await session.execute(query)
         booking = result.scalar_one_or_none()
-        
+
         booking.times.remove(time[0])
         booking.selected_times.append((time))
-        new_booking = update(cls.model).where(cls.model.id == booking_id).values(times=booking.times, selected_times=booking.selected_times)
+        new_booking = (
+            update(cls.model)
+            .where(cls.model.id == booking_id)
+            .values(times=booking.times, selected_times=booking.selected_times)
+        )
         await session.execute(new_booking)
         await session.commit()
 
     @classmethod
-    async def cancel_times(cls, user_id: int, session: AsyncSession, booking_id: int, time: tuple[str]):
+    async def cancel_times(
+        cls, user_id: int, session: AsyncSession, booking_id: int, time: tuple[str]
+    ):
         query = select(cls.model).where(
-            and_(
-                cls.model.user_id == user_id,
-                cls.model.id == booking_id
-            )
+            and_(cls.model.user_id == user_id, cls.model.id == booking_id)
         )
 
         result = await session.execute(query)
@@ -86,9 +81,10 @@ class BookingRepository(BaseRepository):
             raise TimeNotFound
 
         booking.times.append(item_to_remove[0])
-        new_booking = update(cls.model).where(cls.model.id == booking_id).values(times=booking.times, selected_times=booking.selected_times)
+        new_booking = (
+            update(cls.model)
+            .where(cls.model.id == booking_id)
+            .values(times=booking.times, selected_times=booking.selected_times)
+        )
         await session.execute(new_booking)
         await session.commit()
-
-
-        

@@ -4,9 +4,10 @@ from fastapi.responses import HTMLResponse, FileResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 from app.utils.templating import templates
 
+
 class RateLimitingMiddleware(BaseHTTPMiddleware):
     RATE_LIMIT_DURATION = timedelta(minutes=1)
-    RATE_LIMIT_REQUESTS = 50
+    RATE_LIMIT_REQUESTS = 100
 
     def __init__(self, app):
         super().__init__(app)
@@ -25,8 +26,10 @@ class RateLimitingMiddleware(BaseHTTPMiddleware):
             request_count = 1
         else:
             if request_count >= self.RATE_LIMIT_REQUESTS:
-                return HTMLResponse("<p style='font-size: 25px;'><b>Слишком много запросов, повторите через 1 минуту...<b></p>")
-            request_count += 1 
+                return HTMLResponse(
+                    "<p style='font-size: 25px;'><b>Слишком много запросов, повторите через 1 минуту...<b></p>"
+                )
+            request_count += 1
 
         self.request_counts[client_ip] = (request_count, datetime.now())
 

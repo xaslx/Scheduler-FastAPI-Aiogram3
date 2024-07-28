@@ -3,7 +3,8 @@ import pytz
 from datetime import datetime
 
 
-moscow_tz = pytz.timezone('Europe/Moscow')
+moscow_tz = pytz.timezone("Europe/Moscow")
+
 
 async def generate_time_intervals(start_time, end_time, interval_minutes: int) -> list:
     start: datetime = datetime.combine(datetime.today(), start_time)
@@ -13,9 +14,9 @@ async def generate_time_intervals(start_time, end_time, interval_minutes: int) -
         end += timedelta(days=1)
 
     intervals: list = []
-    
+
     while start < end:
         intervals.append(start.time().strftime("%H:%M"))
         start += timedelta(minutes=interval_minutes)
-    
+
     return intervals

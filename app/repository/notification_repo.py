@@ -3,9 +3,9 @@ from app.models.notification_model import Notification
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
+
 class NotificationRepository(BaseRepository):
     model = Notification
-
 
     @classmethod
     async def find_all_notif(cls, session: AsyncSession):

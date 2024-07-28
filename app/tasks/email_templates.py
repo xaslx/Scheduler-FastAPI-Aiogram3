@@ -7,17 +7,17 @@ from config import settings
 
 def register_confirmation_template(email_to: EmailStr):
     email = EmailMessage()
-    email['Subject'] = 'Регистрация аккаунта'
-    email['From'] = settings.SMTP_USER
-    email['To'] = email_to
+    email["Subject"] = "Регистрация аккаунта"
+    email["From"] = settings.SMTP_USER
+    email["To"] = email_to
 
     email.set_content(
-        f'''
+        f"""
             <h1>Scheduler</h1>
             <h2>Успешная регистрация на сервисе</h2>
             <h3>Если вы не регистрировались, то проигнорируйте данное сообщение.</h3>
-        ''',
-        subtype='html',
+        """,
+        subtype="html",
     )
 
     return email
@@ -48,9 +48,7 @@ def forgot_password_email_template(email_to: EmailStr, token: str):
     return email
 
 
-def password_changed_email_template(
-    email_to: EmailStr, new_password: str
-):
+def password_changed_email_template(email_to: EmailStr, new_password: str):
     email = EmailMessage()
     email["Subject"] = "Пароль изменен"
     email["From"] = settings.SMTP_USER
@@ -67,9 +65,8 @@ def password_changed_email_template(
 
     return email
 
-def success_update_password(
-    email_to: EmailStr, new_password: str
-):
+
+def success_update_password(email_to: EmailStr, new_password: str):
     email = EmailMessage()
     email["Subject"] = "Пароль изменен"
     email["From"] = settings.SMTP_USER
@@ -85,6 +82,7 @@ def success_update_password(
     )
 
     return email
+
 
 def add_new_client(email_to: EmailStr, date: str, time: str):
     email = EmailMessage()
@@ -103,12 +101,14 @@ def add_new_client(email_to: EmailStr, date: str, time: str):
 
     return email
 
-def cancel_booking(message: str, email_to: EmailStr, date: str, time: str, description: str):
+
+def cancel_booking(
+    message: str, email_to: EmailStr, date: str, time: str, description: str
+):
     email = EmailMessage()
     email["Subject"] = "Отмена записи!"
     email["From"] = settings.SMTP_USER
     email["To"] = email_to
-
 
     email.set_content(
         f"""
@@ -124,9 +124,7 @@ def cancel_booking(message: str, email_to: EmailStr, date: str, time: str, descr
     return email
 
 
-def confirm_booking(
-        email_to: EmailStr, tg: str, em: EmailStr, time: str, date: str
-):
+def confirm_booking(email_to: EmailStr, tg: str, em: EmailStr, time: str, date: str):
     email = EmailMessage()
     email["Subject"] = "Успешная запись"
     email["From"] = settings.SMTP_USER
@@ -146,9 +144,8 @@ def confirm_booking(
 
     return email
 
-def send_notification_for_all_users(
-    email_to: EmailStr, message: str
-):
+
+def send_notification_for_all_users(email_to: EmailStr, message: str):
     email = EmailMessage()
     email["Subject"] = "Рассылка уведомления"
     email["From"] = settings.SMTP_USER
@@ -163,6 +160,7 @@ def send_notification_for_all_users(
     )
 
     return email
+
 
 def get_help(email_from: EmailStr, description: str):
     email = EmailMessage()

@@ -12,13 +12,12 @@ class BaseException(HTTPException):
 # Пользователи
 class UserAlreadyExistsException(BaseException):
     status_code = 409
-    detail = 'Пользователь уже существует'
-
+    detail = "Пользователь уже существует"
 
 
 class IncorrectEmailOrPasswordException(BaseException):
     status_code = 401
-    detail = 'Неверный email или пароль'
+    detail = "Неверный email или пароль"
 
 
 class IncorrectEmailOrPasswordExceptionNotEn(BaseException):
@@ -30,9 +29,11 @@ class UserNotFound(BaseException):
     status_code = status.HTTP_409_CONFLICT
     detail = "Пользователь не найден"
 
+
 class NotAccessError(BaseException):
     status_code = status.HTTP_409_CONFLICT
     detail = "Недостаточно прав"
+
 
 class UserIsNotPresentException(BaseException):
     status_code = status.HTTP_401_UNAUTHORIZED
@@ -47,9 +48,11 @@ class UserAlreadyUnBan(BaseException):
     status_code = status.HTTP_409_CONFLICT
     detail = "Пользователь уже разблокирован"
 
+
 class IncorrectNameOrSurnameException(BaseException):
     status_code = status.HTTP_422_UNPROCESSABLE_ENTITY
-    detail = 'Некоректное имя или фамилия'
+    detail = "Некоректное имя или фамилия"
+
 
 class UserAlreadyBan(BaseException):
     status_code = status.HTTP_409_CONFLICT
@@ -70,9 +73,11 @@ class FileTooLarge(BaseException):
     status_code = status.HTTP_413_REQUEST_ENTITY_TOO_LARGE
     detail = "Файл не должен привышать 5мб."
 
+
 class NotificationNotFound(BaseException):
     status_code = status.HTTP_404_NOT_FOUND
-    detail = 'Уведомление не найден'
+    detail = "Уведомление не найден"
+
 
 # JWT token
 class TokenExpiredException(BaseException):
@@ -92,8 +97,9 @@ class IncorrectTokenException(BaseException):
 
 class BookingNotFound(BaseException):
     status_code = status.HTTP_404_NOT_FOUND
-    detail = 'Запись не найдена'
+    detail = "Запись не найдена"
+
 
 class TimeNotFound(BaseException):
     status_code = status.HTTP_404_NOT_FOUND
-    detail = 'Время для записи не найдено'
+    detail = "Время для записи не найдено"
