@@ -1,16 +1,13 @@
 from contextlib import asynccontextmanager
 
-from fastapi import Depends, FastAPI, Request
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.middleware.httpsredirect import HTTPSRedirectMiddleware
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
 from fastapi_pagination import add_pagination
 from redis import asyncio as aioredis
-from sqlalchemy.ext.asyncio import AsyncSession
-from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app.auth.dependencies import get_current_user
 from app.repository.notification_repo import NotificationRepository

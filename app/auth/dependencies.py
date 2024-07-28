@@ -8,8 +8,7 @@ from app.repository.user_repo import UserRepository
 from app.schemas.notification_schemas import NotificationOut
 from config import settings
 from database import get_async_session
-from exceptions import (IncorrectTokenException, TokenAbsentException,
-                        TokenExpiredException, UserIsNotAdmin,
+from exceptions import (IncorrectTokenException, UserIsNotAdmin,
                         UserIsNotPresentException)
 
 

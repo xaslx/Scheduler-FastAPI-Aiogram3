@@ -1,8 +1,8 @@
-from datetime import date, datetime, time, timedelta, timezone
+from datetime import date, datetime, timedelta
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, Query, Request
-from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth.dependencies import get_all_notifications, get_current_user
@@ -10,13 +10,13 @@ from app.models.booking_model import Booking
 from app.models.user_model import User
 from app.repository.booking_repo import BookingRepository
 from app.repository.user_repo import UserRepository
-from app.schemas.booking_schemas import (BookingDate, BookingOut, BookingTime,
-                                         CancelBooking, CreateBooking)
+from app.schemas.booking_schemas import (BookingDate, BookingOut, CancelBooking,
+                                         CreateBooking)
 from app.schemas.notification_schemas import NotificationOut
 from app.schemas.user_schema import UserOut
 from app.tasks.tasks import (cancel_client, confirm_booking_for_client,
                              new_client)
-from app.utils.generate_time import generate_time_intervals, moscow_tz
+from app.utils.generate_time import generate_time_intervals
 from app.utils.templating import templates
 from database import get_async_session
 from exceptions import BookingNotFound, NotAccessError, UserNotFound

@@ -1,10 +1,9 @@
 from datetime import datetime
 
-from sqlalchemy import DateTime, ForeignKey, String
+from sqlalchemy import DateTime, String
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.utils.current_time import current_time
-from app.utils.generate_time import moscow_tz
 from database import Base
 
 

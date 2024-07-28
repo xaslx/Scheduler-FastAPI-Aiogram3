@@ -1,11 +1,9 @@
 from datetime import datetime, time
-from typing import TYPE_CHECKING
 
 from sqlalchemy import DateTime, String, Time
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.utils.current_time import current_time
-from app.utils.generate_time import moscow_tz
 from database import Base
 
 from .booking_model import Booking

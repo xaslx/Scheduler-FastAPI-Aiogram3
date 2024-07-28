@@ -5,11 +5,9 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, Query, Request, Response
 from fastapi.exceptions import HTTPException
-from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
-from fastapi.templating import Jinja2Templates
-from fastapi_pagination import Page, Params
+from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi_pagination import Page
 from fastapi_pagination.ext.sqlalchemy import paginate
-from pydantic import EmailStr
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -22,11 +20,11 @@ from app.repository.booking_repo import BookingRepository
 from app.repository.user_repo import UserRepository
 from app.schemas.booking_schemas import BookingOut
 from app.schemas.notification_schemas import NotificationOut
-from app.schemas.user_schema import (CreateMessage, EditEnabled, EditPassword,
-                                     EditRole, EditTime, ResetPassword,
-                                     UserOut, UserUpdate)
+from app.schemas.user_schema import (EditEnabled, EditPassword, EditRole,
+                                     EditTime, ResetPassword, UserOut,
+                                     UserUpdate)
 from app.tasks.tasks import (password_changed, reset_password_email,
-                             send_notification, update_password)
+                             update_password)
 from app.utils.generate_time import moscow_tz
 from app.utils.templating import templates
 from database import get_async_session
