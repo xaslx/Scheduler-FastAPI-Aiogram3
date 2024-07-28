@@ -11,7 +11,7 @@
             </div>
             <hr style="margin-bottom: 10px;">
             <div class="notification-description-by-id">
-                <p>{{ notification.description | safe }}</p>
+                {{ notification.description | safe }}
             </div>
         </div>
     </div>
@@ -42,10 +42,38 @@
             padding: 0;
         }
 
+        .notification-description-by-id ul,
+        .notification-description-by-id ol {
+            padding-left: 20px;
+            margin-left: 15px;
+            color: white;
+        }
+
+        .notification-description-by-id ul {
+            list-style-type: disc;
+        }
+
+        .notification-description-by-id ol {
+            list-style-type: decimal;
+        }
+
+        .notification-description-by-id li {
+            text-align: left;
+            line-height: 30px;
+            font-weight: 100;
+            color: white;
+        }
+
         @media (max-width: 768px) {
             .notification-details-by-id {
                 width: 100%; 
             }
+        }
+        h1, h2, h3, h4, h5, h6 {
+            color: white;
+        }
+        a {
+            color: green;
         }
     </style>
 {% endblock %}

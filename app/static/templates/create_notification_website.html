@@ -5,7 +5,7 @@
 {% block content %}
     <div class="registration-form">
         <h2>Рассылка уведомления</h2>
-        <form id="notification-form">
+        <form id="notification-form" novalidate>
             <div class="form-group">
                 <label style="color: green;" for="title">Заголовок (от 5 до 60 символов)</label>
                 <input type="text" id="title" name="title" placeholder="Введите заголовок уведомления" minlength="5" maxlength="60" required>
@@ -13,7 +13,8 @@
             </div>
             <div class="form-group">
                 <label style="color: green;" for="description">Описание (от 15 до 500 символов)</label>
-                <textarea style="resize: none;" id="description" name="description" placeholder="Это сообщение получат на сайте все зарегистрированные пользователи." rows="6" minlength="15" maxlength="500" required></textarea>
+                <div id="editor-container" style="height: 200px;"></div>
+                <textarea id="description" name="description" style="display:none;" required></textarea>
                 <div id="description-error" class="error-message"></div>
             </div>
             <button type="submit">Отправить</button>
@@ -23,9 +24,84 @@
 
 {% block scripts %}
     {{ super() }}
-
+    <link href="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.snow.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="/app/static/js/create_notif_web.js"></script>
+    <script>document.addEventListener('DOMContentLoaded', function() {
+        console.log('Document loaded, initializing Quill...');
+        var quill = new Quill('#editor-container', {
+            theme: 'snow'
+        });
+    
+        const form = document.getElementById('notification-form');
+    
+        form.addEventListener('submit', async function(event) {
+            event.preventDefault();
+            console.log('Form submission prevented.');
+    
+            const description = quill.root.innerHTML;
+            console.log('Description from Quill:', description);
+    
+            if (description.length < 15 || description.length > 500) {
+                document.getElementById('description-error').textContent = 'Описание должно быть от 15 до 500 символов.';
+                console.log('Description length error.');
+                return;
+            } else {
+                document.getElementById('description-error').textContent = '';
+            }
+    
+            const title = form.querySelector('#title').value;
+            if (title.length < 5 || title.length > 60) {
+                document.getElementById('title-error').textContent = 'Заголовок должен быть от 5 до 60 символов.';
+                console.log('Title length error.');
+                return;
+            } else {
+                document.getElementById('title-error').textContent = '';
+            }
+    
+            const hiddenDescriptionField = document.getElementById('description');
+            hiddenDescriptionField.value = description;
+    
+            const requestData = {
+                title: title,
+                description: description
+            };
+            console.log('Request data:', requestData);
+    
+            try {
+                const response = await fetch('/notification/create_notification_for_website', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(requestData),
+                });
+    
+                if (!response.ok) {
+                    throw new Error('Failed to create notification');
+                }
+    
+                const responseData = await response.json();
+                console.log('Response data:', responseData);
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Уведомление создано успешно!',
+                    showConfirmButton: false,
+                    timer: 1500
+                }).then(() => {
+                    window.location.reload();
+                });
+            } catch (error) {
+                console.error('Error:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Ошибка',
+                    text: 'Не удалось создать уведомление',
+                });
+            }
+        });
+    });
+    </script>
     <style>
         @media only screen and (max-width: 600px) {
             .registration-form {
