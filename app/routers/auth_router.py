@@ -11,7 +11,7 @@ from app.auth.dependencies import get_all_notifications, get_current_user
 from app.models.user_model import User
 from app.repository.user_repo import UserRepository
 from app.schemas.notification_schemas import NotificationOut
-from app.schemas.user_schema import UserLogin, UserRegister
+from app.schemas.user_schema import UserLogin, UserRegister, UserOut
 from app.tasks.tasks import register_confirmation_message
 from app.utils.templating import templates
 from database import get_async_session
@@ -25,7 +25,7 @@ auth_router: APIRouter = APIRouter(
 @auth_router.get("/register", status_code=200)
 async def get_register_template(
     request: Request,
-    user: User = Depends(get_current_user),
+    user: UserOut = Depends(get_current_user),
     notifications: list[NotificationOut] = Depends(get_all_notifications),
 ) -> HTMLResponse:
     return templates.TemplateResponse(
@@ -37,16 +37,17 @@ async def get_register_template(
 @auth_router.post("/register", status_code=201)
 async def rigister_user(
     user: UserRegister, session: AsyncSession = Depends(get_async_session)
-):
-    exist_user: User = await UserRepository.find_one_or_none(
+) -> int:
+    exist_user: UserOut = await UserRepository.find_one_or_none(
         session=session, email=user.email
     )
+
     if exist_user:
         raise UserAlreadyExistsException
 
     hashed_password: str = get_password_hash(user.password)
     new_personal_link: str = secrets.token_hex(8)
-    new_user: User = await UserRepository.add(
+    new_user: UserOut = await UserRepository.add(
         session=session,
         **user.model_dump(exclude="password"),
         personal_link=new_personal_link,
@@ -63,8 +64,9 @@ async def after_register_template(
     notifications: list[NotificationOut] = Depends(get_all_notifications),
 ) -> HTMLResponse:
     return templates.TemplateResponse(
-        "after_register.html",
-        {"request": request, "user": user, "notifications": notifications},
+        request=request,
+        name="after_register.html",
+        context={"user": user, "notifications": notifications}
     )
 
 
@@ -74,7 +76,7 @@ async def login_user(
     user: UserLogin,
     session: AsyncSession = Depends(get_async_session),
 ) -> str:
-    user = await authenticate_user(user.email, user.password, async_db=session)
+    user: UserOut = await authenticate_user(user.email, user.password, async_db=session)
     if not user:
         raise UserNotFound
 
@@ -91,6 +93,7 @@ async def login_user(
 async def get_login_template(
     request: Request, user: User = Depends(get_current_user)
 ) -> HTMLResponse:
+    
     return templates.TemplateResponse(
         request=request, name="login.html", context={"user": user}
     )
@@ -98,4 +101,5 @@ async def get_login_template(
 
 @auth_router.post("/logout", status_code=200)
 async def logout_user(response: Response):
+    
     response.delete_cookie("user_access_token")
