@@ -14,25 +14,26 @@ services:
     container_name: scheduler_redis
 
   scheduler:
-    image: scheduler_app
     build:
       context: .
+    image: scheduler_app
     container_name: scheduler_app
     env_file:
       - .env
     depends_on:
       - db
       - redis
-    command: sh -c "alembic upgrade head && gunicorn main:app --workers 1 --worker-class uvicorn.workers.UvicornWorker --bind=0.0.0.0:8000"
+    command: >
+      sh -c "poetry run alembic upgrade head && poetry run gunicorn main:app --workers 1 --worker-class uvicorn.workers.UvicornWorker --bind=0.0.0.0:8000"
     ports:
       - 7777:8000
 
   celery:
-    image: scheduler_celery
     build:
       context: .
+    image: scheduler_celery
     container_name: scheduler_celery
-    command: sh -c "celery --app=app.tasks.celery_app:celery worker -l INFO"
+    command: sh -c "poetry run celery --app=app.tasks.celery_app:celery worker -l INFO"
     env_file:
       - .env
     depends_on:
