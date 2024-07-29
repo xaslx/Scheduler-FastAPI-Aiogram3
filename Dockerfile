@@ -30,4 +30,4 @@ RUN poetry install --no-interaction --no-cache
 
 COPY . .
 
-CMD poetry run gunicorn app.main:app --workers 1 --worker-class uvicorn.workers.UvicornWorker --bind=0.0.0.0:8000
+CMD poetry run gunicorn main:app --workers 1 --worker-class uvicorn.workers.UvicornWorker --bind=0.0.0.0:8000
