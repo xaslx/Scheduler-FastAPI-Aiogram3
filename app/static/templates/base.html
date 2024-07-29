@@ -81,8 +81,28 @@
     </header>
     <main>
         {% block content %}
-        <h1>Добро пожаловать на наш сайт!</h1>
-        <p>Здесь вы найдете много полезной информации.</p>
+        <h1>Добро пожаловать на сайт!</h1>
+        <div class="main-info-container">
+            <div class="main-info">
+                <div class="info-main text-center three-lines">
+                    <p><b>Для того чтобы ваши клиенты смогли к вам записаться, сначала нужно зарегистрироваться,
+                        затем перейдите в ваш профиль, и скопируйте ссылку</b></p>
+                </div>
+                <img width="300px" height="400px" src="/app/static/profile.png" alt="" class="responsive-image">
+                <div class="info-main">
+                    <p><b>Передайте ее клиенту, где он сможет выбрать дату</b></p>
+                </div>
+                <div class="main-info">
+                    <img src="/app/static/booking.png" alt="" class="responsive-image">
+                    <p><b>Затем нужно выбрать время, <br> зеленым цветом отображается свободное время, красным занятое</b></p>
+                    <img src="/app/static/booking_time.png" alt="" class="responsive-image">
+                    <p><b>В настройках можно изменить начало рабочего дня и конец, интервал, <br> а также можно выключить возможность записи к вам</b></p>
+                    <img src="/app/static/settings.png" alt="" class="responsive-image">
+                    <p><b>Если перейти в "Мои клиенты", то там будут все ваши ближайшие клиенты, <br>
+                    также можно отменить запись.</b></p>
+                </div>
+            </div>
+        </div>
         {% endblock %}
     </main>
     <footer>
@@ -98,6 +118,57 @@
         @media only screen and (max-width: 768px) {
             .user-info .user-name {
                 display: none;
+            }
+        }
+        .main-info-container {
+            margin-top: 50px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .three-lines p {
+            display: inline-block;
+            margin: 0;
+            padding: 0;
+            font-size: 18px;
+            line-height: 1.5;
+            text-align: center;
+            max-width: 600px;
+        }
+        .info-main {
+            margin-top: 30px;
+        }
+
+        .responsive-image {
+            width: 400px;
+            height: auto;
+            margin-top: 20px;
+        }
+
+        .small-image {
+            max-width: 350px;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+        @media only screen and (max-width: 768px) {
+            .user-info .user-name {
+                display: none;
+            }
+            .main-info-container {
+                padding: 10px;
+            }
+            .main-info img {
+                width: 100%;
+                height: auto;
+            }
+            .main-info p {
+                font-size: 16px;
             }
         }
 
