@@ -23,7 +23,7 @@ from app.utils.templating import templates
 from config import settings
 from database import async_session_maker
 from middleware import RateLimitingMiddleware
-
+from prometheus_fastapi_instrumentator import Instrumentator
 
 
 sentry_sdk.init(
@@ -46,8 +46,16 @@ app: FastAPI = FastAPI(
     title="Scheduler",
     version="0.1",
     lifespan=lifespan,
+    docs_url=None,
+    redoc_url=None
 )
 
+
+instrumentator: Instrumentator = Instrumentator(
+    should_group_status_codes=False,
+    excluded_handlers=["metrics"]
+)
+instrumentator.instrument(app).expose(app)
 
 # пагинация
 add_pagination(app)

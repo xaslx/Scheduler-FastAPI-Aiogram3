@@ -1,15 +1,11 @@
-FROM python:3.12.3
+FROM python:3.12
 
-RUN curl -sSL https://install.python-poetry.org | python3 -
+WORKDIR /scheduler
 
-ENV PATH="/root/.local/bin:${PATH}"
+COPY requirements.txt .
 
-WORKDIR /code
+RUN pip install -r requirements.txt
 
-COPY ./pyproject.toml ./poetry.lock* /code/
+COPY . .
 
-RUN poetry install --no-root
-
-COPY ./app /code/app
-
-CMD ["poetry", "run", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["gunicorn", "main:app", "--workers", "1", "--worker-class", "uvicorn.workers.UvicornWorker", "--bind=0.0.0.0:8000"]
