@@ -11,6 +11,7 @@ async_session_maker = async_sessionmaker(
     engine, expire_on_commit=False, class_=AsyncSession
 )
 
+print(settings.DATABASE_URL)
 
 class Base(DeclarativeBase):
     pass
