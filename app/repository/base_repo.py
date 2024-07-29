@@ -48,7 +48,7 @@ class BaseRepository:
                 msg = 'Database Exc: Не удалось добавить обьект.'
             else:
                 msg = 'Unknown Exc: Не удалось добавить обьект.'
-            logger.error(msg, extra=data)
+            logger.error(msg)
             return None
 
     @classmethod
@@ -63,7 +63,7 @@ class BaseRepository:
                 msg = 'Database Exc: Не удалось обновить обьект.'
             else:
                 msg = 'Unknown Exc: Не удалось обновить обьект.'
-            logger.error(msg, extra=data)
+            logger.error(msg)
             return None
 
     @classmethod
@@ -78,5 +78,5 @@ class BaseRepository:
                 msg = 'Database Exc: Не удалось удалить обьект.'
             else:
                 msg = 'Unknown Exc: Не удалось удалить обьект.'
-            logger.error(msg, extra=id)
+            logger.error(msg)
             return None

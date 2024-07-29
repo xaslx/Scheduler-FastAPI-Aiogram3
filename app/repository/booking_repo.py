@@ -30,7 +30,7 @@ class BookingRepository(BaseRepository):
                 msg = 'Database Exc: Не удалось найти все записи.'
             else:
                 msg = 'Unknown Exc: Не удалось найти все записи.'
-            logger.error(msg, extra={'user_id': user_id, 'date': date})
+            logger.error(msg)
             return None
 
 
@@ -48,7 +48,7 @@ class BookingRepository(BaseRepository):
                 msg = 'Database Exc: Не удалось получить запись.'
             else:
                 msg = 'Unknown Exc: Не удалось получить запись.'
-            logger.error(msg, extra={'user_id': user_id, 'date': date})
+            logger.error(msg)
             return None
 
     @classmethod
@@ -76,7 +76,7 @@ class BookingRepository(BaseRepository):
                 msg = 'Database Exc: Не удалось сделать запись.'
             else:
                 msg = 'Unknown Exc: Не удалось сделать запись.'
-            logger.error(msg, extra={'user_id': user_id, 'booking_id': booking_id, 'time': time})
+            logger.error(msg)
             return None
 
     @classmethod
@@ -115,5 +115,5 @@ class BookingRepository(BaseRepository):
                 msg = 'Database Exc: Не удалось получить запись.'
             else:
                 msg = 'Unknown Exc: Не удалось получить запись.'
-            logger.error(msg, extra={'user_id': user_id, 'booking_id': booking_id, 'time': time})
+            logger.error(msg)
             return None

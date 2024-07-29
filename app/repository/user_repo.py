@@ -31,5 +31,5 @@ class UserRepository(BaseRepository):
                 msg = 'Database Exc: Не удалось найти юзера.'
             else:
                 msg = 'Unknown Exc: Не удалось найти юзера.'
-            logger.error(msg, extra={'text': text})
+            logger.error(msg)
             return None
