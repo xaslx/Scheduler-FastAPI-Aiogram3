@@ -357,7 +357,7 @@ def success_update_password(email_to: EmailStr, new_password: str):
     return email
 
 
-def add_new_client(email_to: EmailStr, date: str, time: str):
+def add_new_client(email_to: EmailStr, date: str, time: str, name: str, phone_number: str, user_email: EmailStr, tg: str):
     email = EmailMessage()
     email["Subject"] = "Новая запись!"
     email["From"] = settings.SMTP_USER
@@ -429,6 +429,12 @@ def add_new_client(email_to: EmailStr, date: str, time: str):
                     <h1>К вам записался новый клиент!</h1>
                     <p>Дата: <b>{date}</b></p>
                     <p>Время: <b>{time}</b></p>
+                    </br>
+                    <p><b>Информация о клиенте</b></p>
+                    <p>Имя: {name}</p>
+                    <p>Телефон: {phone_number}</p>
+                    <p>Email клиента: {user_email}</p>
+                    <p>Telegram: {tg}</p>
                 </div>
                 <div class="footer">
                     <a href="https://t.me/xaslx">Telegram если возникли трудности с сервисом.</a>

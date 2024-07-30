@@ -202,6 +202,10 @@ async def select_booking(
         email=user_email.email,
         date=str(booking.date_for_booking),
         time=create_booking.time,
+        name=create_booking.name,
+        phone_number=create_booking.phone_number,
+        user_email=create_booking.email,
+        tg=create_booking.tg,
     )
     logger.info(f'Пользователю: {(user_email.email, user_email.name, user_email.surname, user_email.id)} отправлено письмо о новом клиенте')
 

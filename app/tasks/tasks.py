@@ -54,8 +54,8 @@ def update_password(email: EmailStr, new_password: str):
 
 
 @celery.task
-def new_client(email: EmailStr, date: str, time: str):
-    msg_content = add_new_client(email_to=email, date=date, time=time)
+def new_client(email: EmailStr, date: str, time: str, name: str, phone_number: str, user_email: EmailStr, tg: str):
+    msg_content = add_new_client(email_to=email, date=date, time=time, name=name, phone_number=phone_number, user_email=user_email, tg=tg)
 
     with smtplib.SMTP_SSL(settings.SMTP_HOST, settings.SMTP_PORT) as server:
         server.login(settings.SMTP_USER, settings.SMTP_PASS)
