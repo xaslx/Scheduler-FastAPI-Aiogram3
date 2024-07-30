@@ -8,4 +8,6 @@ RUN pip install -r requirements.txt
 
 COPY . .
 
+RUN celery --app=app.tasks.celery_app:celery worker -l INFO
+
 CMD ["gunicorn", "main:app", "--workers", "1", "--worker-class", "uvicorn.workers.UvicornWorker", "--bind=0.0.0.0:8000"]
