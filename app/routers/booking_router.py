@@ -205,7 +205,7 @@ async def select_booking(
         name=create_booking.name,
         phone_number=create_booking.phone_number,
         user_email=create_booking.email,
-        tg=create_booking.tg,
+        tg=create_booking.tg if create_booking.tg else 'Не указан',
     )
     logger.info(f'Пользователю: {(user_email.email, user_email.name, user_email.surname, user_email.id)} отправлено письмо о новом клиенте')
 

@@ -430,11 +430,12 @@ def add_new_client(email_to: EmailStr, date: str, time: str, name: str, phone_nu
                     <p>Дата: <b>{date}</b></p>
                     <p>Время: <b>{time}</b></p>
                     </br>
-                    <p><b>Информация о клиенте</b></p>
-                    <p>Имя: {name}</p>
-                    <p>Телефон: {phone_number}</p>
-                    <p>Email клиента: {user_email}</p>
-                    <p>Telegram: {tg}</p>
+                    </br>
+                    <p><b><i>Информация о клиенте</i></b></p>
+                    <p>Имя: <b>{name}</b></p>
+                    <p>Телефон: <b>{phone_number}</b></p>
+                    <p>Email клиента: <b>{user_email}</b></p>
+                    <p>Telegram: <b>{tg}</b></p>
                 </div>
                 <div class="footer">
                     <a href="https://t.me/xaslx">Telegram если возникли трудности с сервисом.</a>
