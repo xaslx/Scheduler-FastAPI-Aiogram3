@@ -4,6 +4,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, Query, Request
 from fastapi.responses import HTMLResponse, JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
+from urllib3 import HTTPResponse
 
 from app.auth.dependencies import get_all_notifications, get_current_user
 from app.models.booking_model import Booking
@@ -20,6 +21,8 @@ from app.utils.generate_time import generate_time_intervals
 from app.utils.templating import templates
 from database import get_async_session
 from exceptions import BookingNotFound, NotAccessError, UserNotFound
+from logger import logger
+
 
 booking_router: APIRouter = APIRouter(prefix="/booking", tags=["Запись"])
 
@@ -41,12 +44,13 @@ async def get_booking_by_link(
             name="404.html",
             context={"user": user, "notifications": notifications},
         )
-    return templates.TemplateResponse(
+    template: HTMLResponse = templates.TemplateResponse(
         request=request,
         name="booking.html",
         context={"user": user, "user_link": user_link, "notifications": notifications},
     )
-
+    logger.info(f'Открытие персональной ссылки у пользователя: ID={user_link.id}')
+    return template
 
 @booking_router.post("/add_booking", status_code=201)
 async def add_booking(
@@ -72,6 +76,7 @@ async def add_booking(
         booking_id: BookingOut = await BookingRepository.add(
             session=session, date_for_booking=date_for, user_id=user.id, times=intervals
         )
+        logger.info(f'Добавление новой даты для пользователя: {user.id}, Дата - {date_for}, Время: {intervals}')
 
     redirect_url: str = (
         booking_router.url_path_for("gettime:page", personal_link=user.personal_link)
@@ -135,7 +140,7 @@ async def get_time(
     else:
         available_times = booking.times
 
-    return templates.TemplateResponse(
+    template: HTTPResponse = templates.TemplateResponse(
         request=request,
         name="select_time.html",
         context={
@@ -148,6 +153,8 @@ async def get_time(
             "booking_id": booking_id,
         },
     )
+    logger.info(f'Получение свободного времени на дату: {date}, у пользователя: ID={user.id}')
+    return template
 
 
 @booking_router.patch("/select_booking/{booking_id}", status_code=200)
@@ -178,6 +185,9 @@ async def select_booking(
             create_booking.tg,
         ),
     )
+    logger.info(f'Пользователь: {(create_booking.name,
+            create_booking.phone_number,
+            create_booking.email)} записался к ID={user_email.id}, date={booking.date_for_booking}, time={create_booking.time}')
     confirm_booking_for_client.delay(
         email_to=create_booking.email,
         tg=user_email.telegram_link if user_email.telegram_link else "Не указан",
@@ -185,11 +195,15 @@ async def select_booking(
         time=create_booking.time,
         date=str(booking.date_for_booking),
     )
+    logger.info(f'Пользователю: {(create_booking.name,
+            create_booking.phone_number,
+            create_booking.email)} отправлено письмо о успешной записи')
     new_client.delay(
         email=user_email.email,
         date=str(booking.date_for_booking),
         time=create_booking.time,
     )
+    logger.info(f'Пользователю: {(user_email.email, user_email.name, user_email.surname, user_email.id)} отправлено письмо о новом клиенте')
 
 
 @booking_router.patch("/cancel_booking", status_code=200)
@@ -211,6 +225,11 @@ async def cancel_booking(
         booking_id=booking.id,
         time=cancel_data.time,
     )
+    logger.info(f'Пользователь ID={user.id} отменил запись для клиента:\n \
+                email={cancel_data.email}\n \
+                time={cancel_data.time}\n \
+                date={cancel_data.date}\n \
+                Причина={cancel_data.description}')
     cancel_client.delay(
         message="Вам отменили запись.",
         email=cancel_data.email,
@@ -218,6 +237,7 @@ async def cancel_booking(
         time=cancel_data.time,
         description=cancel_data.description,
     )
+    logger.info(f'Пользователю {cancel_data.email} отправлено письмо на почту о его отмененной записи')
     cancel_client.delay(
         message=f"Вы отменили запись клиенту.\n{cancel_data.email}",
         email=user.email,
@@ -225,3 +245,4 @@ async def cancel_booking(
         time=cancel_data.time,
         description=cancel_data.description,
     )
+    logger.info(f'Пользователю ID={user.id} отправлено письмо на почту об успешной отмене записи')

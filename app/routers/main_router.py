@@ -58,3 +58,4 @@ async def get_help(help: GetHelp, user: UserOut = Depends(get_current_user)):
     if not user:
         raise NotAccessError
     help_message.delay(email=help.email, description=help.description)
+    logger.info(f'Пользователь {help.email} оставил запрос на "Помощь"')

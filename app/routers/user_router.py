@@ -29,6 +29,8 @@ from app.utils.generate_time import moscow_tz
 from app.utils.templating import templates
 from database import get_async_session
 from exceptions import NotAccessError, UserNotFound
+from logger import logger
+
 
 user_router: APIRouter = APIRouter(prefix="/user", tags=["Пользователи"])
 
@@ -154,9 +156,11 @@ async def edit_password(
     await UserRepository.update(
         session=session, id=new_password.user_id, hashed_password=hashed_password
     )
+    logger.info(f'Пользователь: ID={user.id}, email={user.email} изменил свой пароль')
     update_password.delay(
         email=new_password.email, new_password=new_password.new_password
     )
+    logger.info(f'Пользователю: ID={user.id}, email={user.email} отправлено письмо с измененным паролем')
     response.delete_cookie("user_access_token")
 
 
@@ -167,6 +171,7 @@ async def edit_my_profile(
     user: UserOut = Depends(get_current_user),
 ):
     if not user:
+        logger.warning('Ошибка прав доступа при редактировании профиля')
         raise NotAccessError
     
     await UserRepository.update(
@@ -174,6 +179,7 @@ async def edit_my_profile(
         id=user.id,
         **new_user.model_dump(exclude={"password", "email"}),
     )
+    logger.info(f'Пользователь: ID={user.id}, email={user.email} изменил свой профиль')
 
 
 @user_router.get("/all_users", status_code=200, name="allusers:page")
@@ -314,14 +320,17 @@ async def ban_user(
     admin: UserOut = Depends(get_admin_user),
 ):
     if not admin:
+        logger.warning(f'Ошибка прав доступа при блокировке пользователя (не админ)')
         raise NotAccessError
     user: UserOut = await UserRepository.find_one_or_none(id=user_id, session=session)
     if not user:
         raise UserNotFound
     if admin.role == "admin":
         if user_id == admin.id or user.role == "admin":
+            logger.warning(f'Ошибка прав доступа при блокировке пользователя')
             raise NotAccessError
     await UserRepository.update(session=session, id=user_id, is_active=False)
+    logger.info(f'Администратор: ID={admin.id}, email={admin.email} заблокировал пользователя ID={user.id}, email={user.email}')
 
 
 @user_router.patch("/unban/{user_id}", status_code=200)
@@ -331,14 +340,17 @@ async def unban_user(
     admin: UserOut = Depends(get_admin_user),
 ):
     if not admin:
+        logger.warning(f'Ошибка прав доступа при разблокировке пользователя (не админ)')
         raise NotAccessError
     user: UserOut = await UserRepository.find_one_or_none(id=user_id, session=session)
     if not user:
         raise UserNotFound
     if admin.role == "admin" or user.role == "admin":
         if user_id == admin.id:
+            logger.warning(f'Ошибка прав доступа при разблокировке пользователя')
             raise NotAccessError
     await UserRepository.update(session=session, id=user_id, is_active=True)
+    logger.info(f'Администратор: ID={admin.id}, email={admin.email} разблокировал пользователя ID={user.id}, email={user.email}')
 
 
 @user_router.patch("/edit_role/{user_id}", status_code=200, name="edit_role:page")
@@ -348,9 +360,11 @@ async def edit_role_for_user(
     session: AsyncSession = Depends(get_async_session),
     admin: UserOut = Depends(get_admin_user),
 ):
-    if admin.role == "admin":
+    if admin.role == "admin" or not admin:
+        logger.warning(f'Ошибка прав доступа при изменении роли пользователя (только для роли dev)')
         raise NotAccessError
     await UserRepository.update(session=session, id=user_id, role=new_role.role)
+    logger.info(f'Администратор: ID={admin.id}, email={admin.email} изменил роль пользователю ID={user_id}, новая роль - {new_role.role}')
 
 
 @user_router.delete(
@@ -365,8 +379,10 @@ async def delete_user(
     if not user:
         raise UserNotFound
     if admin.role != "dev":
+        logger.warning(f'Ошибка прав доступа при удалении пользователя (только для роли dev)')
         raise NotAccessError
     await UserRepository.delete(session=session, id=user_id)
+    logger.info(f'Администратор: ID={admin.id}, email={admin.email} удалил пользователя ID={user.id}, email={user.email}')
 
 
 @user_router.delete("/delete_user/{user_id}", name="del_user:page")
@@ -385,8 +401,10 @@ async def del_user(
             context={"user": user, "notifications": notifications},
         )
     if user.id != user_id:
+        logger.warning(f'Ошибка прав доступа при удалении профиля')
         raise NotAccessError
     await UserRepository.delete(session=session, id=user_id)
+    logger.info(f'Пользователь ID={user.id}, email={user.email} удалил свой профиль')
 
 
 @user_router.patch("/edit_enabled/{user_id}")
@@ -396,9 +414,11 @@ async def edit_enabled(
     session: AsyncSession = Depends(get_async_session),
     user: UserOut = Depends(get_current_user),
 ):
-    if not user:
+    if not user or user.id != user_id:
+        logger.warning('Ошибка прав доступа при изменении возможности записи')
         raise NotAccessError
     await UserRepository.update(session=session, id=user_id, enabled=enabled.enabled)
+    logger.info(f'Пользователь ID={user.id}, email={user.email} изменил возможность записи на - {enabled.enabled}')
 
 
 @user_router.patch("/edit_time/{user_id}")
@@ -408,11 +428,14 @@ async def edit_time(
     session: AsyncSession = Depends(get_async_session),
     user: UserOut = Depends(get_current_user),
 ):
-    if not user:
+    if not user or user.id != user_id:
+        logger.warning('Ошибка прав доступа при изменении рабочего дня')
         raise NotAccessError
     await UserRepository.update(
         session=session, id=user_id, **new_time.model_dump(exclude_unset=True)
     )
+    logger.info(f'Пользователь ID={user.id}, email={user.email} изменил рабочий день / интервал на: \
+                 start={str(new_time.start_time)}, end={str(new_time.end_time)}, interval={new_time.interval}')
 
 
 @user_router.get("/forgot_password/reset", status_code=200, name="reset:page")
@@ -467,6 +490,7 @@ async def get_forgot_password_template(
         raise HTTPException(status_code=422, detail="Email не найден")
     token: str = await generate_token(exist_user)
     reset_password_email.delay(exist_user.email, token=token)
+    logger.info(f'Пользователь ID={exist_user.id}, email={exist_user.email} письмо с ссылкой для сброса пароля')
 
 
 @user_router.get(
@@ -494,4 +518,6 @@ async def reset_password(
     await UserRepository.update(
         id=user_id.user_id, hashed_password=hashed_password, session=session
     )
+    logger.info(f'Пользователю ID={user_id.user_id}, email={user_id.email} был установлен новый пароль')
     password_changed.delay(email=user_id.email, new_password=new_password)
+    logger.info(f'Пользователю ID={user_id.user_id}, email={user_id.email} отправлено письмо на почту с новым паролем')

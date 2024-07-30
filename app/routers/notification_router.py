@@ -21,6 +21,8 @@ from app.utils.current_time import current_time
 from app.utils.templating import templates
 from database import get_async_session
 from exceptions import NotAccessError, NotificationNotFound
+from logger import logger
+
 
 notification_router: APIRouter = APIRouter(prefix="/notification", tags=["Уведомления"])
 
@@ -138,6 +140,7 @@ async def create_notification(
 ):
 
     if not user:
+        logger.warning(f'Ошибка прав доступа при добавлении уведомления')
         raise NotAccessError
 
     notifications: list[NotificationOut] = await NotificationRepository.find_all(
@@ -146,7 +149,9 @@ async def create_notification(
 
     if len(notifications) >= 30:
         await NotificationRepository.delete(session=session, id=notifications[0].id)
+        logger.info('Удаление последнего уведомления из базы данных')
     await NotificationRepository.add(session=session, **new_notification.model_dump())
+    logger.info(f'Администратор: ID={user.id}, email={user.email} добавил новое уведомление на сайт (в бд)')
     return status.HTTP_201_CREATED
 
 
@@ -157,11 +162,13 @@ async def send_notification_for_all_users(
     user: UserOut = Depends(get_admin_user),
 ):
     if not user:
+        logger.warning(f'Ошибка прав доступа при отправке уведомлений на email')
         raise NotAccessError
 
     users: list[UserOut] = await UserRepository.find_all(session=session)
     emails: list[str] = [user.email for user in users]
     send_notification.delay(users=emails, message=message.message)
+    logger.info(f'Администратор: ID={user.id}, email={user.email} отправил уведомление на email пользователям: кол-во пользователей: {len(emails)}')
     return {"user_count": len(emails)}
 
 
@@ -177,5 +184,7 @@ async def delete_notification(
     if not notification:
         raise NotificationNotFound
     if not user:
+        logger.warning(f'Ошибка прав доступа при удалении уведомления')
         raise NotAccessError
     await NotificationRepository.delete(session=session, id=notif_id)
+    logger.info(f'Администратор ID={user.id}, email={user.email} удалил уведомление на сайте (из бд)')

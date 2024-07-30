@@ -16,6 +16,8 @@ from app.tasks.tasks import register_confirmation_message
 from app.utils.templating import templates
 from database import get_async_session
 from exceptions import UserAlreadyExistsException, UserNotFound
+from logger import logger
+
 
 auth_router: APIRouter = APIRouter(
     prefix="/auth", tags=["Аутентификация и Авторизация"]
@@ -54,6 +56,7 @@ async def rigister_user(
         hashed_password=hashed_password,
     )
     register_confirmation_message.delay(email_to=user.email)
+    logger.info(f'Новый пользователь зарегистрировался! name={user.name}, surname={user.surname}, email={user.email}')
     return new_user
 
 
@@ -86,6 +89,7 @@ async def login_user(
     response.set_cookie(
         "user_access_token", access_token, httponly=True, max_age=max_age
     )
+    logger.info(f'Пользователь вошел в систему: ID={user.id}, name={user.name}, surname={user.surname}')
     return access_token
 
 
@@ -100,6 +104,11 @@ async def get_login_template(
 
 
 @auth_router.post("/logout", status_code=200)
-async def logout_user(response: Response):
-    
-    response.delete_cookie("user_access_token")
+async def logout_user(response: Response, request: Request, session: AsyncSession = Depends(get_async_session)):
+    cookies: str | None = request.cookies.get('user_access_token')
+    try:
+        user: UserOut = await get_current_user(async_db=session, token=cookies)
+        response.delete_cookie("user_access_token")
+        logger.info(f'Пользователь ID={user.id}, name={user.name}, surname={user.surname} вышел из системы')
+    except:
+        logger.error('Ошибка при выходе из системы')
