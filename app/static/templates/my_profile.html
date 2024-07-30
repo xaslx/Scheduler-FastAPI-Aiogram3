@@ -33,7 +33,7 @@
                     </p>
                     <p><strong>Телеграм:</strong>
                         {% if user.telegram_link %}
-                            <a id="telegramLink" class="profile-link" href="https://t.me/{{ user.telegram_link }}" target="_blank" style="color: #007bff; text-decoration: none; margin-left: 10px;">{{ user.telegram_link }}</a>
+                            <span id="telegramLink" style="color: #007bff;">{{ user.telegram_link }}</span>
                             <button class="copy-button" onclick="copyToClipboard('#telegramLink')">Копировать</button>
                         {% else %}
                             <span style="color: #007bff; text-decoration: none; margin-left: 10px;">Не указан</span>

@@ -35,7 +35,7 @@
                         <a class="profile-link" href="{{ url_for('personal_link:page', personal_link=user_by_id.personal_link) }}" style="color: #007bff; text-decoration: none; margin-left: 10px;">{{ user_by_id.personal_link }}</a>
                     </p>
                     <p><strong>
-                        Телеграм: <a class="profile-link" href="https://t.me/{{ user_by_id.telegram_link }}" target="_blank" style="color: #007bff; text-decoration: none; margin-left: 10px;">{{ user_by_id.telegram_link }}</a>
+                        Телеграм: <span style="color: #007bff;">{{ user_by_id.telegram_link }}</span></a>
                     </strong></p>
                     
                     <p><strong>Email:</strong> {{ user_by_id.email }}</p>
@@ -77,10 +77,25 @@
         font-size: 24px;
     }
 
+    .profile-header-details p, .profile-header-details strong, .profile-header-details span, .profile-header-details a {
+        font-size: 16px;
+    }
+
+    .block-user-button, .unblock-user-button, .save-role-button, .confirm-button, .cancel-button {
+        font-size: 16px;
+    }
 
     @media (max-width: 600px) {
         .profile-header-details h1 {
-            font-size: 18px;
+            font-size: 16px;
+        }
+
+        .profile-header-details p, .profile-header-details strong, .profile-header-details span, .profile-header-details a {
+            font-size: 12px;
+        }
+
+        .block-user-button, .unblock-user-button, .save-role-button, .confirm-button, .cancel-button {
+            font-size: 12px;
         }
 
         .modal-content {
