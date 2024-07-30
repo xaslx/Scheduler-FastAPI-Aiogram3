@@ -15,7 +15,6 @@ async function confirmSelection() {
     const phone = document.getElementById('userPhone').value;
     const telegram = document.getElementById('userTelegram').value || null;
 
-
     const nameError = document.getElementById('nameError');
     if (!name || name.length < 2 || name.length > 20 || /\s/.test(name)) {
         nameError.style.display = 'block';
@@ -48,6 +47,15 @@ async function confirmSelection() {
             icon: 'error',
             title: 'Ошибка!',
             text: 'Пожалуйста, укажите ваш email.',
+        });
+        return;
+    }
+
+    if (telegram && (!/^[a-zA-Z0-9_]+$/.test(telegram) || telegram.length < 4)) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Ошибка!',
+            text: 'Telegram должен содержать не менее 4 символов и содержать только английские буквы, цифры и нижнее подчеркивание.',
         });
         return;
     }
