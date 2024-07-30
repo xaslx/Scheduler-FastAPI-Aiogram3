@@ -32,7 +32,7 @@ class CreateBooking(BaseModel):
     time: str
     email: EmailStr
     tg: str | None = None
-    phone_number: str
+    phone_number: str = Field(max_length=11)
 
     @field_validator("phone_number")
     def check_phone(cls, value: str):
