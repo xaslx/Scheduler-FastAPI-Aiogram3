@@ -28,7 +28,7 @@ services:
       - 7777:8000
 
   celery:
-    image: scheduler_celery
+    image: scheduler_app
     container_name: scheduler_celery
     command: sh -c "celery --app=app.tasks.celery_app:celery worker -l INFO"
     env_file:
