@@ -15,8 +15,6 @@ services:
     container_name: scheduler_redis
 
   scheduler:
-    build:
-      context: .
     image: scheduler_app
     container_name: scheduler_app
     env_file:
@@ -30,8 +28,6 @@ services:
       - 7777:8000
 
   celery:
-    build:
-      context: .
     image: scheduler_celery
     container_name: scheduler_celery
     command: sh -c "celery --app=app.tasks.celery_app:celery worker -l INFO"
