@@ -11,7 +11,8 @@ from app.tasks.email_templates import (add_new_client, cancel_booking,
                                        password_changed_email_template,
                                        register_confirmation_template,
                                        send_notification_for_all_users,
-                                       success_update_password)
+                                       success_update_password,
+                                       cancel_booking_for_me)
 from config import settings
 
 
@@ -64,10 +65,23 @@ def new_client(email: EmailStr, date: str, time: str, name: str, phone_number: s
 
 @celery.task
 def cancel_client(
-    message: str, email: EmailStr, date: str, time: str, description: str
+    email: EmailStr, date: str, time: str, description: str
 ):
     msg_content = cancel_booking(
-        message=message, email_to=email, date=date, time=time, description=description
+        email_to=email, date=date, time=time, description=description
+    )
+
+    with smtplib.SMTP_SSL(settings.SMTP_HOST, settings.SMTP_PORT) as server:
+        server.login(settings.SMTP_USER, settings.SMTP_PASS)
+        server.send_message(msg_content)
+
+
+@celery.task
+def cancel_client_for_me(
+    email_to: EmailStr, name: str, email: EmailStr, phone_number: str, date: str, time: str, description: str 
+):
+    msg_content = cancel_booking_for_me(
+        email_to=email_to, name=name, email_user=email, phone_number=phone_number, date=date, time=time, description=description
     )
 
     with smtplib.SMTP_SSL(settings.SMTP_HOST, settings.SMTP_PORT) as server:

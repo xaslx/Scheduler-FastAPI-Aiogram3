@@ -451,7 +451,7 @@ def add_new_client(email_to: EmailStr, date: str, time: str, name: str, phone_nu
 
 
 def cancel_booking(
-    message: str, email_to: EmailStr, date: str, time: str, description: str
+    email_to: EmailStr, date: str, time: str, description: str
 ):
     email = EmailMessage()
     email["Subject"] = "Отмена записи!"
@@ -515,7 +515,93 @@ def cancel_booking(
         <body>
             <div class="outer-container">
                 <div class="inner-container">
-                    <h1>{message}</h1>
+                    <h1>Вам отменили запись</h1>
+                    <p>Дата: <b>{date}</b></p>
+                    <p>Время: <b>{time}</b></p>
+                    <p>Причина: <b>{description}</b></p>
+                </div>
+                <div class="footer">
+                    <a href="https://t.me/xaslx">Telegram если возникли трудности с сервисом.</a>
+                </div>
+            </div>
+        </body>
+        </html>
+        """,
+        subtype="html"
+    )
+
+    return email
+
+def cancel_booking_for_me(
+    email_to: EmailStr, name: str, email_user: EmailStr, phone_number: str, date: str, time: str, description: str
+):
+    email = EmailMessage()
+    email["Subject"] = "Отмена записи!"
+    email["From"] = settings.SMTP_USER
+    email["To"] = email_to
+
+    email.set_content(
+        f"""
+        <!DOCTYPE html>
+        <html lang="ru">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <style>
+                body {{
+                    font-family: Arial, sans-serif;
+                    background-color: #f4f4f4;
+                    margin: 0;
+                    padding: 0;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    height: 100vh;
+                }}
+                .outer-container {{
+                    background-color: #e0e0e0;
+                    padding: 20px;
+                    border-radius: 8px;
+                    text-align: center;
+                    max-width: 600px;
+                    margin: auto;
+                }}
+                .inner-container {{
+                    background-color: #ffffff;
+                    padding: 20px;
+                    border-radius: 8px;
+                    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+                    text-align: left;
+                }}
+                h1 {{
+                    color: #d9534f; /* Цвет для важного сообщения */
+                }}
+                p {{
+                    color: #555555;
+                    font-size: 16px;
+                }}
+                .footer {{
+                    margin-top: 20px;
+                    font-size: 14px;
+                    color: #555555;
+                }}
+                .footer a {{
+                    color: #007bff;
+                    text-decoration: none;
+                }}
+                .footer a:hover {{
+                    text-decoration: underline;
+                }}
+            </style>
+        </head>
+        <body>
+            <div class="outer-container">
+                <div class="inner-container">
+                    <h1>Вы отменили запись клиенту:</h1>
+                    </br>
+                    <b>Имя: {name}</b></br>
+                    <b>Email: {email_user}</b></br>
+                    <b>Телефон: {phone_number}</b></br>
                     <p>Дата: <b>{date}</b></p>
                     <p>Время: <b>{time}</b></p>
                     <p>Причина: <b>{description}</b></p>
