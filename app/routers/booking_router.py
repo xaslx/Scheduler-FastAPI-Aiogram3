@@ -22,6 +22,7 @@ from app.utils.templating import templates
 from database import get_async_session
 from exceptions import BookingNotFound, NotAccessError, UserNotFound
 from logger import logger
+from app.utils.generate_time import moscow_tz
 
 
 booking_router: APIRouter = APIRouter(prefix="/booking", tags=["Запись"])
@@ -131,7 +132,7 @@ async def get_time(
             context={"user": user, "notifications": notifications},
         )
 
-    now: datetime = datetime.now()
+    now: datetime = datetime.now(tz=moscow_tz)
     current_time: str = now.strftime("%H:%M")
     current_date = now.date()
 
