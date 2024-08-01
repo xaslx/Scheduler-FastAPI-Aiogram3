@@ -167,7 +167,7 @@ def forgot_password_email_template(email_to: EmailStr, token: str):
                 <div class="inner-container">
                     <h2>Вы сделали запрос на сброс пароля</h2>
                     <p>Нажмите на кнопку ниже для сброса вашего пароля</p>
-                    <a style="color: white;" class="button" href="http://127.0.0.1:8000/user/reset/reset_password?token={token}">
+                    <a style="color: white;" class="button" href="https://scheduler-bgly.onrender.com/user/reset/reset_password?token={token}">
                         Сбросить пароль
                     </a>
                     <p>Если вы ничего не запрашивали, то проигнорируйте данное письмо</p>
