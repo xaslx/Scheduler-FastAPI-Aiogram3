@@ -17,7 +17,7 @@
                         Email: <b>{{ time[3] }}</b><br>
                         Telegram: <b>{{ time[4] if time[4] is not none else 'Не указан' }}</b>
                     </div>
-                    <button class="custom-cancel-button" data-time="{{ time[0] }}" data-id="{{ booking.id }}" data-email="{{ time[3] }}">Отменить</button>
+                    <button class="custom-cancel-button" data-time="{{ time[0] }}" data-id="{{ booking.id }}" data-email="{{ time[3] }}" data-name="{{ time[1] }}" data-phone="{{ time[2] }}">Отменить</button>
                 </div>
             {% endfor %}
         {% else %}

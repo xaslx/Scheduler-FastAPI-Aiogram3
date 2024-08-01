@@ -28,7 +28,7 @@
                         </span>
                     </p>
                     <p><strong>Ссылка:</strong> 
-                        <a id="personalLink" target="_blank" class="profile-link" href="{{ url_for('personal_link:page', personal_link=user.personal_link) }}" style="color: #007bff; text-decoration: none; margin-left: 10px;">{{ user.personal_link }}</a>
+                        <a id="personalLink" class="profile-link" href="{{ url_for('personal_link:page', personal_link=user.personal_link) }}" style="color: #007bff; text-decoration: none; margin-left: 10px;">{{ user.personal_link }}</a>
                         <button class="copy-button" onclick="copyToClipboard('#personalLink')">Копировать</button>
                     </p>
                     <p><strong>Телеграм:</strong>

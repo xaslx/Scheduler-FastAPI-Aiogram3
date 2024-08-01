@@ -32,15 +32,17 @@ document.addEventListener("DOMContentLoaded", function() {
         const time = currentButton.dataset.time;
         const email = currentButton.dataset.email;
         const bookingId = currentButton.dataset.id;
+        const name = currentButton.dataset.name;
+        const phone = currentButton.dataset.phone;
 
-        console.log({ date: date, time: time, email: email, description: reason });
+        console.log({ date: date, time: time, email: email, description: reason, name: name, phone_number: phone });
         
         fetch(`/booking/cancel_booking?booking_id=${bookingId}`, {
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ date: date, time: time, email: email, description: reason })
+            body: JSON.stringify({ date: date, time: time, email: email, description: reason, name: name, phone_number: phone })
         })
         .then(response => {
             if (response.ok) {
