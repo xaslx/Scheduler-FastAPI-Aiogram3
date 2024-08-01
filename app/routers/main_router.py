@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, Request, BackgroundTasks
 from fastapi.responses import HTMLResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -54,8 +54,9 @@ async def get_help_template(
 
 
 @main_router.post("/help", status_code=200)
-async def get_help(help: GetHelp, user: UserOut = Depends(get_current_user)):
+async def get_help(help: GetHelp, bg_task: BackgroundTasks, user: UserOut = Depends(get_current_user)):
     if not user:
         raise NotAccessError
-    help_message.delay(email=help.email, description=help.description)
+    # help_message.delay(email=help.email, description=help.description)  Celery
+    bg_task.add_task(help_message, email=help.email, description=help.description)
     logger.info(f'Пользователь {help.email} оставил запрос на "Помощь"')

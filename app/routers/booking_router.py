@@ -1,7 +1,7 @@
 from datetime import date, datetime, timedelta
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Query, Request
+from fastapi import APIRouter, Depends, Query, Request, BackgroundTasks
 from fastapi.responses import HTMLResponse, JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from urllib3 import HTTPResponse
@@ -160,6 +160,7 @@ async def get_time(
 @booking_router.patch("/select_booking/{booking_id}", status_code=200)
 async def select_booking(
     booking_id: int,
+    bg_task: BackgroundTasks,
     create_booking: CreateBooking,
     session: AsyncSession = Depends(get_async_session),
 ) -> None:
@@ -188,24 +189,42 @@ async def select_booking(
     logger.info(f'Пользователь: {(create_booking.name,
             create_booking.phone_number,
             create_booking.email)} записался к ID={user_email.id}, date={booking.date_for_booking}, time={create_booking.time}')
-    confirm_booking_for_client.delay(
+    # confirm_booking_for_client.delay(
+    #     email_to=create_booking.email,
+    #     tg=user_email.telegram_link if user_email.telegram_link else "Не указан",
+    #     em=user_email.email,
+    #     time=create_booking.time,
+    #     date=str(booking.date_for_booking),
+    # ) Celery
+    bg_task.add_task(
+        confirm_booking_for_client,
         email_to=create_booking.email,
         tg=user_email.telegram_link if user_email.telegram_link else "Не указан",
         em=user_email.email,
         time=create_booking.time,
-        date=str(booking.date_for_booking),
+        date=str(booking.date_for_booking)
     )
     logger.info(f'Пользователю: {(create_booking.name,
             create_booking.phone_number,
             create_booking.email)} отправлено письмо о успешной записи')
-    new_client.delay(
+    # new_client.delay(
+    #     email=user_email.email,
+    #     date=str(booking.date_for_booking),
+    #     time=create_booking.time,
+    #     name=create_booking.name,
+    #     phone_number=create_booking.phone_number,
+    #     user_email=create_booking.email,
+    #     tg=create_booking.tg if create_booking.tg else 'Не указан',
+    # ) Celery
+    bg_task.add_task(
+        new_client, 
         email=user_email.email,
         date=str(booking.date_for_booking),
         time=create_booking.time,
         name=create_booking.name,
         phone_number=create_booking.phone_number,
         user_email=create_booking.email,
-        tg=create_booking.tg if create_booking.tg else 'Не указан',
+        tg=create_booking.tg if create_booking.tg else 'Не указан'
     )
     logger.info(f'Пользователю: {(user_email.email, user_email.name, user_email.surname, user_email.id)} отправлено письмо о новом клиенте')
 
@@ -213,6 +232,7 @@ async def select_booking(
 @booking_router.patch("/cancel_booking", status_code=200)
 async def cancel_booking(
     cancel_data: CancelBooking,
+    bg_task: BackgroundTasks,
     booking_id: Annotated[int, Query()],
     user: UserOut = Depends(get_current_user),
     session: AsyncSession = Depends(get_async_session),
@@ -234,19 +254,35 @@ async def cancel_booking(
                 time={cancel_data.time}\n \
                 date={cancel_data.date}\n \
                 Причина={cancel_data.description}')
-    cancel_client.delay(
+    # cancel_client.delay(
+    #     message="Вам отменили запись.",
+    #     email=cancel_data.email,
+    #     date=cancel_data.date,
+    #     time=cancel_data.time,
+    #     description=cancel_data.description,
+    # ) Celery
+    bg_task.add_task(
+        cancel_client,
         message="Вам отменили запись.",
         email=cancel_data.email,
         date=cancel_data.date,
         time=cancel_data.time,
-        description=cancel_data.description,
+        description=cancel_data.description 
     )
     logger.info(f'Пользователю {cancel_data.email} отправлено письмо на почту о его отмененной записи')
-    cancel_client.delay(
-        message=f"Вы отменили запись клиенту.\n{cancel_data.email}",
-        email=user.email,
-        date=cancel_data.date,
-        time=cancel_data.time,
-        description=cancel_data.description,
+    # cancel_client.delay(
+    #     message=f"Вы отменили запись клиенту.\n{cancel_data.email}",
+    #     email=user.email,
+    #     date=cancel_data.date,
+    #     time=cancel_data.time,
+    #     description=cancel_data.description,
+    # ) Celery
+    bg_task.add_task(
+        cancel_client,
+        essage=f"Вы отменили запись клиенту",
+        mail=user.email,
+        ate=cancel_data.date,
+        ime=cancel_data.time,
+        escription=cancel_data.description
     )
     logger.info(f'Пользователю ID={user.id} отправлено письмо на почту об успешной отмене записи')

@@ -1,7 +1,7 @@
 import secrets
 from datetime import datetime
 
-from fastapi import (APIRouter, Depends, Request, Response)
+from fastapi import (APIRouter, Depends, Request, Response, BackgroundTasks)
 from fastapi.responses import HTMLResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -38,7 +38,7 @@ async def get_register_template(
 
 @auth_router.post("/register", status_code=201)
 async def rigister_user(
-    user: UserRegister, session: AsyncSession = Depends(get_async_session)
+    user: UserRegister, bg_task: BackgroundTasks, session: AsyncSession = Depends(get_async_session)
 ) -> int:
     exist_user: UserOut = await UserRepository.find_one_or_none(
         session=session, email=user.email
@@ -55,7 +55,8 @@ async def rigister_user(
         personal_link=new_personal_link,
         hashed_password=hashed_password,
     )
-    register_confirmation_message.delay(email_to=user.email)
+    # register_confirmation_message.delay(email_to=user.email) Celery
+    bg_task.add_task(register_confirmation_message, email_to=user.email)
     logger.info(f'Новый пользователь зарегистрировался! name={user.name}, surname={user.surname}, email={user.email}')
     return new_user
 

@@ -1,23 +1,15 @@
-from typing import Annotated
-
-from fastapi import APIRouter, Depends, Query, Request, status
+from fastapi import APIRouter, Depends, Request, status, BackgroundTasks
 from fastapi.responses import HTMLResponse
-from fastapi_pagination import Page
-from fastapi_pagination.ext.sqlalchemy import paginate
-from sqlalchemy import desc, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth.dependencies import (get_admin_user, get_all_notifications,
                                    get_current_user)
-from app.models.notification_model import Notification
-from app.models.user_model import User
 from app.repository.notification_repo import NotificationRepository
 from app.repository.user_repo import UserRepository
 from app.schemas.notification_schemas import (CreateNotification,
                                               NotificationOut)
 from app.schemas.user_schema import CreateMessage, UserOut
 from app.tasks.tasks import send_notification
-from app.utils.current_time import current_time
 from app.utils.templating import templates
 from database import get_async_session
 from exceptions import NotAccessError, NotificationNotFound
@@ -158,6 +150,7 @@ async def create_notification(
 @notification_router.post("/send_notification_email", status_code=200)
 async def send_notification_for_all_users(
     message: CreateMessage,
+    bg_task: BackgroundTasks,
     session: AsyncSession = Depends(get_async_session),
     user: UserOut = Depends(get_admin_user),
 ):
@@ -167,7 +160,12 @@ async def send_notification_for_all_users(
 
     users: list[UserOut] = await UserRepository.find_all(session=session)
     emails: list[str] = [user.email for user in users]
-    send_notification.delay(users=emails, message=message.message)
+    # send_notification.delay(users=emails, message=message.message) Celery
+    bg_task.add_task(
+        send_notification,
+        users=emails, 
+        message=message.message
+    )
     logger.info(f'Администратор: ID={user.id}, email={user.email} отправил уведомление на email пользователям: кол-во пользователей: {len(emails)}')
     return {"user_count": len(emails)}
 

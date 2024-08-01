@@ -3,7 +3,7 @@ import secrets
 from datetime import date, datetime
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Query, Request, Response
+from fastapi import APIRouter, Depends, Query, Request, Response, BackgroundTasks
 from fastapi.exceptions import HTTPException
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi_pagination import Page
@@ -143,6 +143,7 @@ async def get_edit_my_password_template(
 @user_router.patch("/edit_password", status_code=200)
 async def edit_password(
     response: Response,
+    bg_task: BackgroundTasks,
     new_password: EditPassword,
     session: AsyncSession = Depends(get_async_session),
     user: UserOut = Depends(get_current_user),
@@ -157,8 +158,13 @@ async def edit_password(
         session=session, id=new_password.user_id, hashed_password=hashed_password
     )
     logger.info(f'Пользователь: ID={user.id}, email={user.email} изменил свой пароль')
-    update_password.delay(
-        email=new_password.email, new_password=new_password.new_password
+    # update_password.delay(
+    #     email=new_password.email, new_password=new_password.new_password
+    # ) Celery
+    bg_task.add_task(
+        update_password,
+        email=new_password.email, 
+        new_password=new_password.new_password 
     )
     logger.info(f'Пользователю: ID={user.id}, email={user.email} отправлено письмо с измененным паролем')
     response.delete_cookie("user_access_token")
@@ -480,6 +486,7 @@ async def get_reset_password_template(
 @user_router.post("/forgot_password/reset", status_code=200)
 async def get_forgot_password_template(
     email: ResetPassword,
+    bg_task: BackgroundTasks,
     session: AsyncSession = Depends(get_async_session),
 ):
 
@@ -489,7 +496,12 @@ async def get_forgot_password_template(
     if not exist_user:
         raise HTTPException(status_code=422, detail="Email не найден")
     token: str = await generate_token(exist_user)
-    reset_password_email.delay(exist_user.email, token=token)
+    # reset_password_email.delay(exist_user.email, token=token) Celery
+    bg_task.add_task(
+        reset_password_email,
+        exist_user.email, 
+        token=token
+    )
     logger.info(f'Пользователь ID={exist_user.id}, email={exist_user.email} письмо с ссылкой для сброса пароля')
 
 
@@ -511,6 +523,7 @@ async def get_update_password_template(
 @user_router.patch("/forgot_password/reset")
 async def reset_password(
     user_id: ResetPassword,
+    bg_task: BackgroundTasks,
     session: AsyncSession = Depends(get_async_session),
 ):
     new_password: str = secrets.token_hex(10)
@@ -519,5 +532,10 @@ async def reset_password(
         id=user_id.user_id, hashed_password=hashed_password, session=session
     )
     logger.info(f'Пользователю ID={user_id.user_id}, email={user_id.email} был установлен новый пароль')
-    password_changed.delay(email=user_id.email, new_password=new_password)
+    # password_changed.delay(email=user_id.email, new_password=new_password) Celery
+    bg_task.add_task(
+        password_changed,
+        email=user_id.email, 
+        new_password=new_password
+    )
     logger.info(f'Пользователю ID={user_id.user_id}, email={user_id.email} отправлено письмо на почту с новым паролем')
