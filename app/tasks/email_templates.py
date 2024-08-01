@@ -598,10 +598,10 @@ def cancel_booking_for_me(
             <div class="outer-container">
                 <div class="inner-container">
                     <h1>Вы отменили запись клиенту:</h1>
-                    </br>
-                    <b>Имя: {name}</b></br>
-                    <b>Email: {email_user}</b></br>
-                    <b>Телефон: {phone_number}</b></br>
+                    <br>
+                    <b>Имя: {name}</b><br>
+                    <b>Email: {email_user}</b><br>
+                    <b>Телефон: {phone_number}<b></br>
                     <p>Дата: <b>{date}</b></p>
                     <p>Время: <b>{time}</b></p>
                     <p>Причина: <b>{description}</b></p>
