@@ -16,7 +16,7 @@ from app.schemas.booking_schemas import (BookingDate, BookingOut, CancelBooking,
 from app.schemas.notification_schemas import NotificationOut
 from app.schemas.user_schema import UserOut
 from app.tasks.tasks import (cancel_client, confirm_booking_for_client,
-                             new_client)
+                             new_client, cancel_client_for_me)
 from app.utils.generate_time import generate_time_intervals
 from app.utils.templating import templates
 from database import get_async_session
@@ -240,7 +240,6 @@ async def cancel_booking(
     booking: Booking = await BookingRepository.find_one_or_none(
         session=session, id=booking_id
     )
-
     if not booking or (booking.user_id != user.id) or not user:
         raise NotAccessError
     await BookingRepository.cancel_times(
@@ -263,7 +262,6 @@ async def cancel_booking(
     # ) Celery
     bg_task.add_task(
         cancel_client,
-        message="Вам отменили запись.",
         email=cancel_data.email,
         date=cancel_data.date,
         time=cancel_data.time,
@@ -278,11 +276,13 @@ async def cancel_booking(
     #     description=cancel_data.description,
     # ) Celery
     bg_task.add_task(
-        cancel_client,
-        essage=f"Вы отменили запись клиенту",
-        mail=user.email,
-        ate=cancel_data.date,
-        ime=cancel_data.time,
-        escription=cancel_data.description
+        cancel_client_for_me,
+        email_to=user.email,
+        name=cancel_data.name,
+        email=cancel_data.email,
+        phone_number=cancel_data.phone_number,
+        date=cancel_data.date,
+        time=cancel_data.time,
+        description=cancel_data.description,   
     )
     logger.info(f'Пользователю ID={user.id} отправлено письмо на почту об успешной отмене записи')
