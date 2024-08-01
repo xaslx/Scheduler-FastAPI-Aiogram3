@@ -25,6 +25,8 @@ class CancelBooking(BaseModel):
     time: str
     email: EmailStr
     description: str = Field(min_length=10, max_length=200)
+    name: str
+    phone_number: str
 
 
 class CreateBooking(BaseModel):
