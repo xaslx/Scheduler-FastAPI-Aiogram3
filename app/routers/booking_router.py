@@ -154,7 +154,7 @@ async def get_time(
             "booking_id": booking_id,
         },
     )
-    logger.info(f'Получение свободного времени на дату: {date}, у пользователя: ID={user.id}')
+    logger.info(f'Получение свободного времени на дату: {date}, у пользователя: ID={user_link.id}')
     return template
 
 
