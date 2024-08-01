@@ -1,61 +1,61 @@
-version: '3.8'
-services:
-  db:
-    image: postgres:16
-    container_name: scheduler_db
-    volumes:
-      - postgresdata:/var/lib/postgresql/data
-    env_file:
-      - .env
-    ports:
-      - 5432:5432
+# version: '3.8'
+# services:
+#   db:
+#     image: postgres:16
+#     container_name: scheduler_db
+#     volumes:
+#       - postgresdata:/var/lib/postgresql/data
+#     env_file:
+#       - .env
+#     ports:
+#       - 5432:5432
 
-  redis:
-    image: redis:7
-    container_name: scheduler_redis
+#   redis:
+#     image: redis:7
+#     container_name: scheduler_redis
 
-  scheduler:
-    image: scheduler_app
-    container_name: scheduler_app
-    env_file:
-      - .env
-    depends_on:
-      - db
-      - redis
-    command: >
-      sh -c "celery --app=app.tasks.celery_app:celery worker -l INFO && alembic upgrade head && gunicorn main:app --workers 1 --worker-class uvicorn.workers.UvicornWorker --bind=0.0.0.0:8000"
-    ports:
-      - 7777:8000
+#   scheduler:
+#     image: scheduler_app
+#     container_name: scheduler_app
+#     env_file:
+#       - .env
+#     depends_on:
+#       - db
+#       - redis
+#     command: >
+#       sh -c "celery --app=app.tasks.celery_app:celery worker -l INFO && alembic upgrade head && gunicorn main:app --workers 1 --worker-class uvicorn.workers.UvicornWorker --bind=0.0.0.0:8000"
+#     ports:
+#       - 7777:8000
 
-  celery:
-    image: scheduler_app
-    container_name: scheduler_celery
-    command: sh -c "celery --app=app.tasks.celery_app:celery worker -l INFO"
-    env_file:
-      - .env
-    depends_on:
-      - redis
+#   celery:
+#     image: scheduler_app
+#     container_name: scheduler_celery
+#     command: sh -c "celery --app=app.tasks.celery_app:celery worker -l INFO"
+#     env_file:
+#       - .env
+#     depends_on:
+#       - redis
 
-  prometheus:
-    image: prom/prometheus:v2.43.0
-    container_name: prometheus
-    volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml
-      - prometheusdata:/prometheus
-    restart: unless-stopped
-    ports:
-      - 9090:9090
+#   prometheus:
+#     image: prom/prometheus:v2.43.0
+#     container_name: prometheus
+#     volumes:
+#       - ./prometheus.yml:/etc/prometheus/prometheus.yml
+#       - prometheusdata:/prometheus
+#     restart: unless-stopped
+#     ports:
+#       - 9090:9090
 
-  grafana:
-    image: grafana/grafana:9.4.7
-    container_name: grafana
-    volumes:
-      - grafanadata:/var/lib/grafana
-    restart: unless-stopped
-    ports:
-      - 3000:3000
+#   grafana:
+#     image: grafana/grafana:9.4.7
+#     container_name: grafana
+#     volumes:
+#       - grafanadata:/var/lib/grafana
+#     restart: unless-stopped
+#     ports:
+#       - 3000:3000
 
-volumes:
-  postgresdata:
-  grafanadata:
-  prometheusdata:
+# volumes:
+#   postgresdata:
+#   grafanadata:
+#   prometheusdata:
