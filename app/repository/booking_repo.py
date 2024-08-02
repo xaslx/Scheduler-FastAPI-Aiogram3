@@ -63,6 +63,7 @@ class BookingRepository(BaseRepository):
             booking = result.scalar_one_or_none()
 
             booking.times.remove(time[0])
+            booking.selected_times.append((time))
             new_booking = (
                 update(cls.model)
                 .where(cls.model.id == booking_id)
