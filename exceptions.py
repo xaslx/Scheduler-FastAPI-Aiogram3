@@ -63,6 +63,9 @@ class UnverifiedUser(BaseException):
     status_code = status.HTTP_401_UNAUTHORIZED
     detail = "Вы не верифицированный пользователь"
 
+class BookingError(BaseException):
+    status_code = status.HTTP_409_CONFLICT
+    detail = "Не удалось сделать запись"
 
 class YourAccountIsBlocked(BaseException):
     status_code = status.HTTP_403_FORBIDDEN

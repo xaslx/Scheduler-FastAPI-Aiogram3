@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import SQLAlchemyError
 
 from app.models.booking_model import Booking
-from exceptions import TimeNotFound
+from exceptions import TimeNotFound, BookingError
 
 from .base_repo import BaseRepository
 from logger import logger
@@ -63,7 +63,6 @@ class BookingRepository(BaseRepository):
             booking = result.scalar_one_or_none()
 
             booking.times.remove(time[0])
-            booking.selected_times.append((time))
             new_booking = (
                 update(cls.model)
                 .where(cls.model.id == booking_id)
@@ -77,7 +76,7 @@ class BookingRepository(BaseRepository):
             else:
                 msg = 'Unknown Exc: Не удалось сделать запись.'
             logger.error(msg)
-            return None
+            raise BookingError
 
     @classmethod
     async def cancel_times(
