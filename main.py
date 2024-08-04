@@ -51,11 +51,11 @@ app: FastAPI = FastAPI(
 )
 
 
-instrumentator: Instrumentator = Instrumentator(
-    should_group_status_codes=False,
-    excluded_handlers=["metrics"]
-)
-instrumentator.instrument(app).expose(app)
+# instrumentator: Instrumentator = Instrumentator(
+#     should_group_status_codes=False,
+#     excluded_handlers=["metrics"]
+# )
+# instrumentator.instrument(app).expose(app)
 
 # пагинация
 add_pagination(app)
