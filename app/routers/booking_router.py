@@ -1,7 +1,7 @@
 from datetime import date, datetime, timedelta
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Query, Request, BackgroundTasks
+from fastapi import APIRouter, Depends, Path, Query, Request, BackgroundTasks
 from fastapi.responses import HTMLResponse, JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from urllib3 import HTTPResponse
@@ -30,7 +30,7 @@ booking_router: APIRouter = APIRouter(prefix="/booking", tags=["Запись"])
 
 @booking_router.get("/{personal_link}", status_code=200, name="personal_link:page")
 async def get_booking_by_link(
-    personal_link: str,
+    personal_link: Annotated[str, Path()],
     request: Request,
     user: UserOut = Depends(get_current_user),
     notifications: list[NotificationOut] = Depends(get_all_notifications),
@@ -90,7 +90,7 @@ async def add_booking(
     "/{personal_link}/select_time", status_code=200, name="gettime:page"
 )
 async def get_time(
-    personal_link: str,
+    personal_link: Annotated[str, Path()],
     booking_id: Annotated[int, Query()],
     date: Annotated[date, Query()],
     user_id: Annotated[int, Query()],
@@ -160,7 +160,7 @@ async def get_time(
 
 @booking_router.patch("/select_booking/{booking_id}", status_code=200)
 async def select_booking(
-    booking_id: int,
+    booking_id: Annotated[int, Path()],
     bg_task: BackgroundTasks,
     create_booking: CreateBooking,
     session: AsyncSession = Depends(get_async_session),

@@ -3,7 +3,7 @@ import secrets
 from datetime import date, datetime
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Query, Request, Response, BackgroundTasks
+from fastapi import APIRouter, Depends, Query, Request, Response, BackgroundTasks, Path
 from fastapi.exceptions import HTTPException
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi_pagination import Page
@@ -233,7 +233,7 @@ async def get_all_users(
 @user_router.get("/search_user", status_code=200, name="search:page")
 async def search_user_by_name_surname(
     request: Request,
-    query: str | None = None,
+    query: Annotated[str | None, Query()] = None,
     session: AsyncSession = Depends(get_async_session),
     user: UserOut = Depends(get_admin_user),
     page: Annotated[int, Query()] = 1,
@@ -288,7 +288,7 @@ async def get_my_settings_template(
 @user_router.get("/{user_id}", status_code=200, name="user_by_id:page")
 async def get_user_by_id(
     request: Request,
-    user_id: int,
+    user_id: Annotated[int, Path()],
     session: AsyncSession = Depends(get_async_session),
     user: UserOut = Depends(get_admin_user),
     notifications: list[NotificationOut] = Depends(get_all_notifications),
@@ -321,7 +321,7 @@ async def get_user_by_id(
 
 @user_router.patch("/ban/{user_id}", status_code=200)
 async def ban_user(
-    user_id: int,
+    user_id: Annotated[int, Path()],
     session: AsyncSession = Depends(get_async_session),
     admin: UserOut = Depends(get_admin_user),
 ):
@@ -341,7 +341,7 @@ async def ban_user(
 
 @user_router.patch("/unban/{user_id}", status_code=200)
 async def unban_user(
-    user_id: int,
+    user_id: Annotated[int, Path()],
     session: AsyncSession = Depends(get_async_session),
     admin: UserOut = Depends(get_admin_user),
 ):
@@ -362,7 +362,7 @@ async def unban_user(
 @user_router.patch("/edit_role/{user_id}", status_code=200, name="edit_role:page")
 async def edit_role_for_user(
     new_role: EditRole,
-    user_id: int,
+    user_id: Annotated[int, Path()],
     session: AsyncSession = Depends(get_async_session),
     admin: UserOut = Depends(get_admin_user),
 ):
@@ -377,7 +377,7 @@ async def edit_role_for_user(
     "/delete_user_for_admin/{user_id}", status_code=200, name="delete_user:page"
 )
 async def delete_user(
-    user_id: int,
+    user_id: Annotated[int, Path()],
     session: AsyncSession = Depends(get_async_session),
     admin: UserOut = Depends(get_admin_user),
 ):
@@ -393,7 +393,7 @@ async def delete_user(
 
 @user_router.delete("/delete_user/{user_id}", name="del_user:page")
 async def del_user(
-    user_id: int,
+    user_id: Annotated[int, Path()],
     request: Request,
     session: AsyncSession = Depends(get_async_session),
     user: UserOut = Depends(get_current_user),
@@ -416,7 +416,7 @@ async def del_user(
 @user_router.patch("/edit_enabled/{user_id}")
 async def edit_enabled(
     enabled: EditEnabled,
-    user_id: int,
+    user_id: Annotated[int, Path()],
     session: AsyncSession = Depends(get_async_session),
     user: UserOut = Depends(get_current_user),
 ):
@@ -430,7 +430,7 @@ async def edit_enabled(
 @user_router.patch("/edit_time/{user_id}")
 async def edit_time(
     new_time: EditTime,
-    user_id: int,
+    user_id: Annotated[int, Path()],
     session: AsyncSession = Depends(get_async_session),
     user: UserOut = Depends(get_current_user),
 ):
@@ -460,7 +460,7 @@ async def get_forgot_password_template(
 
 @user_router.get("/reset/reset_password", status_code=200, name="reset_password:page")
 async def get_reset_password_template(
-    token: str,
+    token: Annotated[str, Query()],
     request: Request,
     user: UserOut = Depends(get_current_user),
     session: AsyncSession = Depends(get_async_session),

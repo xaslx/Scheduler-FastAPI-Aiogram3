@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Depends, Request, status, BackgroundTasks
+from typing import Annotated
+from fastapi import APIRouter, Depends, Path, Request, status, BackgroundTasks
 from fastapi.responses import HTMLResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -172,7 +173,7 @@ async def send_notification_for_all_users(
 
 @notification_router.delete("/{notif_id}")
 async def delete_notification(
-    notif_id: int,
+    notif_id: Annotated[int, Path()],
     session: AsyncSession = Depends(get_async_session),
     user: UserOut = Depends(get_admin_user),
 ):
