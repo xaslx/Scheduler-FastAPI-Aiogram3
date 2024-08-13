@@ -177,7 +177,7 @@
     </style>
     <script>
         document.addEventListener("DOMContentLoaded", () => {
-            let socket = new WebSocket("ws://scheduler-bgly.onrender.com/counter");
+            let socket = new WebSocket("ws://0.0.0.0:8000/counter");
             socket.onmessage = (event) => {
             const counter = document.querySelector("#counter");
             counter.textContent = event.data;
