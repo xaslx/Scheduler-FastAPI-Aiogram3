@@ -109,7 +109,9 @@
         <a href="https://t.me/xaslx" class="social-link" target="_blank">
             <img src="/app/static/tg.png" alt="Социальная сеть">
             <span>Telegram</span>
-        </a>
+        </a> <br>
+        <span>Пользователей на сайте: </span>
+        <span id="counter"></span>
         <p class="copy">&copy; 2024</p>
     </footer>
     {% block scripts %}
@@ -173,6 +175,15 @@
         }
 
     </style>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            let socket = new WebSocket("ws://https://scheduler-bgly.onrender.com/counter");
+            socket.onmessage = (event) => {
+            const counter = document.querySelector("#counter");
+            counter.textContent = event.data;
+            };
+            });
+    </script>
     {% endblock %}
 </body>
 
