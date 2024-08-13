@@ -17,6 +17,7 @@ from app.routers.booking_router import booking_router
 from app.routers.main_router import main_router
 from app.routers.notification_router import notification_router
 from app.routers.user_router import user_router
+from app.routers.websocket_router import websocket_router
 from app.schemas.notification_schemas import NotificationOut
 from app.schemas.user_schema import UserOut
 from app.utils.templating import templates
@@ -66,6 +67,7 @@ app.include_router(user_router)
 app.include_router(main_router)
 app.include_router(booking_router)
 app.include_router(notification_router)
+app.include_router(websocket_router)
 
 
 app.add_middleware(RateLimitingMiddleware)
