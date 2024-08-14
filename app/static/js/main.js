@@ -1,4 +1,4 @@
-let activeDropdown = null; // Переместите переменную в глобальную область видимости
+let activeDropdown = null;
 const dropdowns = ['notification-list', 'user-dropdown'];
 
 function showDropdown(dropdownId) {
@@ -80,6 +80,12 @@ document.addEventListener('DOMContentLoaded', function() {
             hideDropdown('user-dropdown');
         }
     });
+
+    let socket = new WebSocket("wss://scheduler-bgly.onrender.com/counter");
+    socket.onmessage = (event) => {
+        const counter = document.querySelector("#counter");
+        counter.textContent = event.data;
+    };
 });
 
 function logout(event) {

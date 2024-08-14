@@ -115,7 +115,7 @@
         <p class="copy">&copy; 2024</p>
     </footer>
     {% block scripts %}
-    <script src="/app/static/js/main.js"></script>
+    <script defer src="/app/static/js/main.js"></script>
     <style>
         @media only screen and (max-width: 768px) {
             .user-info .user-name {
@@ -175,15 +175,6 @@
         }
 
     </style>
-    <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            let socket = new WebSocket("ws://0.0.0.0:8000/counter");
-            socket.onmessage = (event) => {
-            const counter = document.querySelector("#counter");
-            counter.textContent = event.data;
-            };
-            });
-    </script>
     {% endblock %}
 </body>
 
