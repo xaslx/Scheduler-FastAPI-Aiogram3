@@ -828,10 +828,7 @@ footer .social-link img {
 .cancel-button:hover {
     transform: scale(1.05);
 }
-.registration-form {
-    width: 60%;
-    margin: 0 auto;
-}
+
 
 .password-group {
     position: relative;
