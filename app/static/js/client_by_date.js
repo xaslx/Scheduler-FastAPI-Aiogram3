@@ -10,6 +10,8 @@ document.addEventListener("DOMContentLoaded", function() {
     cancelButtons.forEach(button => {
         button.addEventListener("click", function() {
             currentButton = this;
+            const tgId = currentButton.dataset.tgId || '';
+            document.getElementById('tg-id').value = tgId;
             modal.style.display = "block";
         });
     });
@@ -28,21 +30,30 @@ document.addEventListener("DOMContentLoaded", function() {
             alert("Причина отмены должна быть от 10 до 200 символов.");
             return;
         }
-        
+
         const time = currentButton.dataset.time;
         const email = currentButton.dataset.email;
         const bookingId = currentButton.dataset.id;
         const name = currentButton.dataset.name;
         const phone = currentButton.dataset.phone;
+        const tgId = document.getElementById('tg-id').value || null;
 
-        console.log({ date: date, time: time, email: email, description: reason, name: name, phone_number: phone });
-        
+        console.log({ date: date, time: time, email: email, description: reason, name: name, phone_number: phone, tg_id: tgId });
+
         fetch(`/booking/cancel_booking?booking_id=${bookingId}`, {
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ date: date, time: time, email: email, description: reason, name: name, phone_number: phone })
+            body: JSON.stringify({ 
+                date: date, 
+                time: time, 
+                email: email, 
+                description: reason, 
+                name: name, 
+                phone_number: phone,
+                tg_id: tgId
+            })
         })
         .then(response => {
             if (response.ok) {
