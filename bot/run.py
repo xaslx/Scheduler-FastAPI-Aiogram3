@@ -4,7 +4,7 @@ from fastapi import Response, Request
 from aiogram import Bot, Dispatcher, types
 from bot.user_handler import user_router
 from logger import logger
-
+from bot.keyboards import set_main_menu
 
 
 bot: Bot = Bot(settings.TOKEN_BOT)
@@ -38,3 +38,4 @@ async def handle_web_hook(request: Request):
 
 dp.startup.register(on_startup)
 dp.include_router(user_router)
+dp.startup.register(set_main_menu)
