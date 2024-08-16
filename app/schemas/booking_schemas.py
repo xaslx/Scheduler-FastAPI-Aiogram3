@@ -27,6 +27,7 @@ class CancelBooking(BaseModel):
     description: str = Field(min_length=10, max_length=200)
     name: str
     phone_number: str
+    tg_id: str | None = None
 
 
 class CreateBooking(BaseModel):
