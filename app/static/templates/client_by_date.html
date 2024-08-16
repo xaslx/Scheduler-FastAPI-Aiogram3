@@ -23,7 +23,7 @@
                             data-email="{{ time[3] }}" 
                             data-name="{{ time[1] }}" 
                             data-phone="{{ time[2] }}" 
-                            data-tg-id="{{ time[4] }}">
+                            data-tg-id="{{ time[4] if time[4] is not none else '' }}">
                         Отменить
                     </button>
                 </div>
