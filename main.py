@@ -1,6 +1,6 @@
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
@@ -25,6 +25,9 @@ from config import settings
 from database import async_session_maker
 from middleware import RateLimitingMiddleware
 from prometheus_fastapi_instrumentator import Instrumentator
+from aiogram import Bot, Dispatcher, types
+from aiogram.filters import CommandStart
+from aiogram.types import Message
 
 
 sentry_sdk.init(
@@ -40,6 +43,7 @@ async def lifespan(app: FastAPI):
         f"redis://{settings.REDIS_HOST}", encoding="utf-8", decode_responses=True
     )
     FastAPICache.init(RedisBackend(redis), prefix="cache")
+    await on_startup()
     yield
 
 
@@ -108,3 +112,43 @@ async def custom_404_handler(request: Request, __) -> HTMLResponse:
         name="404.html",
         context={"user": user, "notifications": notifications},
     )
+
+
+
+
+bot: Bot = Bot(settings.TOKEN_BOT)
+dp: Dispatcher = Dispatcher()
+
+
+
+
+web_hook: str = f'/{settings.TOKEN_BOT}'
+
+async def set_webhook():
+    webhook_url = f'{settings.WEBHOOK_URL}{web_hook}'
+    await bot.set_webhook(webhook_url)
+
+async def on_startup():
+    await set_webhook()
+    print('Бот запущен')
+
+
+@dp.message(CommandStart())
+async def cmd_start(message: Message):
+    await message.answer('hello')
+
+
+async def handle_web_hook(request: Request):
+    url = str(request.url)
+    index = url.rfind('/')
+    token = url[index + 1:]
+    if token == settings.TOKEN_BOT:
+        request_data = await request.json()
+        update = types.Update(**request_data)
+        await dp.feed_webhook_update(bot, update)
+        return Response()
+    else:
+        return Response(status_code=403)
+
+app.add_route(f'/{settings.TOKEN_BOT}', handle_web_hook, methods=["POST"])
+dp.startup.register(on_startup)
