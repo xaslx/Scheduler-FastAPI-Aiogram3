@@ -16,7 +16,7 @@ from app.schemas.booking_schemas import (BookingDate, BookingOut, CancelBooking,
 from app.schemas.notification_schemas import NotificationOut
 from app.schemas.user_schema import UserOut
 from app.tasks.tasks import (cancel_client, confirm_booking_for_client,
-                             new_client, cancel_client_for_me)
+                             new_client, cancel_client_for_me, cancel_booking_tg_client, cancel_booking_tg_owner)
 from app.utils.generate_time import generate_time_intervals
 from app.utils.templating import templates
 from database import get_async_session
@@ -287,3 +287,21 @@ async def cancel_booking(
         description=cancel_data.description,   
     )
     logger.info(f'Пользователю ID={user.id} отправлено письмо на почту об успешной отмене записи')
+    if user.telegram_id:
+        bg_task.add_task(
+            cancel_booking_tg_owner,
+            name=cancel_data.name,
+            email=cancel_data.email,
+            phone_number=cancel_data.phone_number,
+            date=cancel_data.date,
+            time=cancel_data.time,
+            description=cancel_data.description
+        )
+    if cancel_data.tg_id:
+        bg_task.add_task(
+            cancel_booking_tg_client,
+            int(cancel_data.tg_id),
+            date=cancel_data.date,
+            time=cancel_data.time,
+            description=cancel_data.description
+        )
