@@ -14,6 +14,35 @@ from app.tasks.email_templates import (add_new_client, cancel_booking,
                                        success_update_password,
                                        cancel_booking_for_me)
 from config import settings
+from aiogram import Bot
+from aiogram.client.default import DefaultBotProperties
+
+
+bot: Bot = Bot(settings.TOKEN_BOT, default=DefaultBotProperties(parse_mode="HTML"))
+
+
+async def cancel_booking_tg_client(user_id: int, date: str, time: str, description: str):
+    await bot.send_message(
+        chat_id=user_id, 
+        text=
+        f'<b>Вашу запись отменили</b>\n\n'
+        f'Дата: <b>{date}</b>\n'
+        f'Время: <b>{time}</b>\n'
+        f'Причина: <b>{description}</b>',
+    )
+
+async def cancel_booking_tg_owner(owner_id: int, name: str, email: EmailStr, phone_number: str, date: str, time: str, description: str):
+    await bot.send_message(
+        chat_id=owner_id, 
+        text=
+        f'<b>Вы отменили запись пользователю:</b>\n\n'
+        f'Имя: <b>{name}</b>\n'
+        f'Email: <b>{email}</b>\n'
+        f'Телефона: <b>{phone_number}</b>\n'
+        f'Дата: <b>{date}</b>\n'
+        f'Время: <b>{time}</b>\n'
+        f'Причина: <b>{description}</b>',
+    )
 
 
 @celery.task
