@@ -23,7 +23,7 @@ from app.schemas.user_schema import UserOut
 from app.utils.templating import templates
 from config import settings
 from database import async_session_maker
-import logger
+from logger import logger
 from middleware import RateLimitingMiddleware
 from prometheus_fastapi_instrumentator import Instrumentator
 from bot.run import on_startup, handle_web_hook
@@ -43,7 +43,7 @@ async def lifespan(app: FastAPI):
     )
     FastAPICache.init(RedisBackend(redis), prefix="cache")
     await on_startup()
-    logger.info('Fastpi приложение и Бот запущены')
+    logger.info('Fastapi приложение и Бот запущены')
     yield
 
 
