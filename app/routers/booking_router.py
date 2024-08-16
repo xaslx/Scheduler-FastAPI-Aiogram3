@@ -16,7 +16,8 @@ from app.schemas.booking_schemas import (BookingDate, BookingOut, CancelBooking,
 from app.schemas.notification_schemas import NotificationOut
 from app.schemas.user_schema import UserOut
 from app.tasks.tasks import (cancel_client, confirm_booking_for_client,
-                             new_client, cancel_client_for_me, cancel_booking_tg_client, cancel_booking_tg_owner)
+                             new_client, cancel_client_for_me, cancel_booking_tg_client, cancel_booking_tg_owner,
+                             new_booking_tg, new_client_tg)
 from app.utils.generate_time import generate_time_intervals
 from app.utils.templating import templates
 from database import get_async_session
@@ -228,6 +229,24 @@ async def select_booking(
         tg=create_booking.tg if create_booking.tg else 'Не указан'
     )
     logger.info(f'Пользователю: {(user_email.email, user_email.name, user_email.surname, user_email.id)} отправлено письмо о новом клиенте')
+    if create_booking.tg:
+        bg_task.add_task(
+            new_booking_tg,
+            user_id=create_booking.tg,
+            date=str(booking.date_for_booking), 
+            time=create_booking.time, 
+            email=user_email.email
+        )
+    if user_email.telegram_id:
+        bg_task.add_task(
+            new_client_tg,
+            user_id=user_email.telegram_id,
+            date=str(booking.date_for_booking), 
+            time=create_booking.time, 
+            name=create_booking.name, 
+            phone_number=create_booking.phone_number, 
+            user_email=create_booking.email,
+        )
 
 
 @booking_router.patch("/cancel_booking", status_code=200)
@@ -290,6 +309,7 @@ async def cancel_booking(
     if user.telegram_id:
         bg_task.add_task(
             cancel_booking_tg_owner,
+            owner_id=user.telegram_id,
             name=cancel_data.name,
             email=cancel_data.email,
             phone_number=cancel_data.phone_number,
