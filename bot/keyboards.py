@@ -1,9 +1,5 @@
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, BotCommand
 from aiogram import Bot
-from config import settings
-
-bot: Bot = Bot(settings.TOKEN_BOT)
-
 
 async def set_main_menu(bot: Bot):
 
@@ -13,7 +9,7 @@ async def set_main_menu(bot: Bot):
         BotCommand(command='/clients',
                    description='Мои ближайшие клиенты'),
         BotCommand(command='/bookings',
-                   description='Мои записи'),
+                   description='Мои ближайшие записи'),
         BotCommand(command='/help',
                    description='Все команды'),        
         BotCommand(command='/cancel',

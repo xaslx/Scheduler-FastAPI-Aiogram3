@@ -18,6 +18,7 @@ async def set_webhook():
 
 async def on_startup():
     await set_webhook()
+    await set_main_menu(bot)
 
 
 async def handle_web_hook(request: Request):
@@ -35,7 +36,5 @@ async def handle_web_hook(request: Request):
     else:
         return Response(status_code=403)
 
-
 dp.startup.register(on_startup)
 dp.include_router(user_router)
-dp.startup.register(set_main_menu)
