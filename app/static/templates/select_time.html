@@ -46,13 +46,19 @@
                     </div>
                     
                     <div class="input-wrapper">
-                        <input maxlength="20" type="text" id="userTelegram" placeholder="Telegram">
+                        <input maxlength="20" type="text" id="userTelegram" placeholder="Телеграм 'Получить ваш ID'" disabled>
+                        <button type="button" class="get-id-button" onclick="getTelegramId()">Получить ваш ID</button>
                     </div>
+                    <p>Добавьте Телеграм чтобы смотреть ваши записи или отменять их.
+                       А также получать уведомления.
+                    </p>                  
                 </div>
                 <div class="button-group">
                     <button class="custom-modal-confirm green-button" onclick="confirmSelection()">Да</button>
                     <button class="custom-modal-cancel red-button" onclick="hideConfirmation()">Отмена</button>
+                    
                 </div>
+                
             </div>
         </div>
     {% else %}
@@ -63,6 +69,24 @@
 {% block scripts %}
     {{ super() }}
     <style>
+        .input-wrapper input:disabled {
+            background-color: #e9ecef;
+            cursor: not-allowed;
+        }
+        .get-id-button {
+            margin-left: 10px;
+            padding: 3px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .get-id-button:hover {
+            background-color: #0056b3;
+        }
         .time-button {
             margin: 5px;
             padding: 10px 20px;

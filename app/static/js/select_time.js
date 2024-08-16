@@ -51,11 +51,11 @@ async function confirmSelection() {
         return;
     }
 
-    if (telegram && (!/^[a-zA-Z0-9_]+$/.test(telegram) || telegram.length < 4)) {
+    if (telegram && (!/^\d{5,15}$/.test(telegram))) {
         Swal.fire({
             icon: 'error',
             title: 'Ошибка!',
-            text: 'Telegram должен содержать не менее 4 символов и содержать только английские буквы, цифры и нижнее подчеркивание.',
+            text: 'Telegram ID должен содержать только цифры и быть длиной от 5 до 15 символов.',
         });
         return;
     }
@@ -115,4 +115,13 @@ function showUnavailableNotification(time) {
         title: 'Внимание!',
         text: `Выбранное время (${time}) недоступно для записи.`,
     });
+}
+function getTelegramId() {
+    const telegramInput = document.getElementById('userTelegram');
+    telegramInput.disabled = false;
+
+    telegramInput.value = '';
+    telegramInput.placeholder = 'Вставьте сюда ваш Telegram ID';
+
+    window.open('https://t.me/test_fast_shop_bot', '_blank');
 }
