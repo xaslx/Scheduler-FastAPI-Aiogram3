@@ -1,9 +1,9 @@
+from json import JSONDecodeError
 from config import settings
-from aiogram.types import Message
-from aiogram.filters import CommandStart
 from fastapi import Response, Request
 from aiogram import Bot, Dispatcher, types
-
+from bot.user_handler import user_router
+from logger import logger
 
 
 
@@ -13,27 +13,28 @@ web_hook: str = f'/{settings.TOKEN_BOT}'
 
 
 async def set_webhook():
-    webhook_url = f'{settings.WEBHOOK_URL}{web_hook}'
+    webhook_url: str = f'{settings.WEBHOOK_URL}{web_hook}'
     await bot.set_webhook(webhook_url)
 
 async def on_startup():
     await set_webhook()
 
 
-@dp.message(CommandStart())
-async def cmd_start(message: Message):
-    await message.answer('hello')
-
 async def handle_web_hook(request: Request):
-    url = str(request.url)
-    index = url.rfind('/')
-    token = url[index + 1:]
+    url: str = str(request.url)
+    index: str = url.rfind('/')
+    token: str = url[index + 1:]
     if token == settings.TOKEN_BOT:
-        request_data = await request.json()
-        update = types.Update(**request_data)
-        await dp.feed_webhook_update(bot, update)
-        return Response()
+        try:
+            request_data = await request.json()
+            update = types.Update(**request_data)
+            await dp.feed_webhook_update(bot, update)
+            return Response()
+        except JSONDecodeError:
+            logger.error('Ошибка декодирования Json')
     else:
         return Response(status_code=403)
 
+
 dp.startup.register(on_startup)
+dp.include_router(user_router)
