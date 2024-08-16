@@ -35,14 +35,43 @@ async def cancel_booking_tg_owner(owner_id: int, name: str, email: EmailStr, pho
     await bot.send_message(
         chat_id=owner_id, 
         text=
-        f'<b>Вы отменили запись пользователю:</b>\n\n'
+        f'<b>Вы отменили запись пользователю</b>\n\n'
+        f'Инфо о клиенте:\n'
         f'Имя: <b>{name}</b>\n'
         f'Email: <b>{email}</b>\n'
-        f'Телефона: <b>{phone_number}</b>\n'
+        f'Телефона: <b>{phone_number}</b>\n\n'
+        f'Инфо о времени и причина:\n'
         f'Дата: <b>{date}</b>\n'
         f'Время: <b>{time}</b>\n'
         f'Причина: <b>{description}</b>',
     )
+
+async def new_client_tg(user_id: int, date: str, time: str, name: str, phone_number: str, user_email: EmailStr):
+    print(user_id,date,time,name,phone_number,user_email)
+    await bot.send_message(
+        chat_id=user_id,
+        text=
+        f'К вам записался новый клиент!\n'
+        f'Дата: <b>{date}</b>\n'
+        f'Время: <b>{time}</b>\n\n'
+        f'<b>Информация о клиенте</b>\n'
+        f'Имя: <b>{name}</b>\n'
+        f'Телефон: <b>{phone_number}</b>\n'
+        f'Email клиента: <b>{user_email}</b>\n'
+    )
+
+async def new_booking_tg(user_id: int, date: str, time: str, email: EmailStr):
+    await bot.send_message(
+        chat_id=user_id,
+        text=
+        f'Вы успешно записались\n'
+        f'Дата: <b>{date}</b>\n'
+        f'Время: <b>{time}</b>\n\n'
+        f'<b>Если хотите отменить запись то напишите на почту</b>\n'
+        f'Email: <b>{email}</b>\n'
+        f'Или же отменить в телеграм /bookings'
+    )
+
 
 
 @celery.task
