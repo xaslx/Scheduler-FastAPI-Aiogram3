@@ -1,4 +1,4 @@
-# Scheduler
+# Scheduler (FastAPI + Aiogram3)
 
 
 ## Описание проекта
