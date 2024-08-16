@@ -1,6 +1,6 @@
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
@@ -25,7 +25,8 @@ from config import settings
 from database import async_session_maker
 from middleware import RateLimitingMiddleware
 from prometheus_fastapi_instrumentator import Instrumentator
-from bot.run import handle_web_hook
+from bot.run import on_startup, handle_web_hook
+
 
 sentry_sdk.init(
     dsn=settings.dsn,
@@ -40,6 +41,7 @@ async def lifespan(app: FastAPI):
         f"redis://{settings.REDIS_HOST}", encoding="utf-8", decode_responses=True
     )
     FastAPICache.init(RedisBackend(redis), prefix="cache")
+    await on_startup()
     yield
 
 
