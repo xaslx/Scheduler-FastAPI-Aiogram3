@@ -5,9 +5,11 @@ from aiogram import Bot, Dispatcher, types
 from bot.user_handler import user_router
 from logger import logger
 from bot.keyboards import set_main_menu
+from aiogram.client.default import DefaultBotProperties
 
 
-bot: Bot = Bot(settings.TOKEN_BOT)
+
+bot: Bot = Bot(settings.TOKEN_BOT, default=DefaultBotProperties(parse_mode="HTML"))
 dp: Dispatcher = Dispatcher()
 web_hook: str = f'/{settings.TOKEN_BOT}'
 
