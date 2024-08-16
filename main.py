@@ -25,7 +25,7 @@ from config import settings
 from database import async_session_maker
 from middleware import RateLimitingMiddleware
 from prometheus_fastapi_instrumentator import Instrumentator
-
+from bot.run import handle_web_hook
 
 sentry_sdk.init(
     dsn=settings.dsn,
@@ -68,7 +68,7 @@ app.include_router(main_router)
 app.include_router(booking_router)
 app.include_router(notification_router)
 app.include_router(websocket_router)
-
+app.add_route(f'/{settings.TOKEN_BOT}', handle_web_hook, methods=["POST"])
 
 app.add_middleware(RateLimitingMiddleware)
 
