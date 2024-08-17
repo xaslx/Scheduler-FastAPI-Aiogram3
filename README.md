@@ -7,6 +7,7 @@
 Ваши клиенты могут легко и быстро записаться на удобное для них время.
 
 Имеется пользовательский интерфейс, можно протестировать - https://scheduler-bgly.onrender.com/
+https://t.me/scheduler_help_bot - Телеграм Бот
 
 (так как задеплоен на render.com , при открытии ссылки нужно подождать около минуты)
 
@@ -39,3 +40,4 @@
 - Alembic
 - Black, isort, flake8, autoflake
 - HTML, CSS, JS
+- Aiogram3
