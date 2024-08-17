@@ -1,4 +1,3 @@
-from app.repository.telegram_repo import TelegramRepository
 from database import async_session_maker
 from sqlalchemy import select, insert
 from app.models.telegram_model import Telegram
@@ -20,7 +19,7 @@ class BotService:
         async with async_session_maker() as session:
             query = select(cls.model)
             result = await session.execute(query)
-            return result.mappings().all()
+            return result.scalars().all()
         
     @classmethod
     async def find_user_by_tg_id(cls, telegram_id: int) -> TelegramOut:
