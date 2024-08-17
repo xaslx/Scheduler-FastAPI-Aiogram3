@@ -24,13 +24,13 @@ import asyncio
 bot: Bot = Bot(settings.TOKEN_BOT, default=DefaultBotProperties(parse_mode="HTML"))
 
 
-async def send_notifications_for_all_users_tg(users_id: list[int], text: str):
+async def send_notifications_for_all_users_tg(users_id: list[TelegramOut], text: str):
     for user in users_id:
         try:
-            await bot.send_message(chat_id=user, text=text)
+            await bot.send_message(chat_id=user.telegram_id, text=text)
             await asyncio.sleep(0.7)
         except:
-            logger.error(f'Не удалось отправить сообщению пользователю в Telegram, ID: {user}')
+            logger.error(f'Не удалось отправить сообщению пользователю в Telegram, ID: {user.telegram_id}')
 
 
 async def cancel_booking_tg_client(user_id: int, date: str, time: str, description: str):
