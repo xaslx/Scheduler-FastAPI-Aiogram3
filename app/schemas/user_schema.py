@@ -78,7 +78,7 @@ class UserOut(BaseModel):
     profile_photo: str
     role: str
     telegram_link: str | None
-    telegram_id: str | None
+    telegram_id: int | None
     personal_link: str
     registered_at: datetime
     is_active: bool
