@@ -6,7 +6,7 @@ from bot.user_handler import user_router
 from logger import logger
 from bot.keyboards import set_main_menu
 from aiogram.client.default import DefaultBotProperties
-
+from bot.admin_handler import admin_router
 
 
 bot: Bot = Bot(settings.TOKEN_BOT, default=DefaultBotProperties(parse_mode="HTML"))
@@ -40,3 +40,4 @@ async def handle_web_hook(request: Request):
 
 dp.startup.register(on_startup)
 dp.include_router(user_router)
+dp.include_router(admin_router)
