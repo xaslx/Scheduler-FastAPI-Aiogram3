@@ -47,7 +47,6 @@ async def cancel_booking_tg_owner(owner_id: int, name: str, email: EmailStr, pho
     )
 
 async def new_client_tg(user_id: int, date: str, time: str, name: str, phone_number: str, user_email: EmailStr):
-    print(user_id,date,time,name,phone_number,user_email)
     await bot.send_message(
         chat_id=user_id,
         text=
