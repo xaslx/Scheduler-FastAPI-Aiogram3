@@ -123,5 +123,5 @@ function getTelegramId() {
     telegramInput.value = '';
     telegramInput.placeholder = 'Вставьте сюда ваш Telegram ID';
 
-    window.open('https://t.me/scheduler_help_bot', '_blank');
+    window.open('https://t.me/test_fast_shop_bot', '_blank');
 }
