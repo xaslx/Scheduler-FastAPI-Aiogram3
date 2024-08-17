@@ -46,11 +46,10 @@ async def create_notification(message: Message, state: FSMContext):
 async def add_description(message: Message, state: FSMContext):
     await state.update_data(description=message.text)
     users: list[TelegramOut] = await BotService.find_all_users()
-    users_id: list[int] = [user.telegram_id for user in users]
     await message.answer(
         f'Уведомление создано и будет отправлено пользователям\n'
         f'Количество пользователей которые получат уведомление:  {len(users)}'
     )
     text: str = await state.get_data()
     await state.clear()
-    await send_notifications_for_all_users_tg(users_id=users_id, text=text['description'])
+    await send_notifications_for_all_users_tg(users_id=users, text=text['description'])
