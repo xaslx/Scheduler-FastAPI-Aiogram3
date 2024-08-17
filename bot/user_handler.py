@@ -18,7 +18,3 @@ async def cmd_start(message: Message):
     user: TelegramOut = await BotService.find_user_by_tg_id(telegram_id=message.from_user.id)
     if not user:
         await BotService.add_new_user(telegram_id=message.from_user.id)
-
-
-
-
