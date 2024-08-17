@@ -16,9 +16,21 @@ from app.tasks.email_templates import (add_new_client, cancel_booking,
 from config import settings
 from aiogram import Bot
 from aiogram.client.default import DefaultBotProperties
+from logger import logger
+from app.schemas.tg_schema import TelegramOut
+import asyncio
 
 
 bot: Bot = Bot(settings.TOKEN_BOT, default=DefaultBotProperties(parse_mode="HTML"))
+
+
+async def send_notifications_for_all_users_tg(users_id: list[int], text: str):
+    for user in users_id:
+        try:
+            await bot.send_message(chat_id=user, text=text)
+            await asyncio.sleep(0.7)
+        except:
+            logger.error(f'Не удалось отправить сообщению пользователю в Telegram, ID: {user}')
 
 
 async def cancel_booking_tg_client(user_id: int, date: str, time: str, description: str):
