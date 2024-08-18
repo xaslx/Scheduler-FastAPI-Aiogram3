@@ -1,5 +1,6 @@
-from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, BotCommand
+from aiogram.types import KeyboardButton, InlineKeyboardButton, BotCommand
 from aiogram import Bot
+from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
 
 async def set_main_menu(bot: Bot):
 
@@ -17,3 +18,12 @@ async def set_main_menu(bot: Bot):
     ]
 
     await bot.set_my_commands(main_menu_commands)
+
+
+
+async def create_inline_button(selected_times: list[str]):
+    builder: InlineKeyboardBuilder = InlineKeyboardBuilder()
+    for item in selected_times:
+        builder.add(InlineKeyboardButton(text=item[0], url='https://t.me#'))
+    builder.adjust(6)
+    return builder.as_markup(resize_keyboard=True)
