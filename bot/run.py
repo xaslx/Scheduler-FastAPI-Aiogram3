@@ -19,6 +19,7 @@ async def set_webhook():
     await bot.set_webhook(webhook_url)
 
 async def on_startup():
+    await bot.delete_webhook(drop_pending_updates=True)
     await set_webhook()
     await set_main_menu(bot)
 
