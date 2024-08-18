@@ -1,8 +1,11 @@
 from database import async_session_maker
-from sqlalchemy import select, insert
+from sqlalchemy import select, insert, and_
 from app.models.telegram_model import Telegram
 from app.schemas.tg_schema import TelegramOut
-
+from app.models.user_model import User
+from app.models.booking_model import Booking
+from datetime import date
+from app.repository.booking_repo import BookingRepository
 
 class BotService:
     model = Telegram
@@ -27,4 +30,20 @@ class BotService:
             query = select(cls.model).filter_by(telegram_id=telegram_id)
             result = await session.execute(query)
             return result.scalar_one_or_none()
+        
+    @classmethod
+    async def find_user(cls, telegram_id: int):
+        async with async_session_maker() as session:
+            query = select(User).filter_by(telegram_id=telegram_id)
+            result = await session.execute(query)
+            return result.scalar_one_or_none()
     
+    @classmethod
+    async def get_all_bookings(cls, user_id: int, date: date):
+        async with async_session_maker() as session:
+            return await BookingRepository.find_all_booking(user_id=user_id, session=session, date=date)
+        
+    @classmethod
+    async def get_booking(cls, user_id: int, date: date):
+        async with async_session_maker() as session:
+            return await BookingRepository.get_booking(user_id=user_id, date=date, session=session)
