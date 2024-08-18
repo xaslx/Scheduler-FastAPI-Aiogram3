@@ -33,9 +33,9 @@ async def my_clients(message: Message):
         return
     res: list[BookingOut] = await BotService.get_all_bookings(user_id=user.id, date=datetime.now(tz=moscow_tz).date())
     for booking in res:
-        await message.answer(f'{booking.date_for_booking}, <b>количество записанных пользователей: {len(booking.selected_times)}</b>')
+        await message.answer(f'{datetime.strftime(booking.date_for_booking, '%d.%m.%Y')}, <b>количество записанных пользователей: {len(booking.selected_times)}</b>')
     await message.answer(
-        f'Введите /date "ДАТА"\n'
+        f'Введите /date  <i>дату</i>\n'
         f'Чтобы посмотреть забронированное время\n\n'
         f'Пример: /date 01.01.2024'
     )
@@ -57,7 +57,7 @@ async def get_clients_by_date(message: Message, command: CommandObject):
                 await message.answer('На выбранную дату нет клиентов')
             else:
                 await message.answer(
-                    f'Все записи на : {date_object}',
+                    f'Все записи на : <b>{command.args}</b>',
                     reply_markup=await create_inline_button(clients.selected_times)
                 )
 
