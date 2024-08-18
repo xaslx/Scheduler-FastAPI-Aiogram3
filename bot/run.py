@@ -40,5 +40,5 @@ async def handle_web_hook(request: Request):
         return Response(status_code=403)
 
 dp.startup.register(on_startup)
-dp.include_router(user_router)
 dp.include_router(admin_router)
+dp.include_router(user_router)
