@@ -81,7 +81,7 @@ class BookingRepository(BaseRepository):
 
     @classmethod
     async def cancel_times(
-        cls, user_id: int, session: AsyncSession, booking_id: int, time: tuple[str]
+        cls, user_id: int, session: AsyncSession, booking_id: int, time: str
     ):
         try:
             query = select(cls.model).where(
