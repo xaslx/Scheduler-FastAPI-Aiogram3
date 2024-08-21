@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Записи на {{ date }}{% endblock %}
+{% block title %}Записи на {{ date.strftime('%d.%m.%Y') }}{% endblock %}
 
 {% block content %}
     <h1>Записи на {{ date.strftime('%d.%m.%Y') }}</h1>
