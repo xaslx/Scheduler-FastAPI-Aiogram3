@@ -6,6 +6,7 @@ from app.models.user_model import User
 from app.models.booking_model import Booking
 from datetime import date
 from app.repository.booking_repo import BookingRepository
+from app.repository.user_repo import UserRepository
 
 class BotService:
     model = Telegram
@@ -34,9 +35,7 @@ class BotService:
     @classmethod
     async def find_user(cls, telegram_id: int):
         async with async_session_maker() as session:
-            query = select(User).filter_by(telegram_id=telegram_id)
-            result = await session.execute(query)
-            return result.scalar_one_or_none()
+            return await UserRepository.find_one_or_none(session=session, telegram_id=telegram_id)
     
     @classmethod
     async def get_all_bookings(cls, user_id: int, date: date):
@@ -47,3 +46,11 @@ class BotService:
     async def get_booking(cls, user_id: int, date: date):
         async with async_session_maker() as session:
             return await BookingRepository.get_booking(user_id=user_id, date=date, session=session)
+    
+
+    @classmethod
+    async def cancel_booking(cls, user_id: int, booking_id: int, time: str):
+        async with async_session_maker() as session:
+            return await BookingRepository.cancel_times(user_id=user_id, session=session, time=time, booking_id=booking_id)
+    
+    
