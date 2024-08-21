@@ -191,27 +191,29 @@ async def select_booking(
     logger.info(f'Пользователь: {(create_booking.name,
             create_booking.phone_number,
             create_booking.email)} записался к ID={user_email.id}, date={booking.date_for_booking}, time={create_booking.time}')
+    formatted_date: date = booking.date_for_booking.strftime('%d.%m.%Y')
     # confirm_booking_for_client.delay(
     #     email_to=create_booking.email,
     #     tg=user_email.telegram_link if user_email.telegram_link else "Не указан",
     #     em=user_email.email,
     #     time=create_booking.time,
-    #     date=str(booking.date_for_booking),
+    #     date=str(formatted_date),
     # ) Celery
+
     bg_task.add_task(
         confirm_booking_for_client,
         email_to=create_booking.email,
         tg=user_email.telegram_link if user_email.telegram_link else "Не указан",
         em=user_email.email,
         time=create_booking.time,
-        date=str(booking.date_for_booking)
+        date=str(formatted_date)
     )
     logger.info(f'Пользователю: {(create_booking.name,
             create_booking.phone_number,
             create_booking.email)} отправлено письмо о успешной записи')
     # new_client.delay(
     #     email=user_email.email,
-    #     date=str(booking.date_for_booking),
+    #     date=str(formatted_date),
     #     time=create_booking.time,
     #     name=create_booking.name,
     #     phone_number=create_booking.phone_number,
@@ -221,7 +223,7 @@ async def select_booking(
     bg_task.add_task(
         new_client, 
         email=user_email.email,
-        date=str(booking.date_for_booking),
+        date=str(formatted_date),
         time=create_booking.time,
         name=create_booking.name,
         phone_number=create_booking.phone_number,
@@ -233,7 +235,7 @@ async def select_booking(
         bg_task.add_task(
             new_booking_tg,
             user_id=create_booking.tg,
-            date=str(booking.date_for_booking), 
+            date=str(formatted_date), 
             time=create_booking.time, 
             email=user_email.email
         )
@@ -241,7 +243,7 @@ async def select_booking(
         bg_task.add_task(
             new_client_tg,
             user_id=user_email.telegram_id,
-            date=str(booking.date_for_booking), 
+            date=str(formatted_date), 
             time=create_booking.time, 
             name=create_booking.name, 
             phone_number=create_booking.phone_number, 
@@ -268,22 +270,24 @@ async def cancel_booking(
         booking_id=booking.id,
         time=cancel_data.time,
     )
+    date_obj: datetime = datetime.strptime(cancel_data.date, '%Y-%m-%d')
+    formatted_date: str = date_obj.strftime('%d.%m.%Y')
     logger.info(f'Пользователь ID={user.id} отменил запись для клиента:\n \
                 email={cancel_data.email}\n \
                 time={cancel_data.time}\n \
-                date={cancel_data.date}\n \
+                date={formatted_date}\n \
                 Причина={cancel_data.description}')
     # cancel_client.delay(
     #     message="Вам отменили запись.",
     #     email=cancel_data.email,
-    #     date=cancel_data.date,
+    #     date=formatted_date,
     #     time=cancel_data.time,
     #     description=cancel_data.description,
     # ) Celery
     bg_task.add_task(
         cancel_client,
         email=cancel_data.email,
-        date=cancel_data.date,
+        date=formatted_date,
         time=cancel_data.time,
         description=cancel_data.description 
     )
@@ -291,7 +295,7 @@ async def cancel_booking(
     # cancel_client.delay(
     #     message=f"Вы отменили запись клиенту.\n{cancel_data.email}",
     #     email=user.email,
-    #     date=cancel_data.date,
+    #     date=formatted_date,
     #     time=cancel_data.time,
     #     description=cancel_data.description,
     # ) Celery
@@ -301,7 +305,7 @@ async def cancel_booking(
         name=cancel_data.name,
         email=cancel_data.email,
         phone_number=cancel_data.phone_number,
-        date=cancel_data.date,
+        date=formatted_date,
         time=cancel_data.time,
         description=cancel_data.description,   
     )
@@ -313,7 +317,7 @@ async def cancel_booking(
             name=cancel_data.name,
             email=cancel_data.email,
             phone_number=cancel_data.phone_number,
-            date=cancel_data.date,
+            date=formatted_date,
             time=cancel_data.time,
             description=cancel_data.description
         )
@@ -321,7 +325,7 @@ async def cancel_booking(
         bg_task.add_task(
             cancel_booking_tg_client,
             int(cancel_data.tg_id),
-            date=cancel_data.date,
+            date=formatted_date,
             time=cancel_data.time,
             description=cancel_data.description
         )
