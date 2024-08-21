@@ -16,7 +16,7 @@ web_hook: str = f'/{settings.TOKEN_BOT}'
 
 async def set_webhook():
     webhook_url: str = f'{settings.WEBHOOK_URL}{web_hook}'
-    await bot.set_webhook(webhook_url)
+    await bot.set_webhook(webhook_url, allowed_updates=['callback_query', 'message'])
 
 async def on_startup():
     await bot.delete_webhook(drop_pending_updates=True)
