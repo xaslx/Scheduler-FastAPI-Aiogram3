@@ -8,7 +8,7 @@
         {% for booking in clients %}
             {% if booking.selected_times | length > 0 %}
                 <a href="/user/clients/?date={{ booking.date_for_booking }}&user_id={{ user.id }}" class="client-block">
-                    <h2>{{ booking.date_for_booking }}</h2>
+                    <h2>{{ booking.date_for_booking.strftime('%d.%m.%Y') }}</h2>
                     <p>{{ booking.selected_times | length }} записи(ей)</p>
                 </a>
             {% endif %}

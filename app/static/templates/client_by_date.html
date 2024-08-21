@@ -3,7 +3,7 @@
 {% block title %}Записи на {{ date }}{% endblock %}
 
 {% block content %}
-    <h1>Записи на {{ date }}</h1>
+    <h1>Записи на {{ date.strftime('%d.%m.%Y') }}</h1>
     <input type="hidden" id="booking-date" value="{{ date }}">
 
     <div class="custom-booking-container">
