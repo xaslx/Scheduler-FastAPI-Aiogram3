@@ -44,3 +44,10 @@ def confirmation_markup(booking_id: int, user_id: int, date_: str, hour: str, mi
         ]
     )
     return markup
+
+def create_inline_button_times(times: list[str], booking_id: int, user_id: int, date: str) -> InlineKeyboardBuilder:
+    builder: InlineKeyboardBuilder = InlineKeyboardBuilder()
+    for item in times:
+        builder.add(InlineKeyboardButton(text=item, callback_data=f'select:{booking_id}:{user_id}:{date}:{item}'))
+    builder.adjust(5)
+    return builder.as_markup()
