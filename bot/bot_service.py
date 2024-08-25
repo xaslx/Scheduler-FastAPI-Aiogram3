@@ -33,9 +33,9 @@ class BotService:
             return result.scalar_one_or_none()
         
     @classmethod
-    async def find_user(cls, telegram_id: int):
+    async def find_user(cls, **filter_by):
         async with async_session_maker() as session:
-            return await UserRepository.find_one_or_none(session=session, telegram_id=telegram_id)
+            return await UserRepository.find_one_or_none(session=session, **filter_by)
     
     @classmethod
     async def get_all_bookings(cls, user_id: int, date: date):
@@ -47,10 +47,20 @@ class BotService:
         async with async_session_maker() as session:
             return await BookingRepository.get_booking(user_id=user_id, date=date, session=session)
     
+    @classmethod
+    async def add_booking(cls, **data):
+        async with async_session_maker() as session:
+            return await BookingRepository.add(session=session, **data)
+    
 
     @classmethod
     async def cancel_booking(cls, user_id: int, booking_id: int, time: str):
         async with async_session_maker() as session:
             return await BookingRepository.cancel_times(user_id=user_id, session=session, time=time, booking_id=booking_id)
+        
+    @classmethod
+    async def new_booking(cls, user_id: int, booking_id: int, time: str):
+        async with async_session_maker() as session:
+            return await BookingRepository.select_times(user_id=user_id, session=session, booking_id=booking_id, time=time)
     
     
