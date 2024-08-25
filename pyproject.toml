@@ -33,6 +33,7 @@ python-json-logger = "^2.0.7"
 prometheus-fastapi-instrumentator = "^7.0.0"
 aiogram = "^3.12.0"
 aiohttp = "^3.10.3"
+email-validator = "^2.2.0"
 
 
 [build-system]
