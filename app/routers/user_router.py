@@ -22,17 +22,20 @@ from app.schemas.booking_schemas import BookingOut
 from app.schemas.notification_schemas import NotificationOut
 from app.schemas.user_schema import (EditEnabled, EditPassword, EditRole,
                                      EditTime, ResetPassword, UserOut,
-                                     UserUpdate)
+                                     UserUpdate, ConnectTg)
 from app.tasks.tasks import (password_changed, reset_password_email,
-                             update_password)
+                             update_password, disconnect_tg, disconnect_tg_for_user)
 from app.utils.generate_time import moscow_tz
 from app.utils.templating import templates
 from database import get_async_session
 from exceptions import NotAccessError, UserNotFound
 from logger import logger
+from aiogram import Bot
+from config import settings
 
 
 user_router: APIRouter = APIRouter(prefix="/user", tags=["Пользователи"])
+bot: Bot = Bot(settings.TOKEN_BOT)
 
 
 @user_router.get("/my_profile", status_code=200, name="myprofile:page")
@@ -539,3 +542,19 @@ async def reset_password(
         new_password=new_password
     )
     logger.info(f'Пользователю ID={user_id.user_id}, email={user_id.email} отправлено письмо на почту с новым паролем')
+
+
+@user_router.patch("/connect_tg")
+async def connect_tg(
+    connecttg: ConnectTg,
+    bg_task: BackgroundTasks,
+    user: UserOut = Depends(get_current_user), 
+    session: AsyncSession = Depends(get_async_session),
+    ):
+    tg_id: int = user.telegram_id
+    if user.id == connecttg.user_id:
+        await UserRepository.update(session=session, id=user.id, telegram_id=None)
+        await disconnect_tg_for_user(user_id=tg_id)
+        bg_task.add_task(disconnect_tg, email_to=user.email)
+    else:
+        raise NotAccessError
