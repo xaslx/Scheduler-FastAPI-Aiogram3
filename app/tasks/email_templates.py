@@ -5,6 +5,85 @@ from pydantic import EmailStr
 from config import settings
 
 
+
+def disconnect_tg_template(email_to: EmailStr):
+    email = EmailMessage()
+    email["Subject"] = "Отключение аккаунта Телеграм"
+    email["From"] = settings.SMTP_USER
+    email["To"] = email_to
+
+    email.set_content(
+        """
+        <!DOCTYPE html>
+        <html lang="ru">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <style>
+                body {
+                    font-family: Arial, sans-serif;
+                    background-color: #f4f4f4;
+                    margin: 0;
+                    padding: 0;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    height: 100vh;
+                }
+                .outer-container {
+                    background-color: #e0e0e0;
+                    padding: 20px;
+                    border-radius: 8px;
+                    text-align: center;
+                    max-width: 600px;
+                    margin: auto;
+                }
+                .inner-container {
+                    background-color: #ffffff;
+                    padding: 20px;
+                    border-radius: 8px;
+                    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+                    text-align: left;
+                }
+                h1 {
+                    color: #333333;
+                }
+                h3 {
+                    color: #777777;
+                }
+                .footer {
+                    margin-top: 20px;
+                    font-size: 14px;
+                    color: #555555;
+                }
+                .footer a {
+                    color: #007bff;
+                    text-decoration: none;
+                }
+                .footer a:hover {
+                    text-decoration: underline;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="outer-container">
+                <div class="inner-container">
+                    <h1>Scheduler</h1>
+                    <h3>Вы отвязали свой Telegram от сайта.</h3>
+                </div>
+                <div class="footer">
+                    <a href="https://t.me/xaslx">Telegram если возникли трудности с сервисом.</a>
+                </div>
+            </div>
+        </body>
+        </html>
+        """,
+        subtype="html"
+    )
+
+    return email
+
+
 def register_confirmation_template(email_to: EmailStr):
     email = EmailMessage()
     email["Subject"] = "Регистрация аккаунта"
