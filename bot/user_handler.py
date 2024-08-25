@@ -1,4 +1,4 @@
-from datetime import datetime, date, time
+from datetime import datetime, date, time, timedelta
 from aiogram import F, Router, Bot
 from aiogram.filters import Command, CommandStart, StateFilter, CommandObject
 from aiogram.fsm.state import default_state
@@ -83,6 +83,11 @@ async def set_date(message: Message, state: FSMContext):
     await state.update_data(tg_id=message.from_user.id)
     try:
         formated_date: date = datetime.strptime(message.text, '%d.%m.%Y').date()
+        today_date: date = datetime.now(tz=moscow_tz).date()
+        if (formated_date - today_date).days > 7:
+            return await message.answer('Можно выбрать дату максимум на неделю вперед.')
+        if formated_date < today_date:
+            return await message.answer('Нельзя выбрать прошедшую дату.')
         await state.update_data(date=formated_date)
     except:
         await message.answer(
@@ -104,7 +109,7 @@ async def set_date(message: Message, state: FSMContext):
             booking: BookingOut = await BotService.get_booking(user_id=user.id, date=result['date'])
         inline_kb = create_inline_button_times(times=booking.times, booking_id=booking.id, user_id=booking.user_id, date=result['date'])
         await message.answer(
-            '<b>Теперь выберите время для записи.</b>',
+            '<b>Теперь выберите время для записи. Указано по Москве</b>',
             reply_markup=inline_kb
             
         )
@@ -306,8 +311,7 @@ async def cmd_start(message: Message):
 async def my_clients(message: Message):
     user: UserOut = await BotService.find_user(telegram_id=message.from_user.id)
     if not user:
-        await message.answer('Вы не привязали свой телеграм к профилю на сайте')
-        return
+        return await message.answer('Вы не привязали свой телеграм к профилю на сайте')
     res: list[BookingOut] = await BotService.get_all_bookings(user_id=user.id, date=datetime.now(tz=moscow_tz).date())
     exist_booking: bool = False
     for booking in res:
