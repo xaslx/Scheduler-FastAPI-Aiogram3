@@ -144,3 +144,7 @@ class EditPassword(BaseValidators):
 
 class CreateMessage(BaseModel):
     message: str = Field(max_length=500)
+
+
+class ConnectTg(BaseModel):
+    user_id: int
