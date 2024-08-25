@@ -12,7 +12,7 @@ from app.tasks.email_templates import (add_new_client, cancel_booking,
                                        register_confirmation_template,
                                        send_notification_for_all_users,
                                        success_update_password,
-                                       cancel_booking_for_me)
+                                       cancel_booking_for_me, disconnect_tg_template)
 from config import settings
 from aiogram import Bot
 from aiogram.client.default import DefaultBotProperties
@@ -23,6 +23,11 @@ import asyncio
 
 bot: Bot = Bot(settings.TOKEN_BOT, default=DefaultBotProperties(parse_mode="HTML"))
 
+async def disconnect_tg_for_user(user_id: int):
+    await bot.send_message(
+            chat_id=user_id,
+            text='Вы отвязали свой Telegram от сайта.'
+        )
 
 async def send_notifications_for_all_users_tg(users_id: list[TelegramOut], text: str):
     for user in users_id:
@@ -83,6 +88,14 @@ async def new_booking_tg(user_id: int, date: str, time: str, email: EmailStr):
         f'Или же отменить в телеграм /bookings'
     )
 
+
+@celery.task
+def disconnect_tg(email_to: EmailStr):
+    msg_content = disconnect_tg_template(email_to=email_to)
+
+    with smtplib.SMTP_SSL(settings.SMTP_HOST, settings.SMTP_PORT) as server:
+        server.login(settings.SMTP_USER, settings.SMTP_PASS)
+        server.send_message(msg_content)
 
 
 @celery.task
