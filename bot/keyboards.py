@@ -9,14 +9,18 @@ async def set_main_menu(bot: Bot):
     main_menu_commands = [
         BotCommand(command='/start',
                    description='Запуск бота и получить ID'),
+        BotCommand(command='/new',
+                   description='Сделать запись'),
         BotCommand(command='/clients',
                    description='Мои ближайшие клиенты'),
+        BotCommand(command='/date', 
+                   description='Посмотреть занятое время на выбранную дату'),
         BotCommand(command='/bookings',
                    description='Мои ближайшие записи'),
         BotCommand(command='/help',
                    description='Все команды'),        
         BotCommand(command='/cancel',
-                   description='Отменить'),
+                   description='Отменить действие'),
     ]
 
     await bot.set_my_commands(main_menu_commands)
