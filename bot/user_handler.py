@@ -246,11 +246,11 @@ async def cancel_action(callback: CallbackQuery):
 
 @user_router.callback_query(F.data.startswith('confirm_cancel'))
 async def confirm_cancel_booking(callback: CallbackQuery):
-    await callback.answer()
     _, _, _, date_, hour, minute = callback.data.split(':')
     date_obj = datetime.strptime(date_, '%d.%m.%Y').date()
     formatted_time: str = str(time(hour=int(hour), minute=int(minute)).strftime('%H:%M'))
     user: UserOut = await BotService.find_user(telegram_id=callback.from_user.id)
+    await callback.answer()
     if not user:
         await callback.message.answer('Вы не подключили свой телеграм к профилю на сайте')
     else:
@@ -302,7 +302,7 @@ async def confirm_cancel_booking(callback: CallbackQuery):
 async def cmd_start(message: Message):
     await message.answer('Привет, это Бот от сайта Scheduler\nВаш ID, скопируйте его и вставьте на сайте')
     await message.answer(str(message.from_user.id))
-    user: TelegramOut = await BotService.find_user_by_tg_id(telegram_id=message.from_user.id)
+    user: TelegramOut = await BotService.find_user(telegram_id=message.from_user.id)
     if not user:
         await BotService.add_new_user(telegram_id=message.from_user.id)
 
@@ -355,6 +355,14 @@ async def get_clients_by_date(message: Message, command: CommandObject):
                     f'<b>Чтобы отменить запись нажмите на время, которое хотите отменить</b>',
                     reply_markup=inline_kb
                 )
+
+@user_router.message(StateFilter(default_state), Command('link'))
+async def get_my_personal_link(message: Message):
+    user: UserOut = await BotService.find_user(telegram_id=message.from_user.id)
+    if not user:
+        await message.answer('Вы не подключили свой телеграм к профилю на сайте')
+    await message.answer('Ваша персональная ссылка, скопируйте ее и отправьте клиентам')
+    await message.answer(user.personal_link)
 
 @user_router.message(StateFilter(default_state), Command('help'))
 async def help_command(message: Message):
