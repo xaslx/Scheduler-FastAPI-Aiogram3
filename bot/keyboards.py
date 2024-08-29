@@ -11,6 +11,8 @@ async def set_main_menu(bot: Bot):
                    description='Запуск бота и получить ID'),
         BotCommand(command='/new',
                    description='Сделать запись'),
+        BotCommand(command='/link',
+                   description='Моя персональная ссылка'),
         BotCommand(command='/clients',
                    description='Мои ближайшие клиенты'),
         BotCommand(command='/date', 
