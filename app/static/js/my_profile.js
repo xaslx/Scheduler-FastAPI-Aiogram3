@@ -65,3 +65,28 @@ function copyToClipboard(selector) {
     document.execCommand('copy');
     document.body.removeChild(tempInput);
 }
+document.addEventListener('DOMContentLoaded', function() {
+    var modalTg = document.getElementById("bindTelegramModal-tg");
+    var btnOpenTg = document.querySelector('.add-tg-button[data-bs-target="#bindTelegramModal-tg"]');
+    var btnCloseTg = document.getElementById("closeBindModal-tg");
+    var spanCloseTg = document.getElementsByClassName("close-tg")[0];
+
+    btnOpenTg.onclick = function() {
+        modalTg.style.display = "block";
+    }
+
+    btnCloseTg.onclick = function() {
+        modalTg.style.display = "none";
+    }
+
+    spanCloseTg.onclick = function() {
+        modalTg.style.display = "none";
+    }
+
+    window.onclick = function(event) {
+        if (event.target == modalTg) {
+            modalTg.style.display = "none";
+        }
+    }
+});
+
