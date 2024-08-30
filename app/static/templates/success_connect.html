@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block title %}Успешно{% endblock %}
+
+{% block content %}
+<h1>Вы успешно привязали свой Telegram к сайту</h1>
+<h3>Если хотите отвязать, то сделать это можно в профиле <a href="/user/my_profile"></a></h3>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+{% endblock %}
