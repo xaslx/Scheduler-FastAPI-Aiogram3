@@ -1,7 +1,8 @@
 from pydantic import BaseModel
 
 
-
-class TelegramOut(BaseModel):
-    id: int
+class Telegram(BaseModel):
     telegram_id: int
+
+class TelegramOut(Telegram):
+    id: int
