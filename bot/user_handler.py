@@ -5,10 +5,11 @@ from aiogram.fsm.state import default_state
 from aiogram.types import Message, CallbackQuery, InlineKeyboardButton, InlineKeyboardMarkup
 from app.schemas.user_schema import UserOut
 from bot.bot_service import BotService
+from app.auth.authentication import generate_token_connect_tg
 from app.schemas.tg_schema import TelegramOut
 from app.utils.generate_time import moscow_tz
 from app.schemas.booking_schemas import BookingOut
-from bot.keyboards import create_inline_button, confirmation_markup, create_inline_button_times
+from bot.keyboards import create_inline_button, confirmation_markup, create_inline_button_times, create_inline_button_connect_tg
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from app.schemas.booking_schemas import CancelBooking
 from config import settings
@@ -212,8 +213,6 @@ async def set_phone_number_warning(message: Message):
 
 
 
-
-
 @user_router.callback_query(F.data.startswith('cancel'))
 async def cancel_booking(callback: CallbackQuery):
     await callback.answer()
@@ -302,7 +301,7 @@ async def confirm_cancel_booking(callback: CallbackQuery):
 async def cmd_start(message: Message):
     await message.answer('Привет, это Бот от сайта Scheduler\nВаш ID, скопируйте его и вставьте на сайте')
     await message.answer(str(message.from_user.id))
-    user: TelegramOut = await BotService.find_user(telegram_id=message.from_user.id)
+    user: TelegramOut = await BotService.find_user_by_tg_id(telegram_id=message.from_user.id)
     if not user:
         await BotService.add_new_user(telegram_id=message.from_user.id)
 
@@ -363,6 +362,17 @@ async def get_my_personal_link(message: Message):
         await message.answer('Вы не подключили свой телеграм к профилю на сайте')
     await message.answer('Ваша персональная ссылка, скопируйте ее и отправьте клиентам')
     await message.answer(user.personal_link)
+
+
+@user_router.message(StateFilter(default_state), Command('connect'))
+async def connect_telegram(message: Message):
+    token: str = await generate_token_connect_tg(str(message.from_user.id))
+    inline_kb: InlineKeyboardMarkup = create_inline_button_connect_tg(token=token)
+    await message.answer(
+        'Нажмите на кнопку чтобы привязать ваш аккаунт',
+        reply_markup=inline_kb
+    )
+
 
 @user_router.message(StateFilter(default_state), Command('help'))
 async def help_command(message: Message):
