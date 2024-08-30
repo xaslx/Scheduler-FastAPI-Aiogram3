@@ -19,18 +19,23 @@ def get_token(request: Request):
     return token
 
 
-async def get_current_user(
-    async_db: AsyncSession = Depends(get_async_session),
-    token: str = Depends(get_token),
-) -> User:
-    if not token:
-        return None
+def valid_token(token: str):
     try:
         payload = jwt.decode(token, settings.SECRET_KEY, settings.ALGORITHM)
     except ExpiredSignatureError:
         return None
     except JWTError:
         raise IncorrectTokenException
+    return payload
+
+
+async def get_current_user(
+    async_db: AsyncSession = Depends(get_async_session),
+    token: str = Depends(get_token),
+) -> User:
+    if not token:
+        return None
+    payload = valid_token(token=token)
     user_id: str = payload.get("sub")
     if not user_id:
         raise UserIsNotPresentException
@@ -38,6 +43,14 @@ async def get_current_user(
     if not user:
         return None
     return user
+
+
+async def get_tg_id(token: str):
+    payload = valid_token(token=token)
+    if not payload:
+        return None
+    tg_id: int = int(payload.get('sub'))
+    return tg_id
 
 
 async def get_admin_user(user: User = Depends(get_current_user)):
