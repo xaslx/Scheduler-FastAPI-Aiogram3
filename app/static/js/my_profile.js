@@ -90,3 +90,68 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
+document.addEventListener('DOMContentLoaded', function () {
+    const confirmUnlinkModal = document.getElementById('confirmUnlinkModal');
+    const openModalBtn = document.querySelector('[data-bs-target="#confirmUnlinkModal"]');
+    const closeModalBtn = confirmUnlinkModal.querySelector('.close');
+
+    openModalBtn.addEventListener('click', function () {
+        confirmUnlinkModal.style.display = 'block';
+    });
+
+    closeModalBtn.addEventListener('click', function () {
+        confirmUnlinkModal.style.display = 'none';
+    });
+
+    window.addEventListener('click', function (event) {
+        if (event.target === confirmUnlinkModal) {
+            confirmUnlinkModal.style.display = 'none';
+        }
+    });
+});
+
+document.addEventListener('DOMContentLoaded', function () {
+    const confirmUnlinkModal = document.getElementById('confirmUnlinkModal');
+    const confirmUnlinkBtn = document.getElementById('confirmUnlink');
+    const cancelUnlinkBtn = document.getElementById('cancelUnlink');
+    const closeModalBtn = confirmUnlinkModal.querySelector('.close');
+
+    function closeModal() {
+        confirmUnlinkModal.style.display = 'none';
+    }
+    confirmUnlinkBtn.addEventListener('click', async function () {
+        const userId = document.getElementById('userIdInput').value;
+
+        try {
+            const response = await fetch('/user/disconnect_tg', {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ user_id: userId })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                location.reload();
+            } else {
+                alert(`Ошибка: ${data.detail || 'Не удалось отвязать Telegram.'}`);
+            }
+        } catch (error) {
+            console.error('Ошибка:', error);
+            alert('Произошла ошибка при отвязке Telegram.');
+        }
+    });
+
+
+    cancelUnlinkBtn.addEventListener('click', closeModal);
+
+    closeModalBtn.addEventListener('click', closeModal);
+
+    window.addEventListener('click', function (event) {
+        if (event.target === confirmUnlinkModal) {
+            closeModal();
+        }
+    });
+});
