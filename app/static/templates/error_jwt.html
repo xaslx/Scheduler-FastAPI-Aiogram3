@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block title %}Ошибка{% endblock %}
+
+{% block content %}
+<h1>Неверный токен, или он уже истек</h1>
+<p>Попробуйте ввести <strong>/connect</strong> ещё раз в <a target="_blank" href="https://t.me/scheduler_help_bot">боте</a></p>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+{% endblock %}
