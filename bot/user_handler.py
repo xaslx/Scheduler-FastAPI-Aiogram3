@@ -39,7 +39,7 @@ async def process_cancel_command_state(message: Message, state: FSMContext):
     await message.answer(
         text="Вы отменили создание записи\n\n"
         "Чтобы снова перейти к созданию записи - "
-        "отправьте команду /newe"
+        "отправьте команду /new"
     )
     await state.clear()
 
@@ -359,7 +359,7 @@ async def get_clients_by_date(message: Message, command: CommandObject):
 async def get_my_personal_link(message: Message):
     user: UserOut = await BotService.find_user(telegram_id=message.from_user.id)
     if not user:
-        await message.answer('Вы не подключили свой телеграм к профилю на сайте')
+        return await message.answer('Вы не подключили свой телеграм к профилю на сайте')
     await message.answer('Ваша персональная ссылка, скопируйте ее и отправьте клиентам')
     await message.answer(user.personal_link)
 
