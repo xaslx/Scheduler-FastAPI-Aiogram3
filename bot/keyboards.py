@@ -13,6 +13,8 @@ async def set_main_menu(bot: Bot):
                    description='Сделать запись'),
         BotCommand(command='/link',
                    description='Моя персональная ссылка'),
+        BotCommand(command='/connect',
+                   description='Подключить Telegram к сайту'),
         BotCommand(command='/clients',
                    description='Мои ближайшие клиенты'),
         BotCommand(command='/date', 
@@ -57,3 +59,12 @@ def create_inline_button_times(times: list[str], booking_id: int, user_id: int, 
         builder.add(InlineKeyboardButton(text=item, callback_data=f'select:{booking_id}:{user_id}:{date}:{item}'))
     builder.adjust(5)
     return builder.as_markup()
+
+
+def create_inline_button_connect_tg(token: str):
+    url: str = f'https://scheduler-bgly.onrender.com//user/connect_telegram/?token={token}'
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [InlineKeyboardButton(text='Привязать', url=url)]
+        ]
+    )
