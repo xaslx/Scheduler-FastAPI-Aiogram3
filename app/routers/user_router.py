@@ -10,25 +10,28 @@ from fastapi_pagination import Page
 from fastapi_pagination.ext.sqlalchemy import paginate
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from jose import ExpiredSignatureError, JWTError, jwt
 
 from app.auth.auth import get_password_hash
 from app.auth.authentication import generate_token
 from app.auth.dependencies import (get_admin_user, get_all_notifications,
-                                   get_current_user)
+                                   get_current_user, get_tg_id)
 from app.models.user_model import User
 from app.repository.booking_repo import BookingRepository
 from app.repository.user_repo import UserRepository
+from app.repository.telegram_repo import TelegramRepository
 from app.schemas.booking_schemas import BookingOut
 from app.schemas.notification_schemas import NotificationOut
 from app.schemas.user_schema import (EditEnabled, EditPassword, EditRole,
                                      EditTime, ResetPassword, UserOut,
                                      UserUpdate, ConnectTg)
+from app.schemas.tg_schema import Telegram
 from app.tasks.tasks import (password_changed, reset_password_email,
                              update_password, disconnect_tg, disconnect_tg_for_user)
 from app.utils.generate_time import moscow_tz
 from app.utils.templating import templates
 from database import get_async_session
-from exceptions import NotAccessError, UserNotFound
+from exceptions import NotAccessError, UserNotFound, IncorrectTokenException
 from logger import logger
 from aiogram import Bot
 from config import settings
@@ -68,6 +71,48 @@ async def get_my_clients(
         request=request,
         name="my_clients.html",
         context={"user": user, "notifications": notifications, "clients": bookings},
+    )
+
+
+
+@user_router.get('/connect_telegram')
+async def connect_tg_template(
+    token: Annotated[str, Query()],
+    request: Request,
+    user: UserOut = Depends(get_current_user),
+    notifications: list[NotificationOut] = Depends(get_all_notifications),
+    session: AsyncSession = Depends(get_async_session)
+):
+    if not user:
+        return templates.TemplateResponse(
+            request=request,
+            name='404.html',
+            context={'user': user, 'notifications': notifications}
+        )
+    if user.telegram_id:
+        return templates.TemplateResponse(
+            request=request, 
+            name='already_connect.html',
+            context={'user': user, 'notifications': notifications}
+        )
+    tg_id: int = await get_tg_id(token=token)
+    if not tg_id:
+        return templates.TemplateResponse(
+            request=request,
+            name='error_jwt.html',
+            context={'user': user, 'notifications': notifications}
+        )
+    await UserRepository.update(session=session, id=user.id, telegram_id=tg_id)
+    await bot.send_message(
+        chat_id=tg_id,
+        text=
+        'Вы успешно привязали свой Telegram к сайту\n'
+        'Если хотите отменить, то сделать это можно в своем профиле на сайте'
+    )
+    return templates.TemplateResponse(
+        request=request,
+        name='success_connect.html',
+        context={'user': user, 'notifications': notifications}
     )
 
 
@@ -542,6 +587,7 @@ async def reset_password(
         new_password=new_password
     )
     logger.info(f'Пользователю ID={user_id.user_id}, email={user_id.email} отправлено письмо на почту с новым паролем')
+
 
 
 @user_router.patch("/connect_tg")
