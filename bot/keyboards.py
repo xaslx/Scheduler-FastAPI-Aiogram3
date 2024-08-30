@@ -62,7 +62,7 @@ def create_inline_button_times(times: list[str], booking_id: int, user_id: int, 
 
 
 def create_inline_button_connect_tg(token: str):
-    url: str = f'https://scheduler-bgly.onrender.com//user/connect_telegram/?token={token}'
+    url: str = f'https://scheduler-bgly.onrender.com/user/connect_telegram/?token={token}'
     return InlineKeyboardMarkup(
         inline_keyboard=[
             [InlineKeyboardButton(text='Привязать', url=url)]
