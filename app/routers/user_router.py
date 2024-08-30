@@ -590,8 +590,8 @@ async def reset_password(
 
 
 
-@user_router.patch("/connect_tg")
-async def connect_tg(
+@user_router.patch("/disconnect_tg")
+async def disconnect_tg(
     connecttg: ConnectTg,
     bg_task: BackgroundTasks,
     user: UserOut = Depends(get_current_user), 
