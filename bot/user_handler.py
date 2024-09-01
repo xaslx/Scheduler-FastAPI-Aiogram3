@@ -47,6 +47,7 @@ async def process_cancel_command_state(message: Message, state: FSMContext):
 @user_router.message(StateFilter(default_state), Command('new'))
 async def create_new_booking(message: Message, state: FSMContext):
     await state.set_state(NewBooking.personal_link)
+    await state.update_data(tg_username=message.from_user.username if message.from_user.username else 'Скрыт')
     await message.answer('Введите ссылку для записи или /cancel для отмены')
 
 
@@ -57,9 +58,9 @@ async def create_new_booking(message: Message, state: FSMContext):
         personal_link: str = message.text.split('/')[-1]
     user: UserOut = await BotService.find_user(personal_link=personal_link)
     if not user:
-        await message.answer('Не удалось найти пользователя по ссылке')
+        return await message.answer('Не удалось найти пользователя по ссылке')
     elif not user.is_active:
-        await message.answer(
+        return await message.answer(
             'Нельзя записаться к пользователю\n'
             'Так как он заблокирован'
         )
@@ -103,6 +104,7 @@ async def set_date(message: Message, state: FSMContext):
     else:
         result: dict = await state.get_data()
         user: UserOut = await BotService.find_user(personal_link=result['personal_link'])
+        await state.update_data(user_email=user.email, user_tg=user.telegram_link if user.telegram_link else 'Не указан')
         booking: BookingOut = await BotService.get_booking(user_id=user.id, date=formated_date)
         await state.update_data(user_tg_id=user.telegram_id)
         if not booking:
@@ -119,13 +121,16 @@ async def set_date(message: Message, state: FSMContext):
             available_times = [time for time in booking.times if time > current_time]
         else:
             available_times = booking.times
-        inline_kb = create_inline_button_times(times=available_times, booking_id=booking.id, user_id=booking.user_id, date=result['date'])
-        await message.answer(
-            'Теперь выберите время для записи. <b>Указано по Москве</b>',
-            reply_markup=inline_kb
-            
-        )
-        await state.set_state(NewBooking.time)
+        if len(available_times) > 0:
+            inline_kb = create_inline_button_times(times=available_times, booking_id=booking.id, user_id=booking.user_id, date=result['date'])
+            await message.answer(
+                'Теперь выберите время для записи. <b>Указано по Москве</b>',
+                reply_markup=inline_kb
+                
+            )
+            await state.set_state(NewBooking.time)
+        else:
+            return await message.answer('На выбранную дату не осталось свободного времени')
 
         
 
@@ -192,9 +197,9 @@ async def set_phone_number(message: Message, state: FSMContext):
         time=(res['time'], res['name'], res['phone_number'], res['email'], message.from_user.id))
     await message.answer(
         f'Вы успешно записались на время: <b>{res['time']}</b>\n'
-        f'Дата: <b>{res['date'].strftime('%d.%m.%Y')}</b>\n'
-        f'Если хотите посмотреть все ваши записи то введите /bookings\n'
-        f'Также там можно отменять свои записи'
+        f'Дата: <b>{res['date'].strftime('%d.%m.%Y')}</b>\n\n'
+        f'Если хотите отменить запись то напишите на Email: <b>{res['user_email']}</b>\n'
+        f'Или Телеграм: <b>{res['user_tg']}</b>'
     )
     await state.clear()
     if res['user_tg_id']:
@@ -207,9 +212,9 @@ async def set_phone_number(message: Message, state: FSMContext):
             f'<b>Информация о клиенте</b>\n'
             f'Имя: <b>{res['name']}</b>\n'
             f'Телефон: <b>{res['phone_number']}</b>\n'
-            f'Email клиента: <b>{res['email']}</b>\n\n'
+            f'Email клиента: <b>{res['email']}</b>\n'
+            f'Telegram: <b>{res['tg_username']}</b>\n\n'
             f'Введите /clients - чтобы посмотреть ваших клиентов, также там можно отменить запись'
-    
         )
         
     
