@@ -8,7 +8,9 @@ async def set_main_menu(bot: Bot):
 
     main_menu_commands = [
         BotCommand(command='/start',
-                   description='Запуск бота и получить ID'),
+                   description='Запуск бота'),
+        BotCommand(command='/id',
+                   description='Получить свой ID'),
         BotCommand(command='/new',
                    description='Сделать запись'),
         BotCommand(command='/link',
