@@ -76,15 +76,16 @@ async def new_client_tg(user_id: int, date: str, time: str, name: str, phone_num
         f'Email клиента: <b>{user_email}</b>\n'
     )
 
-async def new_booking_tg(user_id: int, date: str, time: str, email: EmailStr):
+async def new_booking_tg(user_id: int, date: str, time: str, email: EmailStr, tg: str):
     await bot.send_message(
         chat_id=user_id,
         text=
         f'Вы успешно записались\n'
         f'Дата: <b>{date}</b>\n'
         f'Время: <b>{time}</b>\n\n'
-        f'<b>Если хотите отменить запись то напишите на почту</b>\n'
+        f'<b>Если хотите отменить запись то напишите на почту или телеграм</b>\n\n'
         f'Email: <b>{email}</b>\n'
+        f'Telegram: <b>{tg}</b>\n'
         f'Или же отменить в телеграм /bookings'
     )
 
