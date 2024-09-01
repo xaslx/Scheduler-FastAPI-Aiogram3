@@ -54,7 +54,7 @@ async def create_new_booking(message: Message, state: FSMContext):
 async def create_new_booking(message: Message, state: FSMContext):
     personal_link: str = message.text
     if 'scheduler' in message.text:
-        personal_link: list[str] = message.text.split('/')[-1]
+        personal_link: str = message.text.split('/')[-1]
     user: UserOut = await BotService.find_user(personal_link=personal_link)
     if not user:
         await message.answer('Не удалось найти пользователя по ссылке')
@@ -74,7 +74,7 @@ async def create_new_booking(message: Message, state: FSMContext):
             'Например <b>01.01.2000</b>\n'
             'Или введите /cancel - для отмены'
         )
-        await state.update_data(personal_link=message.text)
+        await state.update_data(personal_link=personal_link)
         await state.set_state(NewBooking.date)
 
 @user_router.message(StateFilter(NewBooking.personal_link), ~F.text)
