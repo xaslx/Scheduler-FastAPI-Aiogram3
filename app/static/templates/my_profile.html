@@ -34,6 +34,7 @@
                         <a id="personalLink" class="profile-link" href="{{ url_for('personal_link:page', personal_link=user.personal_link) }}" style="color: #007bff; text-decoration: none; margin-left: 10px;">{{ user.personal_link }}</a>
                         <button class="copy-button" onclick="copyToClipboard('#personalLink')">Копировать</button>
                     </p>
+                    
                     <p><strong>Телеграм:</strong>
                             {% if not user.telegram_id %}
                                 <span style="color: #007bff; text-decoration: none; margin-left: 10px;">Не привязан</span>
@@ -43,6 +44,14 @@
                                 <button class="add-tg-button red_color" data-bs-toggle="modal" data-bs-target="#confirmUnlinkModal">Отвязать</button>
                             {% endif %}
                     </p>
+                    {% if user.telegram_link %}
+                        <p style="color: #007bff;;"><strong>Телеграм username:</strong> {{ user.telegram_link }}</p>
+                    {% else %}
+                    <p style="color: #007bff;;"><strong>Телеграм username:</strong> Не указан</p>
+                    {% endif %}
+                    <p style="text-align: left;">Telegram username можно указать при регистрации, 
+                    а также при редактировании профиля, его будут видеть ваши клиенты для связи с вами, но чтобы получать уведомления на Телеграм - 
+                    нужно ещё <b>Привязать</b> его</p>
                     <div id="confirmUnlinkModal" class="modal">
                         <div class="modal-content">
                             <span class="close">&times;</span>
