@@ -52,7 +52,10 @@ async def create_new_booking(message: Message, state: FSMContext):
 
 @user_router.message(StateFilter(NewBooking.personal_link), F.text)
 async def create_new_booking(message: Message, state: FSMContext):
-    user: UserOut = await BotService.find_user(personal_link=message.text)
+    personal_link: str = message.text
+    if 'scheduler' in message.text:
+        personal_link: list[str] = message.text.split('/')[-1]
+    user: UserOut = await BotService.find_user(personal_link=personal_link)
     if not user:
         await message.answer('Не удалось найти пользователя по ссылке')
     elif not user.is_active:
@@ -63,7 +66,7 @@ async def create_new_booking(message: Message, state: FSMContext):
     else:
         await message.answer(
             f'Пользователь найден\n'
-            f'Имя: <b>{user.name}</b> Фамилия: <b>{user.surname}</b>'
+            f'Имя: <b>{user.name}</b>\nФамилия: <b>{user.surname}</b>'
         )
         await message.answer(
             'Теперь введите дату на которую хотите записаться\n'
@@ -108,9 +111,17 @@ async def set_date(message: Message, state: FSMContext):
             )
             booking_id: int = await BotService.add_booking(date_for_booking=result['date'], user_id=user.id, times=intervals)
             booking: BookingOut = await BotService.get_booking(user_id=user.id, date=result['date'])
-        inline_kb = create_inline_button_times(times=booking.times, booking_id=booking.id, user_id=booking.user_id, date=result['date'])
+        now: datetime = datetime.now(tz=moscow_tz)
+        current_time: str = now.strftime("%H:%M")
+        current_date = now.date()
+
+        if booking.date_for_booking == current_date:
+            available_times = [time for time in booking.times if time > current_time]
+        else:
+            available_times = booking.times
+        inline_kb = create_inline_button_times(times=available_times, booking_id=booking.id, user_id=booking.user_id, date=result['date'])
         await message.answer(
-            '<b>Теперь выберите время для записи. Указано по Москве</b>',
+            'Теперь выберите время для записи. <b>Указано по Москве</b>',
             reply_markup=inline_kb
             
         )
@@ -299,7 +310,14 @@ async def confirm_cancel_booking(callback: CallbackQuery):
 
 @user_router.message(StateFilter(default_state), CommandStart())
 async def cmd_start(message: Message):
-    await message.answer('Привет, это Бот от сайта Scheduler\n')
+    await message.answer(
+        'Привет, это Бот от сайта Scheduler\n'
+        'Функционал почти такой же как на сайте\n'
+        'Можно записываться/смотреть свои записи/отменять\n'
+        'Также можно смотреть своих ближайших клиентов и отменять им запись '
+        'и получать уведомления\n\n'
+        'Чтобы посмотреть все команды - введите /help или нажмите на <b>Menu</b>'
+    )
     user: TelegramOut = await BotService.find_user_by_tg_id(telegram_id=message.from_user.id)
     if not user:
         await BotService.add_new_user(telegram_id=message.from_user.id)
@@ -381,12 +399,15 @@ async def connect_telegram(message: Message):
 @user_router.message(StateFilter(default_state), Command('help'))
 async def help_command(message: Message):
     await message.answer(
-        f'<b>Все доступные команды</b>\n\n'
-        f'/start  -  Получить свой ID\n'
-        f'/new  -  Сделать запись\n'
-        f'/clients  -  Посмотреть ближайших клиентов\n'
-        f'/date  -  Посмотреть забронированное время на определенную дату\n'
-        f'/cancel  -  Отменить действие'
+        '<b>Все доступные команды</b>\n\n'
+        '/start  -  Запустить бота\n'
+        '/id  -  Получить свой ID\n'
+        '/new  -  Сделать запись\n'
+        '/link  -  Посмотреть свою персональную ссылку\n'
+        '/connect  -  Привязать Телеграм к сайту\n'
+        '/clients  -  Посмотреть ближайших клиентов\n'
+        '/date  -  Посмотреть забронированное время на определенную дату\n'
+        '/cancel  -  Отменить действие'
     )
 
 
