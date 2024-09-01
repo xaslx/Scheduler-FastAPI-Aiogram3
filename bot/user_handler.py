@@ -297,13 +297,17 @@ async def confirm_cancel_booking(callback: CallbackQuery):
                 )
 
 
-@user_router.message(CommandStart(), StateFilter(default_state))
+@user_router.message(StateFilter(default_state), CommandStart())
 async def cmd_start(message: Message):
-    await message.answer('Привет, это Бот от сайта Scheduler\nВаш ID, скопируйте его и вставьте на сайте')
-    await message.answer(str(message.from_user.id))
+    await message.answer('Привет, это Бот от сайта Scheduler\n')
     user: TelegramOut = await BotService.find_user_by_tg_id(telegram_id=message.from_user.id)
     if not user:
         await BotService.add_new_user(telegram_id=message.from_user.id)
+    
+
+@user_router.message(StateFilter(default_state), Command('id'))
+async def get_my_id(message: Message):
+    await message.answer(f'Ваш ID\n\n<b>{message.from_user.id}</b>\n\nВставьте его на сайте при записи')
 
 
 @user_router.message(StateFilter(default_state), Command('clients'))
