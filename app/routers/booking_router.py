@@ -237,7 +237,8 @@ async def select_booking(
             user_id=create_booking.tg,
             date=str(formatted_date), 
             time=create_booking.time, 
-            email=user_email.email
+            email=user_email.email,
+            tg=user_email.telegram_link if user_email.telegram_link else 'Не указан'
         )
     if user_email.telegram_id:
         bg_task.add_task(
