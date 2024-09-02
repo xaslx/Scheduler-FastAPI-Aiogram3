@@ -7,7 +7,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
 from fastapi_pagination import add_pagination
-from redis import asyncio as aioredis
+from redis_init import redis
 import sentry_sdk
 
 from app.auth.dependencies import get_current_user
@@ -38,13 +38,12 @@ sentry_sdk.init(
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    redis = aioredis.from_url(
-        f"redis://{settings.REDIS_HOST}", encoding="utf-8", decode_responses=True
-    )
     FastAPICache.init(RedisBackend(redis), prefix="cache")
     await on_startup()
     logger.info('Fastapi приложение и Бот запущены')
     yield
+    await redis.close()
+
 
 
 app: FastAPI = FastAPI(
