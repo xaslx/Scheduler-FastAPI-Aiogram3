@@ -1,3 +1,4 @@
+from app.schemas.user_schema import UserOut
 from database import async_session_maker
 from sqlalchemy import select, insert, and_
 from app.models.telegram_model import Telegram
@@ -33,10 +34,15 @@ class BotService:
             return result.scalar_one_or_none()
         
     @classmethod
-    async def find_user(cls, **filter_by):
+    async def find_user(cls, **filter_by) -> UserOut:
         async with async_session_maker() as session:
-            return await UserRepository.find_one_or_none(session=session, **filter_by)
-    
+            user: User = await UserRepository.find_one_or_none(session=session, **filter_by)
+            if user:
+                user_out: UserOut = UserOut.model_validate(user)
+                return user_out
+            return None
+
+        
     @classmethod
     async def get_all_bookings(cls, user_id: int, date: date):
         async with async_session_maker() as session:
