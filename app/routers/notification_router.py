@@ -15,6 +15,8 @@ from app.utils.templating import templates
 from database import get_async_session
 from exceptions import NotAccessError, NotificationNotFound
 from logger import logger
+from redis_init import redis
+
 
 
 notification_router: APIRouter = APIRouter(prefix="/notification", tags=["Уведомления"])
@@ -27,7 +29,21 @@ async def get_all_notification(
     user: UserOut = Depends(get_current_user),
     notifications: list[NotificationOut] = Depends(get_all_notifications),
 ) -> HTMLResponse:
-    all_notifications: list[NotificationOut] = await NotificationRepository.find_all(session=session)
+    cached_data = await redis.hgetall('all_notifications')
+    if not cached_data:
+        all_notifications: list[NotificationOut] = await NotificationRepository.find_all(
+            session=session
+        )
+        notifications_out = [NotificationOut.model_validate(notif) for notif in all_notifications]
+        for notification in notifications_out:
+            await redis.hset('all_notifications', notification.id, notification.model_dump_json())
+            await redis.expire('all_notifications', 600)
+    else:
+        all_notifications: list[NotificationOut] = [
+            NotificationOut.model_validate_json(value)
+            for value in cached_data.values()
+        ]
+        
     return templates.TemplateResponse(
         request=request,
         name="all_notifications.html",
@@ -143,8 +159,13 @@ async def create_notification(
     if len(notifications) >= 30:
         await NotificationRepository.delete(session=session, id=notifications[0].id)
         logger.info('Удаление последнего уведомления из базы данных')
+
     await NotificationRepository.add(session=session, **new_notification.model_dump())
     logger.info(f'Администратор: ID={user.id}, email={user.email} добавил новое уведомление на сайт (в бд)')
+    notifications = await redis.hgetall('notifications')
+    all_notifications = await redis.hgetall('all_notifications')
+    if notifications and all_notifications:
+        await redis.delete('notifications', 'all_notifications')
     return status.HTTP_201_CREATED
 
 
@@ -187,3 +208,7 @@ async def delete_notification(
         raise NotAccessError
     await NotificationRepository.delete(session=session, id=notif_id)
     logger.info(f'Администратор ID={user.id}, email={user.email} удалил уведомление на сайте (из бд)')
+    notifications = await redis.hgetall('notifications')
+    all_notifications = await redis.hgetall('all_notifications')
+    if notifications and all_notifications:
+        await redis.delete('notifications', 'all_notifications')

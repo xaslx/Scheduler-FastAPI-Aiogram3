@@ -3,16 +3,18 @@ from fastapi.responses import HTMLResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth.dependencies import get_all_notifications, get_current_user
-from app.models.user_model import User
 from app.repository.notification_repo import NotificationRepository
 from app.schemas.help_schemas import GetHelp
 from app.schemas.notification_schemas import NotificationOut
 from app.schemas.user_schema import UserOut
 from app.tasks.tasks import help_message
 from app.utils.templating import templates
+from app.utils.redis_cache import get_notifications
 from database import get_async_session
 from exceptions import NotAccessError
 from logger import logger
+from redis_init import redis
+
 
 
 main_router: APIRouter = APIRouter()
@@ -24,9 +26,8 @@ async def get_main_page(
     session: AsyncSession = Depends(get_async_session),
     user: UserOut = Depends(get_current_user),
 ) -> HTMLResponse:
-    notifications: list[NotificationOut] = await NotificationRepository.find_all_notif(
-        session=session
-    )
+    
+    notifications: list[NotificationOut] = await get_notifications(session=session)
     return templates.TemplateResponse(
         request=request,
         name="base.html",

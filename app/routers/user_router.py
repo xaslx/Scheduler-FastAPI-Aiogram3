@@ -35,7 +35,7 @@ from exceptions import NotAccessError, UserNotFound, IncorrectTokenException
 from logger import logger
 from aiogram import Bot
 from config import settings
-
+from redis_init import redis
 
 user_router: APIRouter = APIRouter(prefix="/user", tags=["Пользователи"])
 bot: Bot = Bot(settings.TOKEN_BOT)
