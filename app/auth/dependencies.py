@@ -6,10 +6,14 @@ from app.models.user_model import User
 from app.repository.notification_repo import NotificationRepository
 from app.repository.user_repo import UserRepository
 from app.schemas.notification_schemas import NotificationOut
+from app.schemas.user_schema import UserOut
+from app.utils.redis_cache import get_notifications
 from config import settings
 from database import get_async_session
 from exceptions import (IncorrectTokenException, UserIsNotAdmin,
                         UserIsNotPresentException)
+from redis_init import redis
+
 
 
 def get_token(request: Request):
@@ -36,10 +40,18 @@ async def get_current_user(
     if not token:
         return None
     payload = valid_token(token=token)
-    user_id: str = payload.get("sub")
-    if not user_id:
+    user_personal_link: str = payload.get("sub")
+    user_data: None | str = await redis.get(user_personal_link)
+    if user_data:
+        user: UserOut = UserOut.model_validate_json(user_data)
+    else:
+        user: User = await UserRepository.find_one_or_none(personal_link=user_personal_link, session=async_db)
+        user_out = UserOut.model_validate(user)
+        if user:
+            await redis.set(user_personal_link, user_out.model_dump_json(), ex=600) 
+
+    if not user_personal_link:
         raise UserIsNotPresentException
-    user = await UserRepository.find_one_or_none(id=int(user_id), session=async_db)
     if not user:
         return None
     return user
@@ -63,7 +75,5 @@ async def get_admin_user(user: User = Depends(get_current_user)):
 
 
 async def get_all_notifications(session: AsyncSession = Depends(get_async_session)):
-    notifications: list[NotificationOut] = await NotificationRepository.find_all_notif(
-        session=session
-    )
-    return notifications
+    notifications_out: list[NotificationOut] = await get_notifications(session=session)
+    return notifications_out
