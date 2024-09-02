@@ -10,9 +10,9 @@ class BaseRepository:
     @classmethod
     async def find_one_or_none(cls, session: AsyncSession, **filter_by):
         try:
-            query = select(cls.model.__table__.columns).filter_by(**filter_by)
+            query = select(cls.model).filter_by(**filter_by)
             result = await session.execute(query)
-            return result.mappings().one_or_none()
+            return result.scalar_one_or_none()
         except (SQLAlchemyError, Exception) as e:
             if isinstance(e, SQLAlchemyError):
                 msg = 'Database Exc: Не удалось найти обьект.'
