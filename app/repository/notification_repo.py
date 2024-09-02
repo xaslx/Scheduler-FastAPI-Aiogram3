@@ -1,4 +1,4 @@
-from sqlalchemy import select
+from sqlalchemy import select, desc
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import SQLAlchemyError
 
@@ -13,9 +13,9 @@ class NotificationRepository(BaseRepository):
     @classmethod
     async def find_all_notif(cls, session: AsyncSession):
         try:
-            query = select(cls.model).order_by(cls.model.created_at.desc()).limit(3)
+            query = select(cls.model.__table__.columns).order_by(desc(cls.model.created_at)).limit(3)
             res = await session.execute(query)
-            return res.scalars().all()
+            return res.mappings().all()
         except (SQLAlchemyError, Exception) as e:
             if isinstance(e, SQLAlchemyError):
                 msg = 'Database Exc: Не удалось найти уведомление.'
