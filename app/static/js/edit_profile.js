@@ -53,7 +53,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         if (telegramLink && !validateTelegramLink(telegramLink)) {
-            showError('telegram-link-error', 'Имя пользователя в телеграм должно содержать только [англ.букв, цифры 0-9, знак _], быть минимум 4 символа и не должно превышать 15 символов.');
+            showError('telegram-link-error', 'Поле должно быть пустым или: Имя пользователя в телеграм должно содержать только [англ.букв, цифры 0-9, знак _], быть минимум 4 символа и не должно превышать 15 символов.');
             valid = false;
         }
 
@@ -81,7 +81,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const data = await response.json();
                 console.log('Success:', data);
 
-                window.location.href = profilePageUrl; // Используем переменную
+                window.location.href = profilePageUrl;
             } catch (error) {
                 console.error('Error:', error);
             }
