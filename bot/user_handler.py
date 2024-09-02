@@ -296,7 +296,7 @@ async def confirm_cancel_booking(callback: CallbackQuery):
                         description='Отмена через Телеграм бота',
                         name=client[1],
                         phone_number=client[2],
-                        tg_id=client[4] if client[4] else None
+                        tg_id=str(client[4]) if client[4] else None
                     )
                     break
         try:
