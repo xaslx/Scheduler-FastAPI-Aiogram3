@@ -1,4 +1,4 @@
-from datetime import datetime, date, time, timedelta
+from datetime import datetime, date, time
 from aiogram import F, Router, Bot
 from aiogram.filters import Command, CommandStart, StateFilter, CommandObject
 from aiogram.fsm.state import default_state
@@ -18,6 +18,8 @@ from bot.state import NewBooking
 from aiogram.fsm.context import FSMContext
 from email_validator import validate_email, EmailNotValidError
 from app.utils.generate_time import generate_time_intervals
+from redis_init import redis
+import json
 
 
 user_router: Router = Router()
@@ -56,7 +58,17 @@ async def create_new_booking(message: Message, state: FSMContext):
     personal_link: str = message.text
     if 'scheduler' in message.text:
         personal_link: str = message.text.split('/')[-1]
-    user: UserOut = await BotService.find_user(personal_link=personal_link)
+
+
+    user_data: None | str = await redis.get(personal_link)
+    
+    if user_data:
+        user: UserOut = UserOut.model_validate_json(user_data)
+    else:
+        user: UserOut = await BotService.find_user(personal_link=personal_link)
+        if user:
+            await redis.set(personal_link, user.model_dump_json(), ex=600) 
+
     if not user:
         return await message.answer('Не удалось найти пользователя по ссылке')
     elif not user.is_active:
@@ -77,6 +89,7 @@ async def create_new_booking(message: Message, state: FSMContext):
         )
         await state.update_data(personal_link=personal_link)
         await state.set_state(NewBooking.date)
+
 
 @user_router.message(StateFilter(NewBooking.personal_link), ~F.text)
 async def create_new_booking(message: Message):
