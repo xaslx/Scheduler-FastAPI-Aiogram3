@@ -84,7 +84,7 @@ async def login_user(
     if not user:
         raise UserNotFound
 
-    access_token, expire = create_access_token({"sub": str(user.id)})
+    access_token, expire = create_access_token({"sub": user.personal_link})
     max_age = (expire - datetime.utcnow()).total_seconds()
 
     response.set_cookie(
