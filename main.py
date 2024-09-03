@@ -27,6 +27,8 @@ from logger import logger
 from middleware import RateLimitingMiddleware
 from prometheus_fastapi_instrumentator import Instrumentator
 from bot.run import on_startup, handle_web_hook
+from app.tasks.apscheduler import scheduler
+
 
 
 sentry_sdk.init(
@@ -39,6 +41,7 @@ sentry_sdk.init(
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     FastAPICache.init(RedisBackend(redis), prefix="cache")
+    scheduler.start()
     await on_startup()
     logger.info('Fastapi приложение и Бот запущены')
     yield
