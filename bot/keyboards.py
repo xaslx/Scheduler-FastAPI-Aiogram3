@@ -21,8 +21,6 @@ async def set_main_menu(bot: Bot):
                    description='Мои ближайшие клиенты'),
         BotCommand(command='/date', 
                    description='Посмотреть занятое время на выбранную дату'),
-        BotCommand(command='/bookings',
-                   description='Мои ближайшие записи'),
         BotCommand(command='/help',
                    description='Все команды'),        
         BotCommand(command='/cancel',
