@@ -115,12 +115,13 @@ def reminder_email(email_to: EmailStr, time: str):
 
 
 async def reminder_tg(tg_id: int, time: str):
-    await bot.send_message(
-        chat_id=tg_id,
-        text=
-        '<b>Напоминание</b>\n'
-        f'Вы записывались на сегодня. Время: <b>{time}</b>'         
-    )
+    if not tg_id == 'Не указан':
+        return await bot.send_message(
+            chat_id=tg_id,
+            text=
+            '<b>Напоминание</b>\n'
+            f'Вы записывались на сегодня. Время: <b>{time}</b>'         
+        )
 
 
 @celery.task
