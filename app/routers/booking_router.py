@@ -8,7 +8,6 @@ from urllib3 import HTTPResponse
 
 from app.auth.dependencies import get_all_notifications, get_current_user
 from app.models.booking_model import Booking
-from app.models.user_model import User
 from app.repository.booking_repo import BookingRepository
 from app.repository.user_repo import UserRepository
 from app.schemas.booking_schemas import (BookingDate, BookingOut, CancelBooking,
@@ -25,6 +24,8 @@ from exceptions import BookingNotFound, NotAccessError, UserNotFound
 from logger import logger
 from app.utils.generate_time import moscow_tz
 from app.tasks.apscheduler import scheduler
+from app.utils.reminder import reminder
+
 
 booking_router: APIRouter = APIRouter(prefix="/booking", tags=["Запись"])
 
@@ -192,9 +193,7 @@ async def select_booking(
             create_booking.phone_number,
             create_booking.email)} записался к ID={user_email.id}, date={booking.date_for_booking}, time={create_booking.time}')
     formatted_date: date = booking.date_for_booking.strftime('%d.%m.%Y')
-    time_split = create_booking.time.split(':')
-    booking_datetime = datetime.combine(booking.date_for_booking, time(hour=int(time_split[0]), minute=int(time_split[1])))
-    reminder_time = booking_datetime - timedelta(hours=3)
+    reminder_time = reminder(time_=create_booking.time, date=booking.date_for_booking)
     # confirm_booking_for_client.delay(
     #     email_to=create_booking.email,
     #     tg=user_email.telegram_link if user_email.telegram_link else "Не указан",
