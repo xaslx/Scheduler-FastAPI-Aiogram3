@@ -21,7 +21,7 @@ async def admins_panel(message: Message):
 async def process_cancel_command(message: Message):
     await message.answer(
         text='Отменять нечего. Вы пока не создаете уведомление\n\n'
-        'Чтобы перейти к созданию уведомления - '
+        'Чтобы перейти к созданию уведомления\n'
         'отправьте команду /create_notification'
     )
 
@@ -30,7 +30,7 @@ async def process_cancel_command(message: Message):
 async def process_cancel_command_state(message: Message, state: FSMContext):
     await message.answer(
         text='Вы отменили создание уведомления\n\n'
-        'Чтобы снова перейти к созданию уведомления - '
+        'Чтобы снова перейти к созданию уведомления\n'
         'отправьте команду /create_notification'
     )
     await state.clear()
