@@ -1,4 +1,4 @@
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, timedelta, time
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, Path, Query, Request, BackgroundTasks
@@ -17,14 +17,14 @@ from app.schemas.notification_schemas import NotificationOut
 from app.schemas.user_schema import UserOut
 from app.tasks.tasks import (cancel_client, confirm_booking_for_client,
                              new_client, cancel_client_for_me, cancel_booking_tg_client, cancel_booking_tg_owner,
-                             new_booking_tg, new_client_tg)
+                             new_booking_tg, new_client_tg, reminder_email, reminder_tg)
 from app.utils.generate_time import generate_time_intervals
 from app.utils.templating import templates
 from database import get_async_session
 from exceptions import BookingNotFound, NotAccessError, UserNotFound
 from logger import logger
 from app.utils.generate_time import moscow_tz
-
+from app.tasks.apscheduler import scheduler
 
 booking_router: APIRouter = APIRouter(prefix="/booking", tags=["Запись"])
 
@@ -192,6 +192,9 @@ async def select_booking(
             create_booking.phone_number,
             create_booking.email)} записался к ID={user_email.id}, date={booking.date_for_booking}, time={create_booking.time}')
     formatted_date: date = booking.date_for_booking.strftime('%d.%m.%Y')
+    time_split = create_booking.time.split(':')
+    booking_datetime = datetime.combine(booking.date_for_booking, time(hour=int(time_split[0]), minute=int(time_split[1])))
+    reminder_time = booking_datetime - timedelta(hours=3)
     # confirm_booking_for_client.delay(
     #     email_to=create_booking.email,
     #     tg=user_email.telegram_link if user_email.telegram_link else "Не указан",
@@ -220,6 +223,9 @@ async def select_booking(
     #     user_email=create_booking.email,
     #     tg=create_booking.tg if create_booking.tg else 'Не указан',
     # ) Celery
+    # reminder_time = datetime()
+    scheduler.add_job(reminder_email, trigger='date', args=[user_email.email, create_booking.time], run_date=reminder_time)
+    scheduler.add_job(reminder_tg, trigger='date', args=[create_booking.tg if create_booking.tg else 'Не указан', create_booking.time], run_date=reminder_time)
     bg_task.add_task(
         new_client, 
         email=user_email.email,
