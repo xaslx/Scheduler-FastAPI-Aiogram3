@@ -346,7 +346,7 @@ async def cmd_start(message: Message):
 @user_router.message(StateFilter(default_state), Command('id'))
 async def get_my_id(message: Message):
     await message.answer(f'Ваш ID\nВставьте его на сайте при записи')
-    await message.answer(message.from_user.id)
+    await message.answer(text=f'{message.from_user.id}')
 
 
 @user_router.message(StateFilter(default_state), Command('clients'))
