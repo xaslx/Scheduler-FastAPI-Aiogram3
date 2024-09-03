@@ -1,3 +1,4 @@
+from email import message
 import smtplib
 from time import sleep
 
@@ -12,7 +13,8 @@ from app.tasks.email_templates import (add_new_client, cancel_booking,
                                        register_confirmation_template,
                                        send_notification_for_all_users,
                                        success_update_password,
-                                       cancel_booking_for_me, disconnect_tg_template)
+                                       cancel_booking_for_me, disconnect_tg_template, reminder_template
+                                       )
 from config import settings
 from aiogram import Bot
 from aiogram.client.default import DefaultBotProperties
@@ -22,6 +24,11 @@ import asyncio
 
 
 bot: Bot = Bot(settings.TOKEN_BOT, default=DefaultBotProperties(parse_mode="HTML"))
+
+
+
+
+
 
 async def disconnect_tg_for_user(user_id: int):
     await bot.send_message(
@@ -97,6 +104,23 @@ def disconnect_tg(email_to: EmailStr):
     with smtplib.SMTP_SSL(settings.SMTP_HOST, settings.SMTP_PORT) as server:
         server.login(settings.SMTP_USER, settings.SMTP_PASS)
         server.send_message(msg_content)
+
+@celery.task
+def reminder_email(email_to: EmailStr, time: str):
+    msg_content = reminder_template(email_to=email_to, time=time)
+
+    with smtplib.SMTP_SSL(settings.SMTP_HOST, settings.SMTP_PORT) as server:
+        server.login(settings.SMTP_USER, settings.SMTP_PASS)
+        server.send_message(msg_content)
+
+
+async def reminder_tg(tg_id: int, time: str):
+    await bot.send_message(
+        chat_id=tg_id,
+        text=
+        '<b>Напоминание</b>\n'
+        f'Вы записывались на сегодня. Время: <b>{time}</b>'         
+    )
 
 
 @celery.task
