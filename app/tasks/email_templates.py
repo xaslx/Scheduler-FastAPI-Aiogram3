@@ -6,6 +6,19 @@ from config import settings
 
 
 
+def reminder_template(email_to: EmailStr, time: str):
+    email = EmailMessage()
+    email["Subject"] = "Напоминание"
+    email["From"] = settings.SMTP_USER
+    email["To"] = email_to
+
+    email.set_content(f'Вы записывались на сегодня, <b>Время: {time}</b>', subtype="html")
+
+    return email
+
+
+
+
 def disconnect_tg_template(email_to: EmailStr):
     email = EmailMessage()
     email["Subject"] = "Отключение аккаунта Телеграм"
