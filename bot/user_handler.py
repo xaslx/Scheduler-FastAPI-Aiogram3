@@ -1,4 +1,4 @@
-from datetime import datetime, date, time
+from datetime import datetime, date, time, timedelta
 from aiogram import F, Router, Bot
 from aiogram.filters import Command, CommandStart, StateFilter, CommandObject
 from aiogram.fsm.state import default_state
@@ -18,8 +18,11 @@ from bot.state import NewBooking
 from aiogram.fsm.context import FSMContext
 from email_validator import validate_email, EmailNotValidError
 from app.utils.generate_time import generate_time_intervals
+from app.utils.reminder import reminder
 from redis_init import redis
-import json
+from app.tasks.tasks import reminder_email, reminder_tg
+from app.tasks.apscheduler import scheduler
+
 
 
 user_router: Router = Router()
@@ -214,6 +217,10 @@ async def set_phone_number(message: Message, state: FSMContext):
         f'Если хотите отменить запись то напишите на Email: <b>{res['user_email']}</b>\n'
         f'Или Телеграм: <b>{res['user_tg']}</b>'
     )
+
+    reminder_time: datetime = reminder(time_=res['time'], date=res['date'])
+    scheduler.add_job(reminder_email, trigger='date', args=[res['email'], res['time']], run_date=reminder_time)
+    scheduler.add_job(reminder_tg, trigger='date', args=[message.from_user.id if message.from_user.id else 'Не указан', res['time']], run_date=reminder_time)
     await state.clear()
     if res['user_tg_id']:
         await bot.send_message(
@@ -228,8 +235,7 @@ async def set_phone_number(message: Message, state: FSMContext):
             f'Email клиента: <b>{res['email']}</b>\n'
             f'Telegram: <b>{res['tg_username']}</b>\n\n'
             f'Введите /clients - чтобы посмотреть ваших клиентов, также там можно отменить запись'
-        )
-        
+        )  
     
 
 
@@ -329,11 +335,7 @@ async def confirm_cancel_booking(callback: CallbackQuery):
 @user_router.message(StateFilter(default_state), CommandStart())
 async def cmd_start(message: Message):
     await message.answer(
-        'Привет, это Бот от сайта Scheduler\n'
-        'Функционал почти такой же как на сайте\n'
-        'Можно записываться/смотреть свои записи/отменять\n'
-        'Также можно смотреть своих ближайших клиентов и отменять им запись '
-        'и получать уведомления\n\n'
+        'Привет, это Бот от сайта <a href="https://scheduler-bgly.onrender.com/">Scheduler</a>\n\n'
         'Чтобы посмотреть все команды - введите /help или нажмите на <b>Menu</b>'
     )
     user: TelegramOut = await BotService.find_user_by_tg_id(telegram_id=message.from_user.id)
