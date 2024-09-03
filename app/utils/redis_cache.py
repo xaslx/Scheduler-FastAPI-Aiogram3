@@ -2,7 +2,7 @@ from redis_init import redis
 from app.schemas.notification_schemas import NotificationOut
 from app.repository.notification_repo import NotificationRepository
 from sqlalchemy.ext.asyncio import AsyncSession
-
+from logger import logger
 
 
 async def get_notifications(session: AsyncSession):
@@ -21,3 +21,10 @@ async def get_notifications(session: AsyncSession):
             for value in cached_data.values()
         ], key=lambda notif: notif.created_at, reverse=True)
     return notifications
+
+
+async def delete_cache_personal_link(personal_link: str):
+    try:
+        await redis.delete(personal_link)
+    except:
+        logger.error('Ошибка при удалении кэша')
