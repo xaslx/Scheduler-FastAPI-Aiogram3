@@ -28,3 +28,10 @@ async def delete_cache_personal_link(personal_link: str):
         await redis.delete(personal_link)
     except:
         logger.error('Ошибка при удалении кэша')
+
+    
+async def delete_cache_notifications():
+    try:
+        await redis.delete('notifications', 'all_notifications')
+    except:
+        logger.error('Ошибка при удалении кэша')
