@@ -5,12 +5,12 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, Query, Request, Response, BackgroundTasks, Path
 from fastapi.exceptions import HTTPException
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import HTMLResponse
 from fastapi_pagination import Page
 from fastapi_pagination.ext.sqlalchemy import paginate
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from jose import ExpiredSignatureError, JWTError, jwt
+
 
 from app.auth.auth import get_password_hash
 from app.auth.authentication import generate_token
@@ -19,23 +19,23 @@ from app.auth.dependencies import (get_admin_user, get_all_notifications,
 from app.models.user_model import User
 from app.repository.booking_repo import BookingRepository
 from app.repository.user_repo import UserRepository
-from app.repository.telegram_repo import TelegramRepository
 from app.schemas.booking_schemas import BookingOut
 from app.schemas.notification_schemas import NotificationOut
 from app.schemas.user_schema import (EditEnabled, EditPassword, EditRole,
                                      EditTime, ResetPassword, UserOut,
                                      UserUpdate, ConnectTg)
-from app.schemas.tg_schema import Telegram
+
 from app.tasks.tasks import (password_changed, reset_password_email,
                              update_password, disconnect_tg, disconnect_tg_for_user)
 from app.utils.generate_time import moscow_tz
 from app.utils.templating import templates
 from database import get_async_session
-from exceptions import NotAccessError, UserNotFound, IncorrectTokenException
+from exceptions import NotAccessError, UserNotFound
 from logger import logger
 from aiogram import Bot
 from config import settings
-from redis_init import redis
+from app.utils.redis_cache import delete_cache_personal_link
+
 
 user_router: APIRouter = APIRouter(prefix="/user", tags=["Пользователи"])
 bot: Bot = Bot(settings.TOKEN_BOT)
@@ -103,6 +103,7 @@ async def connect_tg_template(
             context={'user': user, 'notifications': notifications}
         )
     await UserRepository.update(session=session, id=user.id, telegram_id=tg_id)
+    await delete_cache_personal_link(personal_link=user.personal_link)
     await bot.send_message(
         chat_id=tg_id,
         text=
@@ -205,6 +206,7 @@ async def edit_password(
     await UserRepository.update(
         session=session, id=new_password.user_id, hashed_password=hashed_password
     )
+    await delete_cache_personal_link(personal_link=user.personal_link)
     logger.info(f'Пользователь: ID={user.id}, email={user.email} изменил свой пароль')
     # update_password.delay(
     #     email=new_password.email, new_password=new_password.new_password
@@ -233,6 +235,7 @@ async def edit_my_profile(
         id=user.id,
         **new_user.model_dump(exclude={"password", "email"}),
     )
+    await delete_cache_personal_link(personal_link=user.personal_link)
     logger.info(f'Пользователь: ID={user.id}, email={user.email} изменил свой профиль')
 
 
@@ -384,6 +387,7 @@ async def ban_user(
             logger.warning(f'Ошибка прав доступа при блокировке пользователя')
             raise NotAccessError
     await UserRepository.update(session=session, id=user_id, is_active=False)
+    await delete_cache_personal_link(personal_link=user.personal_link)
     logger.info(f'Администратор: ID={admin.id}, email={admin.email} заблокировал пользователя ID={user.id}, email={user.email}')
 
 
@@ -404,6 +408,7 @@ async def unban_user(
             logger.warning(f'Ошибка прав доступа при разблокировке пользователя')
             raise NotAccessError
     await UserRepository.update(session=session, id=user_id, is_active=True)
+    await delete_cache_personal_link(personal_link=user.personal_link)
     logger.info(f'Администратор: ID={admin.id}, email={admin.email} разблокировал пользователя ID={user.id}, email={user.email}')
 
 
@@ -436,6 +441,7 @@ async def delete_user(
         logger.warning(f'Ошибка прав доступа при удалении пользователя (только для роли dev)')
         raise NotAccessError
     await UserRepository.delete(session=session, id=user_id)
+    await delete_cache_personal_link(personal_link=user.personal_link)
     logger.info(f'Администратор: ID={admin.id}, email={admin.email} удалил пользователя ID={user.id}, email={user.email}')
 
 
@@ -443,6 +449,7 @@ async def delete_user(
 async def del_user(
     user_id: Annotated[int, Path()],
     request: Request,
+    response: Response,
     session: AsyncSession = Depends(get_async_session),
     user: UserOut = Depends(get_current_user),
     notifications: list[str] = Depends(get_all_notifications),
@@ -458,6 +465,8 @@ async def del_user(
         logger.warning(f'Ошибка прав доступа при удалении профиля')
         raise NotAccessError
     await UserRepository.delete(session=session, id=user_id)
+    await delete_cache_personal_link(personal_link=user.personal_link)
+    response.delete_cookie('user_access_token')
     logger.info(f'Пользователь ID={user.id}, email={user.email} удалил свой профиль')
 
 
@@ -472,6 +481,7 @@ async def edit_enabled(
         logger.warning('Ошибка прав доступа при изменении возможности записи')
         raise NotAccessError
     await UserRepository.update(session=session, id=user_id, enabled=enabled.enabled)
+    await delete_cache_personal_link(personal_link=user.personal_link)
     logger.info(f'Пользователь ID={user.id}, email={user.email} изменил возможность записи на - {enabled.enabled}')
 
 
@@ -488,6 +498,7 @@ async def edit_time(
     await UserRepository.update(
         session=session, id=user_id, **new_time.model_dump(exclude_unset=True)
     )
+    await delete_cache_personal_link(personal_link=user.personal_link)
     logger.info(f'Пользователь ID={user.id}, email={user.email} изменил рабочий день / интервал на: \
                  start={str(new_time.start_time)}, end={str(new_time.end_time)}, interval={new_time.interval}')
 
@@ -602,5 +613,6 @@ async def disconnect_tg(
         await UserRepository.update(session=session, id=user.id, telegram_id=None)
         await disconnect_tg_for_user(user_id=tg_id)
         bg_task.add_task(disconnect_tg, email_to=user.email)
+        await delete_cache_personal_link(personal_link=user.personal_link)
     else:
         raise NotAccessError

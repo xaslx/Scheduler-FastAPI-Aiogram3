@@ -16,7 +16,7 @@ from database import get_async_session
 from exceptions import NotAccessError, NotificationNotFound
 from logger import logger
 from redis_init import redis
-
+from app.utils.redis_cache import delete_cache_notifications
 
 
 notification_router: APIRouter = APIRouter(prefix="/notification", tags=["Уведомления"])
@@ -162,10 +162,7 @@ async def create_notification(
 
     await NotificationRepository.add(session=session, **new_notification.model_dump())
     logger.info(f'Администратор: ID={user.id}, email={user.email} добавил новое уведомление на сайт (в бд)')
-    notifications = await redis.hgetall('notifications')
-    all_notifications = await redis.hgetall('all_notifications')
-    if notifications and all_notifications:
-        await redis.delete('notifications', 'all_notifications')
+    await delete_cache_notifications()
     return status.HTTP_201_CREATED
 
 
@@ -208,7 +205,4 @@ async def delete_notification(
         raise NotAccessError
     await NotificationRepository.delete(session=session, id=notif_id)
     logger.info(f'Администратор ID={user.id}, email={user.email} удалил уведомление на сайте (из бд)')
-    notifications = await redis.hgetall('notifications')
-    all_notifications = await redis.hgetall('all_notifications')
-    if notifications and all_notifications:
-        await redis.delete('notifications', 'all_notifications')
+    await delete_cache_notifications()
