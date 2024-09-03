@@ -29,7 +29,7 @@
                          onclick="toggleDropdown('notification-list')">
                         <img src="/app/static/notification.png" alt="Уведомления">
                         <div id="notification-list" class="notification-menu">
-                            <div class="menu-header-notification">Уведомления</div>
+                            <div class="menu-header-notification"><span style="font-size: 16px;">Новые уведомления</span></div>
                             {% if notifications %}
                                 {% for notification in notifications %}
                                     {% if loop.index <= 3 %}
