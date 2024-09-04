@@ -227,7 +227,7 @@ async def select_booking(
         trigger='date', 
         args=[user_email.email, create_booking.time], 
         run_date=reminder_time,
-        id=f'reminder_email_{create_booking.email}_{booking.date_for_booking}_{create_booking.time}_{user_email.id}'
+        id=f'reminder_email_{booking.id}_{create_booking.email}_{booking.date_for_booking}_{create_booking.time}_{user_email.id}'
     )
     
     scheduler.add_job(
@@ -235,7 +235,7 @@ async def select_booking(
         trigger='date', 
         args=[create_booking.tg if create_booking.tg else 'Не указан', create_booking.time], 
         run_date=reminder_time,
-        id=f'reminder_tg_{create_booking.email}_{booking.date_for_booking}_{create_booking.time}_{user_email.id}'
+        id=f'reminder_tg_{booking.id}_{create_booking.email}_{booking.date_for_booking}_{create_booking.time}_{user_email.id}'
     )
     bg_task.add_task(
         new_client, 
@@ -329,10 +329,10 @@ async def cancel_booking(
     )
     logger.info(f'Пользователю ID={user.id} отправлено письмо на почту об успешной отмене записи')
     scheduler.remove_job(
-        job_id=f'reminder_tg_{cancel_data.email}_{booking.date_for_booking}_{cancel_data.time}_{user.id}'
+        job_id=f'reminder_tg_{booking.id}_{cancel_data.email}_{booking.date_for_booking}_{cancel_data.time}_{user.id}'
     )
     scheduler.remove_job(
-        job_id=f'reminder_email_{cancel_data.email}_{booking.date_for_booking}_{cancel_data.time}_{user.id}'
+        job_id=f'reminder_email_{booking.id}_{cancel_data.email}_{booking.date_for_booking}_{cancel_data.time}_{user.id}'
     )
     if user.telegram_id:
         bg_task.add_task(
