@@ -24,7 +24,6 @@ from app.tasks.tasks import reminder_email, reminder_tg
 from app.tasks.apscheduler import scheduler
 
 
-
 user_router: Router = Router()
 
 bot: Bot = Bot(settings.TOKEN_BOT, default=DefaultBotProperties(parse_mode='HTML'))
@@ -219,14 +218,27 @@ async def set_phone_number(message: Message, state: FSMContext):
     )
 
     reminder_time: datetime = reminder(time_=res['time'], date=res['date'])
-    scheduler.add_job(reminder_email, trigger='date', args=[res['email'], res['time']], run_date=reminder_time)
-    scheduler.add_job(reminder_tg, trigger='date', args=[message.from_user.id if message.from_user.id else 'Не указан', res['time']], run_date=reminder_time)
+    scheduler.add_job(
+        reminder_email, 
+        trigger='date', 
+        args=[res['email'], res['time']], 
+        run_date=reminder_time,
+        id=f'reminder_email_{int(res['booking_id'])}_{res['email']}_{res['date']}_{res['time']}_{res['user_id']}'
+    )
+    
+    scheduler.add_job(
+        reminder_tg, 
+        trigger='date', 
+        args=[message.from_user.id if message.from_user.id else 'Не указан', res['time']], 
+        run_date=reminder_time,
+        id=f'reminder_tg_{int(res['booking_id'])}_{res['email']}_{res['date']}_{res['time']}_{res['user_id']}'
+    )
     await state.clear()
     if res['user_tg_id']:
         await bot.send_message(
             res['user_tg_id'], 
             text=
-            f'К вам записался новый клиент!\n'
+            f'К вам записался новый клиент!\n\n'
             f'Дата: <b>{res['date'].strftime('%d.%m.%Y')}</b>\n'
             f'Время: <b>{res['time']}</b> (МСК)\n\n'
             f'<b>Информация о клиенте</b>\n'
@@ -313,13 +325,20 @@ async def confirm_cancel_booking(callback: CallbackQuery):
             await callback.message.edit_text('<b>Вы успешно отменили запись.</b>')
             await callback.message.answer(
                 f'<b>Вы отменили запись у пользователя</b>\n'
-                f'<b>Инфо о пользователе:</b>\n'
+                f'<b>Инфо о пользователе:</b>\n\n'
                 f'Имя: <b>{cancel_booking.name}</b>\n'
                 f'Email: <b>{cancel_booking.email}</b>\n'
                 f'Телефон: <b>{cancel_booking.phone_number}</b>\n'
-                f'Телеграм ID: <b>{cancel_booking.tg_id}</b>\n\n'
+                f'Телеграм ID: <b>{cancel_booking.tg_id if cancel_booking.tg_id else 'Не указан'}</b>\n\n'
                 f'Дата: <b>{date_}</b>\n'
                 f'Время: <b>{formatted_time}</b> (МСК)'
+            )
+
+            scheduler.remove_job(
+                job_id=f'reminder_tg_{booking.id}_{cancel_booking.email}_{booking.date_for_booking}_{formatted_time}_{user.id}'
+            )
+            scheduler.remove_job(
+                job_id=f'reminder_email_{booking.id}_{cancel_booking.email}_{booking.date_for_booking}_{formatted_time}_{user.id}'
             )
             if cancel_booking.tg_id:
                 await bot.send_message(
@@ -393,11 +412,11 @@ async def get_clients_by_date(message: Message, command: CommandObject):
                         user_id=user.id,
                         date=command.args)
                 await message.answer(
-                    f'Все записи на : <b>{command.args}</b>\n'
-                    f'<b>Чтобы отменить запись нажмите на время, которое хотите отменить</b>\n',
-                    f'Время указано <b>по Москве</b>',
+                    f'Все записи на: <b>{command.args}</b>\n\n'
+                    f'Чтобы отменить запись нажмите на время, которое хотите отменить\nВремя указано по <b>Москве</b>',
                     reply_markup=inline_kb
                 )
+
 
 @user_router.message(StateFilter(default_state), Command('link'))
 async def get_my_personal_link(message: Message):
