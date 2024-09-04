@@ -46,6 +46,7 @@ async def lifespan(app: FastAPI):
     logger.info('Fastapi приложение и Бот запущены')
     yield
     await redis.close()
+    scheduler.shutdown()
 
 
 
