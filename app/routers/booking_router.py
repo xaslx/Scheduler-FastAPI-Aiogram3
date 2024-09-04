@@ -25,7 +25,7 @@ from logger import logger
 from app.utils.generate_time import moscow_tz
 from app.tasks.apscheduler import scheduler
 from app.utils.reminder import reminder
-
+from config import settings
 
 booking_router: APIRouter = APIRouter(prefix="/booking", tags=["Запись"])
 
@@ -222,10 +222,21 @@ async def select_booking(
     #     user_email=create_booking.email,
     #     tg=create_booking.tg if create_booking.tg else 'Не указан',
     # ) Celery
-    # reminder_time = datetime()
-    dat = datetime.combine(date=date(2024, 9, 4), time=time(11, 35))
-    scheduler.add_job(reminder_email, trigger='date', args=[user_email.email, create_booking.time], run_date=dat)
-    scheduler.add_job(reminder_tg, trigger='date', args=[create_booking.tg if create_booking.tg else 'Не указан', create_booking.time], run_date=dat)
+    scheduler.add_job(
+        reminder_email, 
+        trigger='date', 
+        args=[user_email.email, create_booking.time], 
+        run_date=reminder_time,
+        id=f'reminder_email_{create_booking.email}_{booking.date_for_booking}_{create_booking.time}_{user_email.id}'
+    )
+    
+    scheduler.add_job(
+        reminder_tg, 
+        trigger='date', 
+        args=[create_booking.tg if create_booking.tg else 'Не указан', create_booking.time], 
+        run_date=reminder_time,
+        id=f'reminder_tg_{create_booking.email}_{booking.date_for_booking}_{create_booking.time}_{user_email.id}'
+    )
     bg_task.add_task(
         new_client, 
         email=user_email.email,
@@ -317,6 +328,12 @@ async def cancel_booking(
         description=cancel_data.description,   
     )
     logger.info(f'Пользователю ID={user.id} отправлено письмо на почту об успешной отмене записи')
+    scheduler.remove_job(
+        job_id=f'reminder_tg_{cancel_data.email}_{booking.date_for_booking}_{cancel_data.time}_{user.id}'
+    )
+    scheduler.remove_job(
+        job_id=f'reminder_email_{cancel_data.email}_{booking.date_for_booking}_{cancel_data.time}_{user.id}'
+    )
     if user.telegram_id:
         bg_task.add_task(
             cancel_booking_tg_owner,
