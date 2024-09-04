@@ -105,7 +105,8 @@ def disconnect_tg(email_to: EmailStr):
         server.login(settings.SMTP_USER, settings.SMTP_PASS)
         server.send_message(msg_content)
 
-@celery.task
+
+
 def reminder_email(email_to: EmailStr, time: str):
     msg_content = reminder_template(email_to=email_to, time=time)
 
@@ -119,8 +120,9 @@ async def reminder_tg(tg_id: int, time: str):
         return await bot.send_message(
             chat_id=tg_id,
             text=
-            '<b>Напоминание</b>\n'
-            f'Вы записывались на сегодня. Время: <b>{time}</b>'         
+            '<b>Напоминание</b>\n\n'
+            f'Вы записывались на сегодня.\n'
+            f'Время: <b>{time}</b>'         
         )
 
 
