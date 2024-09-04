@@ -163,7 +163,7 @@ async def set_time(callback: CallbackQuery, state: FSMContext):
     await callback.answer()
     _, booking_id, user_id, date_, hour, minute = callback.data.split(':')
     await state.update_data(booking_id=booking_id, user_id=user_id, time=f'{hour}:{minute}')
-    await callback.message.edit_text(f'Вы выбрали время: <b>{hour}:{minute}.</b>\nТеперь введите ваше имя.\nИли /cancel - если хотите отменить')
+    await callback.message.edit_text(f'Вы выбрали время: <b>{hour}:{minute}.</b> (МСК)\nТеперь введите ваше имя.\nИли /cancel - если хотите отменить')
     await state.set_state(NewBooking.name)
 
 
@@ -212,7 +212,7 @@ async def set_phone_number(message: Message, state: FSMContext):
         booking_id=int(res['booking_id']), 
         time=(res['time'], res['name'], res['phone_number'], res['email'], message.from_user.id))
     await message.answer(
-        f'Вы успешно записались на время: <b>{res['time']}</b>\n'
+        f'Вы успешно записались на время: <b>{res['time']}</b> (МСК)\n'
         f'Дата: <b>{res['date'].strftime('%d.%m.%Y')}</b>\n\n'
         f'Если хотите отменить запись то напишите на Email: <b>{res['user_email']}</b>\n'
         f'Или Телеграм: <b>{res['user_tg']}</b>'
@@ -228,7 +228,7 @@ async def set_phone_number(message: Message, state: FSMContext):
             text=
             f'К вам записался новый клиент!\n'
             f'Дата: <b>{res['date'].strftime('%d.%m.%Y')}</b>\n'
-            f'Время: <b>{res['time']}</b>\n\n'
+            f'Время: <b>{res['time']}</b> (МСК)\n\n'
             f'<b>Информация о клиенте</b>\n'
             f'Имя: <b>{res['name']}</b>\n'
             f'Телефон: <b>{res['phone_number']}</b>\n'
@@ -265,7 +265,7 @@ async def cancel_booking(callback: CallbackQuery):
         )
         await callback.message.edit_text(
             f'Вы уверенны что хотите отменить запись?\n'
-            f'на время: <b>{hour}:{minute}</b> и дату: <b>{date_}</b>',
+            f'на время: <b>{hour}:{minute}</b> (по МСК) и дату: <b>{date_}</b>',
             reply_markup=inline_kb
         )
 
@@ -319,7 +319,7 @@ async def confirm_cancel_booking(callback: CallbackQuery):
                 f'Телефон: <b>{cancel_booking.phone_number}</b>\n'
                 f'Телеграм ID: <b>{cancel_booking.tg_id}</b>\n\n'
                 f'Дата: <b>{date_}</b>\n'
-                f'Время: <b>{formatted_time}</b>'
+                f'Время: <b>{formatted_time}</b> (МСК)'
             )
             if cancel_booking.tg_id:
                 await bot.send_message(
@@ -327,7 +327,7 @@ async def confirm_cancel_booking(callback: CallbackQuery):
                     text=
                     f'<b>Вам отменили запись</b>\n'
                     f'Дата: <b>{date_}</b>\n'
-                    f'Время: <b>{formatted_time}</b>\n'
+                    f'Время: <b>{formatted_time}</b> (МСК)\n'
                     f'Причина: <b>{cancel_booking.description}</b>'
                 )
 
@@ -394,7 +394,8 @@ async def get_clients_by_date(message: Message, command: CommandObject):
                         date=command.args)
                 await message.answer(
                     f'Все записи на : <b>{command.args}</b>\n'
-                    f'<b>Чтобы отменить запись нажмите на время, которое хотите отменить</b>',
+                    f'<b>Чтобы отменить запись нажмите на время, которое хотите отменить</b>\n',
+                    f'Время указано <b>по Москве</b>',
                     reply_markup=inline_kb
                 )
 
