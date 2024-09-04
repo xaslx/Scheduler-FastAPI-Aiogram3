@@ -12,7 +12,7 @@ def reminder_template(email_to: EmailStr, time: str):
     email["From"] = settings.SMTP_USER
     email["To"] = email_to
 
-    email.set_content(f'Вы записывались на сегодня, <b>Время: {time}</b>', subtype="html")
+    email.set_content(f'У вас имеется запись на сегодня<br><b>Время: {time}</b><br>Время указано по <b>Москве</b>', subtype="html")
 
     return email
 
@@ -609,7 +609,7 @@ def cancel_booking(
                 <div class="inner-container">
                     <h1>Вам отменили запись</h1>
                     <p>Дата: <b>{date}</b></p>
-                    <p>Время: <b>{time}</b></p>
+                    <p>Время: <b>{time}</b> (МСК)</p>
                     <p>Причина: <b>{description}</b></p>
                 </div>
                 <div class="footer">
@@ -695,7 +695,7 @@ def cancel_booking_for_me(
                     <b>Email: {email_user}</b><br>
                     <b>Телефон: {phone_number}<b></br>
                     <p>Дата: <b>{date}</b></p>
-                    <p>Время: <b>{time}</b></p>
+                    <p>Время: <b>{time}</b> (МСК)</p>
                     <p>Причина: <b>{description}</b></p>
                 </div>
                 <div class="footer">
@@ -778,7 +778,7 @@ def confirm_booking(email_to: EmailStr, tg: str, em: EmailStr, time: str, date: 
             <div class="outer-container">
                 <div class="inner-container">
                     <h1>Вы сделали запись</h1>
-                    <p>Время: <b>{time}</b></p>
+                    <p>Время: <b>{time}</b> (МСК) </p>
                     <p>Дата: <b>{date}</b></p>
                     <p><b>Если вы хотите отменить запись, свяжитесь с нами:</b></p>
                     <p>По Email: <b>{em}</b></p>
