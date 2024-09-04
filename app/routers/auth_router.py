@@ -88,7 +88,7 @@ async def login_user(
     max_age = (expire - datetime.utcnow()).total_seconds()
 
     response.set_cookie(
-        "user_access_token", access_token, httponly=True, max_age=max_age
+        "user_access_token", access_token, httponly=True, max_age=max_age, secure=True
     )
     logger.info(f'Пользователь вошел в систему: ID={user.id}, name={user.name}, surname={user.surname}')
     return access_token
