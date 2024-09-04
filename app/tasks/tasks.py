@@ -51,7 +51,7 @@ async def cancel_booking_tg_client(user_id: int, date: str, time: str, descripti
         text=
         f'<b>Вашу запись отменили</b>\n\n'
         f'Дата: <b>{date}</b>\n'
-        f'Время: <b>{time}</b>\n'
+        f'Время: <b>{time}</b> (МСК)\n'
         f'Причина: <b>{description}</b>',
     )
 
@@ -66,7 +66,7 @@ async def cancel_booking_tg_owner(owner_id: int, name: str, email: EmailStr, pho
         f'Телефона: <b>{phone_number}</b>\n\n'
         f'Инфо о времени и причина:\n'
         f'Дата: <b>{date}</b>\n'
-        f'Время: <b>{time}</b>\n'
+        f'Время: <b>{time}</b> (МСК)\n'
         f'Причина: <b>{description}</b>',
     )
 
@@ -76,7 +76,7 @@ async def new_client_tg(user_id: int, date: str, time: str, name: str, phone_num
         text=
         f'К вам записался новый клиент!\n'
         f'Дата: <b>{date}</b>\n'
-        f'Время: <b>{time}</b>\n\n'
+        f'Время: <b>{time}</b> (МСК)\n\n'
         f'<b>Информация о клиенте</b>\n'
         f'Имя: <b>{name}</b>\n'
         f'Телефон: <b>{phone_number}</b>\n'
@@ -89,7 +89,7 @@ async def new_booking_tg(user_id: int, date: str, time: str, email: EmailStr, tg
         text=
         f'Вы успешно записались\n'
         f'Дата: <b>{date}</b>\n'
-        f'Время: <b>{time}</b>\n\n'
+        f'Время: <b>{time}</b> (МСК)\n\n'
         f'<b>Если хотите отменить запись то напишите на почту или телеграм</b>\n\n'
         f'Email: <b>{email}</b>\n'
         f'Telegram: <b>{tg}</b>\n'
@@ -122,7 +122,7 @@ async def reminder_tg(tg_id: int, time: str):
             text=
             '<b>Напоминание</b>\n\n'
             f'Вы записывались на сегодня.\n'
-            f'Время: <b>{time}</b>'         
+            f'Время: <b>{time}</b> (МСК)'         
         )
 
 
