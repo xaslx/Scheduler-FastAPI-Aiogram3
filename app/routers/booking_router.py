@@ -223,7 +223,7 @@ async def select_booking(
     #     tg=create_booking.tg if create_booking.tg else 'Не указан',
     # ) Celery
     # reminder_time = datetime()
-    dat = datetime.combine(date=date(2024, 9, 4), time=time(10, 20))
+    dat = datetime.combine(date=date(2024, 9, 4), time=time(10, 35))
     scheduler.add_job(reminder_email, trigger='date', args=[user_email.email, create_booking.time], run_date=dat)
     scheduler.add_job(reminder_tg, trigger='date', args=[create_booking.tg if create_booking.tg else 'Не указан', create_booking.time], run_date=dat)
     bg_task.add_task(
