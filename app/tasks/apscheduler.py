@@ -1,13 +1,10 @@
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from app.utils.generate_time import moscow_tz
 from config import settings
-from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from apscheduler.jobstores.redis import RedisJobStore
 
 
 
-jobstores = {
-    'default': SQLAlchemyJobStore(url='sqlite:///jobs.sqlite')
-}
-
-scheduler: AsyncIOScheduler = AsyncIOScheduler()
-scheduler.configure(timezone=moscow_tz, jobstores=jobstores)
+jobstores: dict[str, RedisJobStore] = {'default': RedisJobStore(db=2, host=settings.REDIS_HOST, port=settings.REDIS_PORT)}
+scheduler: AsyncIOScheduler = AsyncIOScheduler(timezone=moscow_tz, jobstores=jobstores)
