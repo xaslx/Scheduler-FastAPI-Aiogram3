@@ -20,7 +20,9 @@ class User(Base):
     email: Mapped[str] = mapped_column(String(255), unique=True)
     personal_link: Mapped[str] = mapped_column(String(255), unique=True)
     telegram_link: Mapped[str] = mapped_column(String(255), default=None, nullable=True)
-    telegram_id: Mapped[BigInteger] = mapped_column(BigInteger, unique=True, nullable=True)
+    telegram_id: Mapped[BigInteger] = mapped_column(
+        BigInteger, unique=True, nullable=True
+    )
     hashed_password: Mapped[str]
     registered_at: Mapped[datetime] = mapped_column(DateTime, default=current_time)
     is_active: Mapped[bool] = mapped_column(default=True)

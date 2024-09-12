@@ -5,18 +5,18 @@ from pydantic import EmailStr
 from config import settings
 
 
-
 def reminder_template(email_to: EmailStr, time: str):
     email = EmailMessage()
     email["Subject"] = "Напоминание"
     email["From"] = settings.SMTP_USER
     email["To"] = email_to
 
-    email.set_content(f'У вас имеется запись на сегодня<br><b>Время: {time}</b><br>Время указано по <b>Москве</b>', subtype="html")
+    email.set_content(
+        f"У вас имеется запись на сегодня<br><b>Время: {time}</b><br>Время указано по <b>Москве</b>",
+        subtype="html",
+    )
 
     return email
-
-
 
 
 def disconnect_tg_template(email_to: EmailStr):
@@ -91,7 +91,7 @@ def disconnect_tg_template(email_to: EmailStr):
         </body>
         </html>
         """,
-        subtype="html"
+        subtype="html",
     )
 
     return email
@@ -173,11 +173,10 @@ def register_confirmation_template(email_to: EmailStr):
         </body>
         </html>
         """,
-        subtype="html"
+        subtype="html",
     )
 
     return email
-
 
 
 def forgot_password_email_template(email_to: EmailStr, token: str):
@@ -271,7 +270,7 @@ def forgot_password_email_template(email_to: EmailStr, token: str):
         </body>
         </html>
         """,
-        subtype="html"
+        subtype="html",
     )
 
     return email
@@ -357,7 +356,7 @@ def password_changed_email_template(email_to: EmailStr, new_password: str):
         </body>
         </html>
         """,
-        subtype="html"
+        subtype="html",
     )
 
     return email
@@ -443,13 +442,21 @@ def success_update_password(email_to: EmailStr, new_password: str):
         </body>
         </html>
         """,
-        subtype="html"
+        subtype="html",
     )
 
     return email
 
 
-def add_new_client(email_to: EmailStr, date: str, time: str, name: str, phone_number: str, user_email: EmailStr, tg: str):
+def add_new_client(
+    email_to: EmailStr,
+    date: str,
+    time: str,
+    name: str,
+    phone_number: str,
+    user_email: EmailStr,
+    tg: str,
+):
     email = EmailMessage()
     email["Subject"] = "Новая запись!"
     email["From"] = settings.SMTP_USER
@@ -536,15 +543,13 @@ def add_new_client(email_to: EmailStr, date: str, time: str, name: str, phone_nu
         </body>
         </html>
         """,
-        subtype="html"
+        subtype="html",
     )
 
     return email
 
 
-def cancel_booking(
-    email_to: EmailStr, date: str, time: str, description: str
-):
+def cancel_booking(email_to: EmailStr, date: str, time: str, description: str):
     email = EmailMessage()
     email["Subject"] = "Отмена записи!"
     email["From"] = settings.SMTP_USER
@@ -619,13 +624,20 @@ def cancel_booking(
         </body>
         </html>
         """,
-        subtype="html"
+        subtype="html",
     )
 
     return email
 
+
 def cancel_booking_for_me(
-    email_to: EmailStr, name: str, email_user: EmailStr, phone_number: str, date: str, time: str, description: str
+    email_to: EmailStr,
+    name: str,
+    email_user: EmailStr,
+    phone_number: str,
+    date: str,
+    time: str,
+    description: str,
 ):
     email = EmailMessage()
     email["Subject"] = "Отмена записи!"
@@ -705,7 +717,7 @@ def cancel_booking_for_me(
         </body>
         </html>
         """,
-        subtype="html"
+        subtype="html",
     )
 
     return email
@@ -791,7 +803,7 @@ def confirm_booking(email_to: EmailStr, tg: str, em: EmailStr, time: str, date: 
         </body>
         </html>
         """,
-        subtype="html"
+        subtype="html",
     )
 
     return email
@@ -870,7 +882,7 @@ def send_notification_for_all_users(email_to: EmailStr, message: str):
         </body>
         </html>
         """,
-        subtype="html"
+        subtype="html",
     )
 
     return email
@@ -951,7 +963,7 @@ def get_help(email_from: EmailStr, description: str):
         </body>
         </html>
         """,
-        subtype="html"
+        subtype="html",
     )
 
     return email

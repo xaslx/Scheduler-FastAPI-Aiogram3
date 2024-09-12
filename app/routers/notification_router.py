@@ -3,12 +3,14 @@ from fastapi import APIRouter, Depends, Path, Request, status, BackgroundTasks
 from fastapi.responses import HTMLResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.auth.dependencies import (get_admin_user, get_all_notifications,
-                                   get_current_user)
+from app.auth.dependencies import (
+    get_admin_user,
+    get_all_notifications,
+    get_current_user,
+)
 from app.repository.notification_repo import NotificationRepository
 from app.repository.user_repo import UserRepository
-from app.schemas.notification_schemas import (CreateNotification,
-                                              NotificationOut)
+from app.schemas.notification_schemas import CreateNotification, NotificationOut
 from app.schemas.user_schema import CreateMessage, UserOut
 from app.tasks.tasks import send_notification
 from app.utils.templating import templates
@@ -29,27 +31,32 @@ async def get_all_notification(
     user: UserOut = Depends(get_current_user),
     notifications: list[NotificationOut] = Depends(get_all_notifications),
 ) -> HTMLResponse:
-    cached_data = await redis.hgetall('all_notifications')
+    cached_data = await redis.hgetall("all_notifications")
     if not cached_data:
-        all_notifications: list[NotificationOut] = await NotificationRepository.find_all(
-            session=session
+        all_notifications: list[NotificationOut] = (
+            await NotificationRepository.find_all(session=session)
         )
-        notifications_out = [NotificationOut.model_validate(notif) for notif in all_notifications]
+        notifications_out = [
+            NotificationOut.model_validate(notif) for notif in all_notifications
+        ]
         for notification in notifications_out:
-            await redis.hset('all_notifications', notification.id, notification.model_dump_json())
-            await redis.expire('all_notifications', 600)
+            await redis.hset(
+                "all_notifications", notification.id, notification.model_dump_json()
+            )
+            await redis.expire("all_notifications", 600)
     else:
         all_notifications: list[NotificationOut] = [
-            NotificationOut.model_validate_json(value)
-            for value in cached_data.values()
+            NotificationOut.model_validate_json(value) for value in cached_data.values()
         ]
-        
+
     return templates.TemplateResponse(
         request=request,
         name="all_notifications.html",
         context={
             "user": user,
-            "all_notifications": sorted(all_notifications, key=lambda notif: notif.created_at, reverse=True),
+            "all_notifications": sorted(
+                all_notifications, key=lambda notif: notif.created_at, reverse=True
+            ),
             "notifications": notifications,
         },
     )
@@ -61,7 +68,7 @@ async def get_create_notification_template(
     user: UserOut = Depends(get_admin_user),
     notifications: list[NotificationOut] = Depends(get_all_notifications),
 ) -> HTMLResponse:
- 
+
     if not user:
         return templates.TemplateResponse(
             request=request,
@@ -149,7 +156,7 @@ async def create_notification(
 ):
 
     if not user:
-        logger.warning(f'Ошибка прав доступа при добавлении уведомления')
+        logger.warning(f"Ошибка прав доступа при добавлении уведомления")
         raise NotAccessError
 
     notifications: list[NotificationOut] = await NotificationRepository.find_all(
@@ -158,10 +165,12 @@ async def create_notification(
 
     if len(notifications) >= 30:
         await NotificationRepository.delete(session=session, id=notifications[0].id)
-        logger.info('Удаление последнего уведомления из базы данных')
+        logger.info("Удаление последнего уведомления из базы данных")
 
     await NotificationRepository.add(session=session, **new_notification.model_dump())
-    logger.info(f'Администратор: ID={user.id}, email={user.email} добавил новое уведомление на сайт (в бд)')
+    logger.info(
+        f"Администратор: ID={user.id}, email={user.email} добавил новое уведомление на сайт (в бд)"
+    )
     await delete_cache_notifications()
     return status.HTTP_201_CREATED
 
@@ -174,18 +183,16 @@ async def send_notification_for_all_users(
     user: UserOut = Depends(get_admin_user),
 ):
     if not user:
-        logger.warning(f'Ошибка прав доступа при отправке уведомлений на email')
+        logger.warning(f"Ошибка прав доступа при отправке уведомлений на email")
         raise NotAccessError
 
     users: list[UserOut] = await UserRepository.find_all(session=session)
     emails: list[str] = [user.email for user in users]
     # send_notification.delay(users=emails, message=message.message) Celery
-    bg_task.add_task(
-        send_notification,
-        users=emails, 
-        message=message.message
+    bg_task.add_task(send_notification, users=emails, message=message.message)
+    logger.info(
+        f"Администратор: ID={user.id}, email={user.email} отправил уведомление на email пользователям: кол-во пользователей: {len(emails)}"
     )
-    logger.info(f'Администратор: ID={user.id}, email={user.email} отправил уведомление на email пользователям: кол-во пользователей: {len(emails)}')
     return {"user_count": len(emails)}
 
 
@@ -201,8 +208,10 @@ async def delete_notification(
     if not notification:
         raise NotificationNotFound
     if not user:
-        logger.warning(f'Ошибка прав доступа при удалении уведомления')
+        logger.warning(f"Ошибка прав доступа при удалении уведомления")
         raise NotAccessError
     await NotificationRepository.delete(session=session, id=notif_id)
-    logger.info(f'Администратор ID={user.id}, email={user.email} удалил уведомление на сайте (из бд)')
+    logger.info(
+        f"Администратор ID={user.id}, email={user.email} удалил уведомление на сайте (из бд)"
+    )
     await delete_cache_notifications()

@@ -2,8 +2,14 @@ import re
 from datetime import datetime, time
 
 from fastapi import HTTPException
-from pydantic import (BaseModel, ConfigDict, EmailStr, Field, field_validator,
-                      model_validator)
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    EmailStr,
+    Field,
+    field_validator,
+    model_validator,
+)
 
 
 PASSWORD_CHECK = re.compile(r"^[a-zA-Z0-9_-]{6,30}$")
@@ -86,7 +92,7 @@ class UserOut(BaseModel):
     end_time: time
     interval: int
     enabled: bool
-    
+
     model_config = ConfigDict(from_attributes=True)
 
 

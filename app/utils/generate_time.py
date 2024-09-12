@@ -5,7 +5,9 @@ import pytz
 moscow_tz = pytz.timezone("Europe/Moscow")
 
 
-async def generate_time_intervals(start_time, end_time, interval_minutes: int) -> list[str]:
+async def generate_time_intervals(
+    start_time, end_time, interval_minutes: int
+) -> list[str]:
     start: datetime = datetime.combine(datetime.today(), start_time)
     end: datetime = datetime.combine(datetime.today(), end_time)
 

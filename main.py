@@ -30,12 +30,7 @@ from bot.run import on_startup, handle_web_hook
 from app.tasks.apscheduler import scheduler
 
 
-
-sentry_sdk.init(
-    dsn=settings.dsn,
-    traces_sample_rate=1.0,
-    profiles_sample_rate=1.0
-)
+sentry_sdk.init(dsn=settings.dsn, traces_sample_rate=1.0, profiles_sample_rate=1.0)
 
 
 @asynccontextmanager
@@ -43,19 +38,14 @@ async def lifespan(app: FastAPI):
     FastAPICache.init(RedisBackend(redis), prefix="cache")
     scheduler.start()
     await on_startup()
-    logger.info('Fastapi приложение и Бот запущены')
+    logger.info("Fastapi приложение и Бот запущены")
     yield
     await redis.close()
     scheduler.shutdown()
 
 
-
 app: FastAPI = FastAPI(
-    title="Scheduler",
-    version="0.1",
-    lifespan=lifespan,
-    docs_url=None,
-    redoc_url=None
+    title="Scheduler", version="0.1", lifespan=lifespan, docs_url=None, redoc_url=None
 )
 
 
@@ -69,7 +59,7 @@ app: FastAPI = FastAPI(
 add_pagination(app)
 
 # роутеры
-app.add_route(f'/{settings.TOKEN_BOT}', handle_web_hook, methods=["POST"])
+app.add_route(f"/{settings.TOKEN_BOT}", handle_web_hook, methods=["POST"])
 app.include_router(auth_router)
 app.include_router(user_router)
 app.include_router(main_router)

@@ -14,19 +14,35 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth.auth import get_password_hash
 from app.auth.authentication import generate_token
-from app.auth.dependencies import (get_admin_user, get_all_notifications,
-                                   get_current_user, get_tg_id)
+from app.auth.dependencies import (
+    get_admin_user,
+    get_all_notifications,
+    get_current_user,
+    get_tg_id,
+)
 from app.models.user_model import User
 from app.repository.booking_repo import BookingRepository
 from app.repository.user_repo import UserRepository
 from app.schemas.booking_schemas import BookingOut
 from app.schemas.notification_schemas import NotificationOut
-from app.schemas.user_schema import (EditEnabled, EditPassword, EditRole,
-                                     EditTime, ResetPassword, UserOut,
-                                     UserUpdate, ConnectTg)
+from app.schemas.user_schema import (
+    EditEnabled,
+    EditPassword,
+    EditRole,
+    EditTime,
+    ResetPassword,
+    UserOut,
+    UserUpdate,
+    ConnectTg,
+)
 
-from app.tasks.tasks import (password_changed, reset_password_email,
-                             update_password, disconnect_tg, disconnect_tg_for_user)
+from app.tasks.tasks import (
+    password_changed,
+    reset_password_email,
+    update_password,
+    disconnect_tg,
+    disconnect_tg_for_user,
+)
 from app.utils.generate_time import moscow_tz
 from app.utils.templating import templates
 from database import get_async_session
@@ -74,46 +90,44 @@ async def get_my_clients(
     )
 
 
-
-@user_router.get('/connect_telegram')
+@user_router.get("/connect_telegram")
 async def connect_tg_template(
     token: Annotated[str, Query()],
     request: Request,
     user: UserOut = Depends(get_current_user),
     notifications: list[NotificationOut] = Depends(get_all_notifications),
-    session: AsyncSession = Depends(get_async_session)
+    session: AsyncSession = Depends(get_async_session),
 ):
     if not user:
         return templates.TemplateResponse(
             request=request,
-            name='404.html',
-            context={'user': user, 'notifications': notifications}
+            name="404.html",
+            context={"user": user, "notifications": notifications},
         )
     if user.telegram_id:
         return templates.TemplateResponse(
-            request=request, 
-            name='already_connect.html',
-            context={'user': user, 'notifications': notifications}
+            request=request,
+            name="already_connect.html",
+            context={"user": user, "notifications": notifications},
         )
     tg_id: int = await get_tg_id(token=token)
     if not tg_id:
         return templates.TemplateResponse(
             request=request,
-            name='error_jwt.html',
-            context={'user': user, 'notifications': notifications}
+            name="error_jwt.html",
+            context={"user": user, "notifications": notifications},
         )
     await UserRepository.update(session=session, id=user.id, telegram_id=tg_id)
     await delete_cache_personal_link(personal_link=user.personal_link)
     await bot.send_message(
         chat_id=tg_id,
-        text=
-        'Вы успешно привязали свой Telegram к сайту\n'
-        'Если хотите отменить, то сделать это можно в своем профиле на сайте'
+        text="Вы успешно привязали свой Telegram к сайту\n"
+        "Если хотите отменить, то сделать это можно в своем профиле на сайте",
     )
     return templates.TemplateResponse(
         request=request,
-        name='success_connect.html',
-        context={'user': user, 'notifications': notifications}
+        name="success_connect.html",
+        context={"user": user, "notifications": notifications},
     )
 
 
@@ -207,16 +221,18 @@ async def edit_password(
         session=session, id=new_password.user_id, hashed_password=hashed_password
     )
     await delete_cache_personal_link(personal_link=user.personal_link)
-    logger.info(f'Пользователь: ID={user.id}, email={user.email} изменил свой пароль')
+    logger.info(f"Пользователь: ID={user.id}, email={user.email} изменил свой пароль")
     # update_password.delay(
     #     email=new_password.email, new_password=new_password.new_password
     # ) Celery
     bg_task.add_task(
         update_password,
-        email=new_password.email, 
-        new_password=new_password.new_password 
+        email=new_password.email,
+        new_password=new_password.new_password,
     )
-    logger.info(f'Пользователю: ID={user.id}, email={user.email} отправлено письмо с измененным паролем')
+    logger.info(
+        f"Пользователю: ID={user.id}, email={user.email} отправлено письмо с измененным паролем"
+    )
     response.delete_cookie("user_access_token")
 
 
@@ -227,16 +243,16 @@ async def edit_my_profile(
     user: UserOut = Depends(get_current_user),
 ):
     if not user:
-        logger.warning('Ошибка прав доступа при редактировании профиля')
+        logger.warning("Ошибка прав доступа при редактировании профиля")
         raise NotAccessError
-    
+
     await UserRepository.update(
         session=session,
         id=user.id,
         **new_user.model_dump(exclude={"password", "email"}),
     )
     await delete_cache_personal_link(personal_link=user.personal_link)
-    logger.info(f'Пользователь: ID={user.id}, email={user.email} изменил свой профиль')
+    logger.info(f"Пользователь: ID={user.id}, email={user.email} изменил свой профиль")
 
 
 @user_router.get("/all_users", status_code=200, name="allusers:page")
@@ -303,8 +319,10 @@ async def search_user_by_name_surname(
             context={"user": user, "notifications": notifications},
         )
     if query:
-        users: list[UserOut] = await UserRepository.search_user_by_name_surname_or_email(
-            session=session, text=query
+        users: list[UserOut] = (
+            await UserRepository.search_user_by_name_surname_or_email(
+                session=session, text=query
+            )
         )
     return templates.TemplateResponse(
         request=request,
@@ -377,18 +395,20 @@ async def ban_user(
     admin: UserOut = Depends(get_admin_user),
 ):
     if not admin:
-        logger.warning(f'Ошибка прав доступа при блокировке пользователя (не админ)')
+        logger.warning(f"Ошибка прав доступа при блокировке пользователя (не админ)")
         raise NotAccessError
     user: UserOut = await UserRepository.find_one_or_none(id=user_id, session=session)
     if not user:
         raise UserNotFound
     if admin.role == "admin":
         if user_id == admin.id or user.role == "admin":
-            logger.warning(f'Ошибка прав доступа при блокировке пользователя')
+            logger.warning(f"Ошибка прав доступа при блокировке пользователя")
             raise NotAccessError
     await UserRepository.update(session=session, id=user_id, is_active=False)
     await delete_cache_personal_link(personal_link=user.personal_link)
-    logger.info(f'Администратор: ID={admin.id}, email={admin.email} заблокировал пользователя ID={user.id}, email={user.email}')
+    logger.info(
+        f"Администратор: ID={admin.id}, email={admin.email} заблокировал пользователя ID={user.id}, email={user.email}"
+    )
 
 
 @user_router.patch("/unban/{user_id}", status_code=200)
@@ -398,18 +418,20 @@ async def unban_user(
     admin: UserOut = Depends(get_admin_user),
 ):
     if not admin:
-        logger.warning(f'Ошибка прав доступа при разблокировке пользователя (не админ)')
+        logger.warning(f"Ошибка прав доступа при разблокировке пользователя (не админ)")
         raise NotAccessError
     user: UserOut = await UserRepository.find_one_or_none(id=user_id, session=session)
     if not user:
         raise UserNotFound
     if admin.role == "admin" or user.role == "admin":
         if user_id == admin.id:
-            logger.warning(f'Ошибка прав доступа при разблокировке пользователя')
+            logger.warning(f"Ошибка прав доступа при разблокировке пользователя")
             raise NotAccessError
     await UserRepository.update(session=session, id=user_id, is_active=True)
     await delete_cache_personal_link(personal_link=user.personal_link)
-    logger.info(f'Администратор: ID={admin.id}, email={admin.email} разблокировал пользователя ID={user.id}, email={user.email}')
+    logger.info(
+        f"Администратор: ID={admin.id}, email={admin.email} разблокировал пользователя ID={user.id}, email={user.email}"
+    )
 
 
 @user_router.patch("/edit_role/{user_id}", status_code=200, name="edit_role:page")
@@ -420,10 +442,14 @@ async def edit_role_for_user(
     admin: UserOut = Depends(get_admin_user),
 ):
     if admin.role == "admin" or not admin:
-        logger.warning(f'Ошибка прав доступа при изменении роли пользователя (только для роли dev)')
+        logger.warning(
+            f"Ошибка прав доступа при изменении роли пользователя (только для роли dev)"
+        )
         raise NotAccessError
     await UserRepository.update(session=session, id=user_id, role=new_role.role)
-    logger.info(f'Администратор: ID={admin.id}, email={admin.email} изменил роль пользователю ID={user_id}, новая роль - {new_role.role}')
+    logger.info(
+        f"Администратор: ID={admin.id}, email={admin.email} изменил роль пользователю ID={user_id}, новая роль - {new_role.role}"
+    )
 
 
 @user_router.delete(
@@ -438,11 +464,15 @@ async def delete_user(
     if not user:
         raise UserNotFound
     if admin.role != "dev":
-        logger.warning(f'Ошибка прав доступа при удалении пользователя (только для роли dev)')
+        logger.warning(
+            f"Ошибка прав доступа при удалении пользователя (только для роли dev)"
+        )
         raise NotAccessError
     await UserRepository.delete(session=session, id=user_id)
     await delete_cache_personal_link(personal_link=user.personal_link)
-    logger.info(f'Администратор: ID={admin.id}, email={admin.email} удалил пользователя ID={user.id}, email={user.email}')
+    logger.info(
+        f"Администратор: ID={admin.id}, email={admin.email} удалил пользователя ID={user.id}, email={user.email}"
+    )
 
 
 @user_router.delete("/delete_user/{user_id}", name="del_user:page")
@@ -462,12 +492,12 @@ async def del_user(
             context={"user": user, "notifications": notifications},
         )
     if user.id != user_id:
-        logger.warning(f'Ошибка прав доступа при удалении профиля')
+        logger.warning(f"Ошибка прав доступа при удалении профиля")
         raise NotAccessError
     await UserRepository.delete(session=session, id=user_id)
     await delete_cache_personal_link(personal_link=user.personal_link)
-    response.delete_cookie('user_access_token')
-    logger.info(f'Пользователь ID={user.id}, email={user.email} удалил свой профиль')
+    response.delete_cookie("user_access_token")
+    logger.info(f"Пользователь ID={user.id}, email={user.email} удалил свой профиль")
 
 
 @user_router.patch("/edit_enabled/{user_id}")
@@ -478,11 +508,13 @@ async def edit_enabled(
     user: UserOut = Depends(get_current_user),
 ):
     if not user or user.id != user_id:
-        logger.warning('Ошибка прав доступа при изменении возможности записи')
+        logger.warning("Ошибка прав доступа при изменении возможности записи")
         raise NotAccessError
     await UserRepository.update(session=session, id=user_id, enabled=enabled.enabled)
     await delete_cache_personal_link(personal_link=user.personal_link)
-    logger.info(f'Пользователь ID={user.id}, email={user.email} изменил возможность записи на - {enabled.enabled}')
+    logger.info(
+        f"Пользователь ID={user.id}, email={user.email} изменил возможность записи на - {enabled.enabled}"
+    )
 
 
 @user_router.patch("/edit_time/{user_id}")
@@ -493,14 +525,16 @@ async def edit_time(
     user: UserOut = Depends(get_current_user),
 ):
     if not user or user.id != user_id:
-        logger.warning('Ошибка прав доступа при изменении рабочего дня')
+        logger.warning("Ошибка прав доступа при изменении рабочего дня")
         raise NotAccessError
     await UserRepository.update(
         session=session, id=user_id, **new_time.model_dump(exclude_unset=True)
     )
     await delete_cache_personal_link(personal_link=user.personal_link)
-    logger.info(f'Пользователь ID={user.id}, email={user.email} изменил рабочий день / интервал на: \
-                 start={str(new_time.start_time)}, end={str(new_time.end_time)}, interval={new_time.interval}')
+    logger.info(
+        f"Пользователь ID={user.id}, email={user.email} изменил рабочий день / интервал на: \
+                 start={str(new_time.start_time)}, end={str(new_time.end_time)}, interval={new_time.interval}"
+    )
 
 
 @user_router.get("/forgot_password/reset", status_code=200, name="reset:page")
@@ -556,12 +590,10 @@ async def get_forgot_password_template(
         raise HTTPException(status_code=422, detail="Email не найден")
     token: str = await generate_token(exist_user)
     # reset_password_email.delay(exist_user.email, token=token) Celery
-    bg_task.add_task(
-        reset_password_email,
-        exist_user.email, 
-        token=token
+    bg_task.add_task(reset_password_email, exist_user.email, token=token)
+    logger.info(
+        f"Пользователь ID={exist_user.id}, email={exist_user.email} письмо с ссылкой для сброса пароля"
     )
-    logger.info(f'Пользователь ID={exist_user.id}, email={exist_user.email} письмо с ссылкой для сброса пароля')
 
 
 @user_router.get(
@@ -590,24 +622,23 @@ async def reset_password(
     await UserRepository.update(
         id=user_id.user_id, hashed_password=hashed_password, session=session
     )
-    logger.info(f'Пользователю ID={user_id.user_id}, email={user_id.email} был установлен новый пароль')
-    # password_changed.delay(email=user_id.email, new_password=new_password) Celery
-    bg_task.add_task(
-        password_changed,
-        email=user_id.email, 
-        new_password=new_password
+    logger.info(
+        f"Пользователю ID={user_id.user_id}, email={user_id.email} был установлен новый пароль"
     )
-    logger.info(f'Пользователю ID={user_id.user_id}, email={user_id.email} отправлено письмо на почту с новым паролем')
-
+    # password_changed.delay(email=user_id.email, new_password=new_password) Celery
+    bg_task.add_task(password_changed, email=user_id.email, new_password=new_password)
+    logger.info(
+        f"Пользователю ID={user_id.user_id}, email={user_id.email} отправлено письмо на почту с новым паролем"
+    )
 
 
 @user_router.patch("/disconnect_tg")
 async def disconnect_tg(
     connecttg: ConnectTg,
     bg_task: BackgroundTasks,
-    user: UserOut = Depends(get_current_user), 
+    user: UserOut = Depends(get_current_user),
     session: AsyncSession = Depends(get_async_session),
-    ):
+):
     tg_id: int = user.telegram_id
     if user.id == connecttg.user_id:
         await UserRepository.update(session=session, id=user.id, telegram_id=None)

@@ -5,6 +5,7 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
 
 
-
-jobstores: dict[str, SQLAlchemyJobStore] = {'default': SQLAlchemyJobStore(url='sqlite:///jobs.sqlite')}
+jobstores: dict[str, SQLAlchemyJobStore] = {
+    "default": SQLAlchemyJobStore(url="sqlite:///jobs.sqlite")
+}
 scheduler: AsyncIOScheduler = AsyncIOScheduler(timezone=moscow_tz, jobstores=jobstores)

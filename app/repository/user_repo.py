@@ -28,8 +28,8 @@ class UserRepository(BaseRepository):
             return res.mappings().all()
         except (SQLAlchemyError, Exception) as e:
             if isinstance(e, SQLAlchemyError):
-                msg = 'Database Exc: Не удалось найти юзера.'
+                msg = "Database Exc: Не удалось найти юзера."
             else:
-                msg = 'Unknown Exc: Не удалось найти юзера.'
+                msg = "Unknown Exc: Не удалось найти юзера."
             logger.error(msg)
             return None

@@ -4,7 +4,6 @@ from fastapi.responses import HTMLResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 
 
-
 class RateLimitingMiddleware(BaseHTTPMiddleware):
     RATE_LIMIT_DURATION = timedelta(minutes=1)
     RATE_LIMIT_REQUESTS = 100

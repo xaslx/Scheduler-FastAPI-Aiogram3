@@ -1,12 +1,11 @@
 import secrets
 from datetime import datetime
 
-from fastapi import (APIRouter, Depends, Request, Response, BackgroundTasks)
+from fastapi import APIRouter, Depends, Request, Response, BackgroundTasks
 from fastapi.responses import HTMLResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.auth.auth import (authenticate_user, create_access_token,
-                           get_password_hash)
+from app.auth.auth import authenticate_user, create_access_token, get_password_hash
 from app.auth.dependencies import get_all_notifications, get_current_user
 from app.models.user_model import User
 from app.repository.user_repo import UserRepository
@@ -38,7 +37,9 @@ async def get_register_template(
 
 @auth_router.post("/register", status_code=201)
 async def rigister_user(
-    user: UserRegister, bg_task: BackgroundTasks, session: AsyncSession = Depends(get_async_session)
+    user: UserRegister,
+    bg_task: BackgroundTasks,
+    session: AsyncSession = Depends(get_async_session),
 ) -> int:
     exist_user: UserOut = await UserRepository.find_one_or_none(
         session=session, email=user.email
@@ -57,7 +58,9 @@ async def rigister_user(
     )
     # register_confirmation_message.delay(email_to=user.email) Celery
     bg_task.add_task(register_confirmation_message, email_to=user.email)
-    logger.info(f'Новый пользователь зарегистрировался! name={user.name}, surname={user.surname}, email={user.email}')
+    logger.info(
+        f"Новый пользователь зарегистрировался! name={user.name}, surname={user.surname}, email={user.email}"
+    )
     return new_user
 
 
@@ -70,7 +73,7 @@ async def after_register_template(
     return templates.TemplateResponse(
         request=request,
         name="after_register.html",
-        context={"user": user, "notifications": notifications}
+        context={"user": user, "notifications": notifications},
     )
 
 
@@ -90,7 +93,9 @@ async def login_user(
     response.set_cookie(
         "user_access_token", access_token, httponly=True, max_age=max_age, secure=True
     )
-    logger.info(f'Пользователь вошел в систему: ID={user.id}, name={user.name}, surname={user.surname}')
+    logger.info(
+        f"Пользователь вошел в систему: ID={user.id}, name={user.name}, surname={user.surname}"
+    )
     return access_token
 
 
@@ -98,18 +103,24 @@ async def login_user(
 async def get_login_template(
     request: Request, user: UserOut = Depends(get_current_user)
 ) -> HTMLResponse:
-    
+
     return templates.TemplateResponse(
         request=request, name="login.html", context={"user": user}
     )
 
 
 @auth_router.post("/logout", status_code=200)
-async def logout_user(response: Response, request: Request, session: AsyncSession = Depends(get_async_session)):
-    cookies: str | None = request.cookies.get('user_access_token')
+async def logout_user(
+    response: Response,
+    request: Request,
+    session: AsyncSession = Depends(get_async_session),
+):
+    cookies: str | None = request.cookies.get("user_access_token")
     try:
         user: UserOut = await get_current_user(async_db=session, token=cookies)
         response.delete_cookie("user_access_token")
-        logger.info(f'Пользователь ID={user.id}, name={user.name}, surname={user.surname} вышел из системы')
+        logger.info(
+            f"Пользователь ID={user.id}, name={user.name}, surname={user.surname} вышел из системы"
+        )
     except:
-        logger.error('Ошибка при выходе из системы')
+        logger.error("Ошибка при выходе из системы")

@@ -16,7 +16,6 @@ from logger import logger
 from redis_init import redis
 
 
-
 main_router: APIRouter = APIRouter()
 
 
@@ -26,7 +25,7 @@ async def get_main_page(
     session: AsyncSession = Depends(get_async_session),
     user: UserOut = Depends(get_current_user),
 ) -> HTMLResponse:
-    
+
     notifications: list[NotificationOut] = await get_notifications(session=session)
     return templates.TemplateResponse(
         request=request,
@@ -55,7 +54,9 @@ async def get_help_template(
 
 
 @main_router.post("/help", status_code=200)
-async def get_help(help: GetHelp, bg_task: BackgroundTasks, user: UserOut = Depends(get_current_user)):
+async def get_help(
+    help: GetHelp, bg_task: BackgroundTasks, user: UserOut = Depends(get_current_user)
+):
     if not user:
         raise NotAccessError
     # help_message.delay(email=help.email, description=help.description)  Celery

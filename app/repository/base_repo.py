@@ -15,12 +15,11 @@ class BaseRepository:
             return result.scalar_one_or_none()
         except (SQLAlchemyError, Exception) as e:
             if isinstance(e, SQLAlchemyError):
-                msg = 'Database Exc: Не удалось найти обьект.'
+                msg = "Database Exc: Не удалось найти обьект."
             else:
-                msg = 'Unknown Exc: Не удалось найти обьект.'
+                msg = "Unknown Exc: Не удалось найти обьект."
             logger.error(msg)
             return None
-
 
     @classmethod
     async def find_all(cls, session: AsyncSession, **filter_by):
@@ -30,9 +29,9 @@ class BaseRepository:
             return result.mappings().all()
         except (SQLAlchemyError, Exception) as e:
             if isinstance(e, SQLAlchemyError):
-                msg = 'Database Exc: Не удалось найти обьекты.'
+                msg = "Database Exc: Не удалось найти обьекты."
             else:
-                msg = 'Unknown Exc: Не удалось найти обьекты.'
+                msg = "Unknown Exc: Не удалось найти обьекты."
             logger.error(msg)
             return None
 
@@ -45,24 +44,26 @@ class BaseRepository:
             return result.scalar()
         except (SQLAlchemyError, Exception) as e:
             if isinstance(e, SQLAlchemyError):
-                msg = 'Database Exc: Не удалось добавить обьект.'
+                msg = "Database Exc: Не удалось добавить обьект."
             else:
-                msg = 'Unknown Exc: Не удалось добавить обьект.'
+                msg = "Unknown Exc: Не удалось добавить обьект."
             logger.error(msg)
             return None
 
     @classmethod
     async def update(cls, session: AsyncSession, id: int, **data):
         try:
-            query = update(cls.model).filter_by(id=id).values(**data).returning(cls.model)
+            query = (
+                update(cls.model).filter_by(id=id).values(**data).returning(cls.model)
+            )
             result = await session.execute(query)
             await session.commit()
             return result.scalar()
         except (SQLAlchemyError, Exception) as e:
             if isinstance(e, SQLAlchemyError):
-                msg = 'Database Exc: Не удалось обновить обьект.'
+                msg = "Database Exc: Не удалось обновить обьект."
             else:
-                msg = 'Unknown Exc: Не удалось обновить обьект.'
+                msg = "Unknown Exc: Не удалось обновить обьект."
             logger.error(msg)
             return None
 
@@ -75,8 +76,8 @@ class BaseRepository:
             return result.scalar()
         except (SQLAlchemyError, Exception) as e:
             if isinstance(e, SQLAlchemyError):
-                msg = 'Database Exc: Не удалось удалить обьект.'
+                msg = "Database Exc: Не удалось удалить обьект."
             else:
-                msg = 'Unknown Exc: Не удалось удалить обьект.'
+                msg = "Unknown Exc: Не удалось удалить обьект."
             logger.error(msg)
             return None

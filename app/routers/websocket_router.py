@@ -4,6 +4,7 @@ from typing import List
 
 websocket_router: APIRouter = APIRouter()
 
+
 class UserCounter:
     def __init__(self):
         self.sockets: List[WebSocket] = []
@@ -36,7 +37,8 @@ class UserCounter:
 
 counter: UserCounter = UserCounter()
 
-@websocket_router.websocket('/counter')
+
+@websocket_router.websocket("/counter")
 async def websocket_endpoint(websocket: WebSocket):
     await counter.connect(websocket)
     try:

@@ -1,8 +1,6 @@
 from aiogram.fsm.state import State, StatesGroup
 
 
-
-
 class NewBooking(StatesGroup):
     personal_link: State = State()
     date: State = State()

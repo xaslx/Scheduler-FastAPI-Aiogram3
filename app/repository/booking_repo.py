@@ -10,6 +10,7 @@ from exceptions import TimeNotFound, BookingError
 from .base_repo import BaseRepository
 from logger import logger
 
+
 class BookingRepository(BaseRepository):
     model = Booking
 
@@ -19,7 +20,9 @@ class BookingRepository(BaseRepository):
             query = (
                 select(cls.model)
                 .where(
-                    and_(cls.model.user_id == user_id, cls.model.date_for_booking >= date)
+                    and_(
+                        cls.model.user_id == user_id, cls.model.date_for_booking >= date
+                    )
                 )
                 .order_by(cls.model.date_for_booking)
             )
@@ -27,12 +30,11 @@ class BookingRepository(BaseRepository):
             return res.scalars().all()
         except (SQLAlchemyError, Exception) as e:
             if isinstance(e, SQLAlchemyError):
-                msg = 'Database Exc: Не удалось найти все записи.'
+                msg = "Database Exc: Не удалось найти все записи."
             else:
-                msg = 'Unknown Exc: Не удалось найти все записи.'
+                msg = "Unknown Exc: Не удалось найти все записи."
             logger.error(msg)
             return None
-
 
     @classmethod
     async def get_booking(cls, user_id: int, session: AsyncSession, date: date):
@@ -45,9 +47,9 @@ class BookingRepository(BaseRepository):
             return res.scalars().first()
         except (SQLAlchemyError, Exception) as e:
             if isinstance(e, SQLAlchemyError):
-                msg = 'Database Exc: Не удалось получить запись.'
+                msg = "Database Exc: Не удалось получить запись."
             else:
-                msg = 'Unknown Exc: Не удалось получить запись.'
+                msg = "Unknown Exc: Не удалось получить запись."
             logger.error(msg)
             return None
 
@@ -73,9 +75,9 @@ class BookingRepository(BaseRepository):
             await session.commit()
         except (SQLAlchemyError, Exception) as e:
             if isinstance(e, SQLAlchemyError):
-                msg = 'Database Exc: Не удалось сделать запись.'
+                msg = "Database Exc: Не удалось сделать запись."
             else:
-                msg = 'Unknown Exc: Не удалось сделать запись.'
+                msg = "Unknown Exc: Не удалось сделать запись."
             logger.error(msg)
             raise BookingError
 
@@ -112,8 +114,8 @@ class BookingRepository(BaseRepository):
             await session.commit()
         except (SQLAlchemyError, Exception) as e:
             if isinstance(e, SQLAlchemyError):
-                msg = 'Database Exc: Не удалось получить запись.'
+                msg = "Database Exc: Не удалось получить запись."
             else:
-                msg = 'Unknown Exc: Не удалось получить запись.'
+                msg = "Unknown Exc: Не удалось получить запись."
             logger.error(msg)
             return None

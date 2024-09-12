@@ -3,9 +3,6 @@ from config import settings
 from aiogram.types import Message
 
 
-
-
-
 class AdminProtect(Filter):
 
     def __init__(self):

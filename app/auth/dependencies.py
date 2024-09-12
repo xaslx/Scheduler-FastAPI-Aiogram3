@@ -10,10 +10,12 @@ from app.schemas.user_schema import UserOut
 from app.utils.redis_cache import get_notifications
 from config import settings
 from database import get_async_session
-from exceptions import (IncorrectTokenException, UserIsNotAdmin,
-                        UserIsNotPresentException)
+from exceptions import (
+    IncorrectTokenException,
+    UserIsNotAdmin,
+    UserIsNotPresentException,
+)
 from redis_init import redis
-
 
 
 def get_token(request: Request):
@@ -45,10 +47,12 @@ async def get_current_user(
     if user_data:
         user: UserOut = UserOut.model_validate_json(user_data)
     else:
-        user: User = await UserRepository.find_one_or_none(personal_link=user_personal_link, session=async_db)
+        user: User = await UserRepository.find_one_or_none(
+            personal_link=user_personal_link, session=async_db
+        )
         user_out = UserOut.model_validate(user)
         if user:
-            await redis.set(user_personal_link, user_out.model_dump_json(), ex=600) 
+            await redis.set(user_personal_link, user_out.model_dump_json(), ex=600)
 
     if not user_personal_link:
         raise UserIsNotPresentException
@@ -61,7 +65,7 @@ async def get_tg_id(token: str):
     payload = valid_token(token=token)
     if not payload:
         return None
-    tg_id: int = int(payload.get('sub'))
+    tg_id: int = int(payload.get("sub"))
     return tg_id
 
 
