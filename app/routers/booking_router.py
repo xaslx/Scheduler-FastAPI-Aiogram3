@@ -1,7 +1,7 @@
-from datetime import date, datetime, timedelta, time
+from datetime import date, datetime, timedelta
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Path, Query, Request, BackgroundTasks
+from fastapi import APIRouter, BackgroundTasks, Depends, Path, Query, Request
 from fastapi.responses import HTMLResponse, JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from urllib3 import HTTPResponse
@@ -18,27 +18,26 @@ from app.schemas.booking_schemas import (
 )
 from app.schemas.notification_schemas import NotificationOut
 from app.schemas.user_schema import UserOut
+from app.tasks.apscheduler import scheduler
 from app.tasks.tasks import (
-    cancel_client,
-    confirm_booking_for_client,
-    new_client,
-    cancel_client_for_me,
     cancel_booking_tg_client,
     cancel_booking_tg_owner,
+    cancel_client,
+    cancel_client_for_me,
+    confirm_booking_for_client,
     new_booking_tg,
+    new_client,
     new_client_tg,
     reminder_email,
     reminder_tg,
 )
-from app.utils.generate_time import generate_time_intervals
+from app.utils.generate_time import generate_time_intervals, moscow_tz
+from app.utils.reminder import reminder
 from app.utils.templating import templates
+from config import settings
 from database import get_async_session
 from exceptions import BookingNotFound, NotAccessError, UserNotFound
 from logger import logger
-from app.utils.generate_time import moscow_tz
-from app.tasks.apscheduler import scheduler
-from app.utils.reminder import reminder
-from config import settings
 
 booking_router: APIRouter = APIRouter(prefix="/booking", tags=["Запись"])
 

@@ -3,14 +3,14 @@ import secrets
 from datetime import date, datetime
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Query, Request, Response, BackgroundTasks, Path
+from aiogram import Bot
+from fastapi import APIRouter, BackgroundTasks, Depends, Path, Query, Request, Response
 from fastapi.exceptions import HTTPException
 from fastapi.responses import HTMLResponse
 from fastapi_pagination import Page
 from fastapi_pagination.ext.sqlalchemy import paginate
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-
 
 from app.auth.auth import get_password_hash
 from app.auth.authentication import generate_token
@@ -26,6 +26,7 @@ from app.repository.user_repo import UserRepository
 from app.schemas.booking_schemas import BookingOut
 from app.schemas.notification_schemas import NotificationOut
 from app.schemas.user_schema import (
+    ConnectTg,
     EditEnabled,
     EditPassword,
     EditRole,
@@ -33,25 +34,21 @@ from app.schemas.user_schema import (
     ResetPassword,
     UserOut,
     UserUpdate,
-    ConnectTg,
 )
-
 from app.tasks.tasks import (
+    disconnect_tg,
+    disconnect_tg_for_user,
     password_changed,
     reset_password_email,
     update_password,
-    disconnect_tg,
-    disconnect_tg_for_user,
 )
 from app.utils.generate_time import moscow_tz
+from app.utils.redis_cache import delete_cache_personal_link
 from app.utils.templating import templates
+from config import settings
 from database import get_async_session
 from exceptions import NotAccessError, UserNotFound
 from logger import logger
-from aiogram import Bot
-from config import settings
-from app.utils.redis_cache import delete_cache_personal_link
-
 
 user_router: APIRouter = APIRouter(prefix="/user", tags=["Пользователи"])
 bot: Bot = Bot(settings.TOKEN_BOT)

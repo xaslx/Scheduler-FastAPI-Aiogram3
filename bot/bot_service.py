@@ -1,13 +1,15 @@
-from app.schemas.user_schema import UserOut
-from database import async_session_maker
-from sqlalchemy import select, insert, and_
-from app.models.telegram_model import Telegram
-from app.schemas.tg_schema import TelegramOut
-from app.models.user_model import User
-from app.models.booking_model import Booking
 from datetime import date
+
+from sqlalchemy import and_, insert, select
+
+from app.models.booking_model import Booking
+from app.models.telegram_model import Telegram
+from app.models.user_model import User
 from app.repository.booking_repo import BookingRepository
 from app.repository.user_repo import UserRepository
+from app.schemas.tg_schema import TelegramOut
+from app.schemas.user_schema import UserOut
+from database import async_session_maker
 
 
 class BotService:

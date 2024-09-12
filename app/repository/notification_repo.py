@@ -1,11 +1,11 @@
-from sqlalchemy import select, desc
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import desc, select
 from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.notification_model import Notification
+from logger import logger
 
 from .base_repo import BaseRepository
-from logger import logger
 
 
 class NotificationRepository(BaseRepository):

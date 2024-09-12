@@ -1,6 +1,7 @@
 from aiogram.filters import Filter
-from config import settings
 from aiogram.types import Message
+
+from config import settings
 
 
 class AdminProtect(Filter):

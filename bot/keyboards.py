@@ -1,12 +1,13 @@
-from aiogram.types import (
-    KeyboardButton,
-    InlineKeyboardButton,
-    BotCommand,
-    InlineKeyboardMarkup,
-)
-from aiogram import Bot
-from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
 from datetime import date, datetime
+
+from aiogram import Bot
+from aiogram.types import (
+    BotCommand,
+    InlineKeyboardButton,
+    InlineKeyboardMarkup,
+    KeyboardButton,
+)
+from aiogram.utils.keyboard import InlineKeyboardBuilder, ReplyKeyboardBuilder
 
 
 async def set_main_menu(bot: Bot):

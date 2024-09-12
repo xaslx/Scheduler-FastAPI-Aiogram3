@@ -1,7 +1,7 @@
 import secrets
 from datetime import datetime
 
-from fastapi import APIRouter, Depends, Request, Response, BackgroundTasks
+from fastapi import APIRouter, BackgroundTasks, Depends, Request, Response
 from fastapi.responses import HTMLResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -10,13 +10,12 @@ from app.auth.dependencies import get_all_notifications, get_current_user
 from app.models.user_model import User
 from app.repository.user_repo import UserRepository
 from app.schemas.notification_schemas import NotificationOut
-from app.schemas.user_schema import UserLogin, UserRegister, UserOut
+from app.schemas.user_schema import UserLogin, UserOut, UserRegister
 from app.tasks.tasks import register_confirmation_message
 from app.utils.templating import templates
 from database import get_async_session
 from exceptions import UserAlreadyExistsException, UserNotFound
 from logger import logger
-
 
 auth_router: APIRouter = APIRouter(
     prefix="/auth", tags=["Аутентификация и Авторизация"]

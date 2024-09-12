@@ -11,7 +11,6 @@ from pydantic import (
     model_validator,
 )
 
-
 PASSWORD_CHECK = re.compile(r"^[a-zA-Z0-9_-]{6,30}$")
 TELEGRAM_CHECK = re.compile(r"^[a-zA-Z0-9_@]{5,15}$")
 

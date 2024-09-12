@@ -1,31 +1,30 @@
-from email import message
+import asyncio
 import smtplib
+from email import message
 from time import sleep
 
+from aiogram import Bot
+from aiogram.client.default import DefaultBotProperties
 from pydantic import EmailStr
 
+from app.schemas.tg_schema import TelegramOut
 from app.tasks.celery_app import celery
 from app.tasks.email_templates import (
     add_new_client,
     cancel_booking,
+    cancel_booking_for_me,
     confirm_booking,
+    disconnect_tg_template,
     forgot_password_email_template,
     get_help,
     password_changed_email_template,
     register_confirmation_template,
+    reminder_template,
     send_notification_for_all_users,
     success_update_password,
-    cancel_booking_for_me,
-    disconnect_tg_template,
-    reminder_template,
 )
 from config import settings
-from aiogram import Bot
-from aiogram.client.default import DefaultBotProperties
 from logger import logger
-from app.schemas.tg_schema import TelegramOut
-import asyncio
-
 
 bot: Bot = Bot(settings.TOKEN_BOT, default=DefaultBotProperties(parse_mode="HTML"))
 

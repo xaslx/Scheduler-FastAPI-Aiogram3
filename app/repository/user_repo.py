@@ -1,12 +1,12 @@
 from sqlalchemy import or_, select
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.models.user_model import User
+from logger import logger
 
 from .base_repo import BaseRepository
-from logger import logger
 
 
 class UserRepository(BaseRepository):

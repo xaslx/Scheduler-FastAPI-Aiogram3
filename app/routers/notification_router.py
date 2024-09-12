@@ -1,5 +1,6 @@
 from typing import Annotated
-from fastapi import APIRouter, Depends, Path, Request, status, BackgroundTasks
+
+from fastapi import APIRouter, BackgroundTasks, Depends, Path, Request, status
 from fastapi.responses import HTMLResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -13,13 +14,12 @@ from app.repository.user_repo import UserRepository
 from app.schemas.notification_schemas import CreateNotification, NotificationOut
 from app.schemas.user_schema import CreateMessage, UserOut
 from app.tasks.tasks import send_notification
+from app.utils.redis_cache import delete_cache_notifications
 from app.utils.templating import templates
 from database import get_async_session
 from exceptions import NotAccessError, NotificationNotFound
 from logger import logger
 from redis_init import redis
-from app.utils.redis_cache import delete_cache_notifications
-
 
 notification_router: APIRouter = APIRouter(prefix="/notification", tags=["Уведомления"])
 

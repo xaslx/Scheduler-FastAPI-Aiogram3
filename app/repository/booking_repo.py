@@ -1,14 +1,14 @@
 from datetime import date
 
 from sqlalchemy import and_, select, update
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.booking_model import Booking
-from exceptions import TimeNotFound, BookingError
+from exceptions import BookingError, TimeNotFound
+from logger import logger
 
 from .base_repo import BaseRepository
-from logger import logger
 
 
 class BookingRepository(BaseRepository):

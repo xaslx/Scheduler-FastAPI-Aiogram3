@@ -1,5 +1,6 @@
 from contextlib import asynccontextmanager
 
+import sentry_sdk
 from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
@@ -7,8 +8,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
 from fastapi_pagination import add_pagination
-from redis_init import redis
-import sentry_sdk
+from prometheus_fastapi_instrumentator import Instrumentator
 
 from app.auth.dependencies import get_current_user
 from app.repository.notification_repo import NotificationRepository
@@ -20,15 +20,14 @@ from app.routers.user_router import user_router
 from app.routers.websocket_router import websocket_router
 from app.schemas.notification_schemas import NotificationOut
 from app.schemas.user_schema import UserOut
+from app.tasks.apscheduler import scheduler
 from app.utils.templating import templates
+from bot.run import handle_web_hook, on_startup
 from config import settings
 from database import async_session_maker
 from logger import logger
 from middleware import RateLimitingMiddleware
-from prometheus_fastapi_instrumentator import Instrumentator
-from bot.run import on_startup, handle_web_hook
-from app.tasks.apscheduler import scheduler
-
+from redis_init import redis
 
 sentry_sdk.init(dsn=settings.dsn, traces_sample_rate=1.0, profiles_sample_rate=1.0)
 

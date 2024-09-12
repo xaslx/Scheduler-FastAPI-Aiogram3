@@ -1,8 +1,9 @@
-from redis_init import redis
-from app.schemas.notification_schemas import NotificationOut
-from app.repository.notification_repo import NotificationRepository
 from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.repository.notification_repo import NotificationRepository
+from app.schemas.notification_schemas import NotificationOut
 from logger import logger
+from redis_init import redis
 
 
 async def get_notifications(session: AsyncSession):

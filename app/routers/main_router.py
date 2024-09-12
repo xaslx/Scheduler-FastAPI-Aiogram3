@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Request, BackgroundTasks
+from fastapi import APIRouter, BackgroundTasks, Depends, Request
 from fastapi.responses import HTMLResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -8,13 +8,12 @@ from app.schemas.help_schemas import GetHelp
 from app.schemas.notification_schemas import NotificationOut
 from app.schemas.user_schema import UserOut
 from app.tasks.tasks import help_message
-from app.utils.templating import templates
 from app.utils.redis_cache import get_notifications
+from app.utils.templating import templates
 from database import get_async_session
 from exceptions import NotAccessError
 from logger import logger
 from redis_init import redis
-
 
 main_router: APIRouter = APIRouter()
 

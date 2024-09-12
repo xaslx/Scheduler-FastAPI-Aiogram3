@@ -1,6 +1,6 @@
 from datetime import datetime, time
 
-from sqlalchemy import DateTime, String, Time, BigInteger
+from sqlalchemy import BigInteger, DateTime, String, Time
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.utils.current_time import current_time

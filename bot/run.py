@@ -1,13 +1,14 @@
 from json import JSONDecodeError
-from config import settings
-from fastapi import Response, Request
-from aiogram import Bot, Dispatcher, types
-from bot.user_handler import user_router
-from logger import logger
-from bot.keyboards import set_main_menu
-from aiogram.client.default import DefaultBotProperties
-from bot.admin_handler import admin_router
 
+from aiogram import Bot, Dispatcher, types
+from aiogram.client.default import DefaultBotProperties
+from fastapi import Request, Response
+
+from bot.admin_handler import admin_router
+from bot.keyboards import set_main_menu
+from bot.user_handler import user_router
+from config import settings
+from logger import logger
 
 bot: Bot = Bot(settings.TOKEN_BOT, default=DefaultBotProperties(parse_mode="HTML"))
 dp: Dispatcher = Dispatcher()

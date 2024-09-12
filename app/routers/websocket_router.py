@@ -1,6 +1,7 @@
 import asyncio
-from fastapi import WebSocket, WebSocketDisconnect, APIRouter
 from typing import List
+
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 
 websocket_router: APIRouter = APIRouter()
 

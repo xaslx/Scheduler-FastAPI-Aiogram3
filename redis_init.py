@@ -1,7 +1,7 @@
-from redis.asyncio import Redis as aioredis
 from redis import Redis
-from config import settings
+from redis.asyncio import Redis as aioredis
 
+from config import settings
 
 redis: Redis = aioredis.from_url(
     f"redis://{settings.REDIS_HOST}:{settings.REDIS_PORT}",

@@ -1,38 +1,37 @@
-from datetime import datetime, date, time, timedelta
-from aiogram import F, Router, Bot
-from aiogram.filters import Command, CommandStart, StateFilter, CommandObject
+from datetime import date, datetime, time, timedelta
+
+from aiogram import Bot, F, Router
+from aiogram.client.default import DefaultBotProperties
+from aiogram.filters import Command, CommandObject, CommandStart, StateFilter
+from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import default_state
 from aiogram.types import (
-    Message,
     CallbackQuery,
     InlineKeyboardButton,
     InlineKeyboardMarkup,
-)
-from app.schemas.user_schema import UserOut
-from bot.bot_service import BotService
-from app.auth.authentication import generate_token_connect_tg
-from app.schemas.tg_schema import TelegramOut
-from app.utils.generate_time import moscow_tz
-from app.schemas.booking_schemas import BookingOut
-from bot.keyboards import (
-    create_inline_button,
-    confirmation_markup,
-    create_inline_button_times,
-    create_inline_button_connect_tg,
+    Message,
 )
 from aiogram.utils.keyboard import InlineKeyboardBuilder
-from app.schemas.booking_schemas import CancelBooking
-from config import settings
-from aiogram.client.default import DefaultBotProperties
-from bot.state import NewBooking
-from aiogram.fsm.context import FSMContext
-from email_validator import validate_email, EmailNotValidError
-from app.utils.generate_time import generate_time_intervals
-from app.utils.reminder import reminder
-from redis_init import redis
-from app.tasks.tasks import reminder_email, reminder_tg
-from app.tasks.apscheduler import scheduler
+from email_validator import EmailNotValidError, validate_email
 
+from app.auth.authentication import generate_token_connect_tg
+from app.schemas.booking_schemas import BookingOut, CancelBooking
+from app.schemas.tg_schema import TelegramOut
+from app.schemas.user_schema import UserOut
+from app.tasks.apscheduler import scheduler
+from app.tasks.tasks import reminder_email, reminder_tg
+from app.utils.generate_time import generate_time_intervals, moscow_tz
+from app.utils.reminder import reminder
+from bot.bot_service import BotService
+from bot.keyboards import (
+    confirmation_markup,
+    create_inline_button,
+    create_inline_button_connect_tg,
+    create_inline_button_times,
+)
+from bot.state import NewBooking
+from config import settings
+from redis_init import redis
 
 user_router: Router = Router()
 
