@@ -8,7 +8,7 @@ from config import settings
 
 async def generate_token(user: User):
     expire = datetime.utcnow() + timedelta(minutes=5)
-    user_to_email = {"sub": str(user.id), "exp": expire}
+    user_to_email = {"sub": user.personal_link, "exp": expire}
     token = jwt.encode(user_to_email, settings.SECRET_KEY, settings.ALGORITHM)
     return token
 
