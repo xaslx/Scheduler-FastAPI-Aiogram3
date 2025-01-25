@@ -31,6 +31,7 @@ from redis_init import redis
 
 sentry_sdk.init(dsn=settings.dsn, traces_sample_rate=1.0, profiles_sample_rate=1.0)
 
+print('okey')
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
